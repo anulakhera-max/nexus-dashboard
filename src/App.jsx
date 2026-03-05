@@ -47,6 +47,29 @@ function parseJSON(text) {
   try { return m ? JSON.parse(m[0]) : null; } catch { return null; }
 }
 
+function getUpcomingFridays() {
+  const now = new Date();
+  const day = now.getDay();
+  const daysToFriday = day === 5 ? 7 : (5 - day + 7) % 7 || 7;
+  const first = new Date(now); first.setDate(now.getDate() + daysToFriday);
+  const second = new Date(first); second.setDate(first.getDate() + 7);
+  const fmt = (d) => d.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
+  return { first: fmt(first), second: fmt(second) };
+}
+
+const OPTS_KEY = "nexus_options_picks";
+const OPTS_TIME_KEY = "nexus_options_time";
+
+function saveOptions(data) {
+  try { localStorage.setItem(OPTS_KEY, JSON.stringify(data)); localStorage.setItem(OPTS_TIME_KEY, new Date().toISOString()); } catch {}
+}
+function loadOptions() {
+  try { const r = localStorage.getItem(OPTS_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
+}
+function loadOptionsTime() {
+  try { const r = localStorage.getItem(OPTS_TIME_KEY); return r ? new Date(r) : null; } catch { return null; }
+}
+
 const S = {
   app: { fontFamily: "'Segoe UI', sans-serif", background: "#03060d", color: "#c8dff0", height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" },
   topbar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 20px", background: "linear-gradient(90deg,#020a14,#03101f,#020a14)", borderBottom: "1px solid #1a2d47", flexShrink: 0 },
@@ -61,8 +84,9 @@ const S = {
   input: { flex: 1, background: "#0d1829", border: "1px solid #1a2d47", borderRadius: 3, padding: "9px 14px", color: "#e8f4ff", fontSize: 12, fontFamily: "monospace", outline: "none" },
   btnPrimary: (dis) => ({ background: dis ? "#1a2d47" : "#00d4ff", color: dis ? "#4a6d8c" : "#03060d", border: "none", borderRadius: 3, padding: "9px 18px", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: dis ? "not-allowed" : "pointer", fontFamily: "monospace", whiteSpace: "nowrap" }),
   btnSecondary: { background: "transparent", color: "#ff6b35", border: "1px solid #ff6b35", borderRadius: 3, padding: "9px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: "pointer", fontFamily: "monospace" },
+  btnGold: (dis) => ({ background: dis ? "#1a2d47" : "linear-gradient(135deg,#b8860b,#ffd700)", color: dis ? "#4a6d8c" : "#0a0800", border: "none", borderRadius: 3, padding: "9px 18px", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: dis ? "not-allowed" : "pointer", fontFamily: "monospace", whiteSpace: "nowrap" }),
   tabs: { display: "flex", borderBottom: "1px solid #1a2d47", background: "#080f1a", flexShrink: 0 },
-  tab: (active) => ({ padding: "10px 16px", cursor: "pointer", color: active ? "#00d4ff" : "#4a6d8c", borderBottom: active ? "2px solid #00d4ff" : "2px solid transparent", fontSize: 11, letterSpacing: 2, fontFamily: "monospace", background: "none", border: "none", borderBottom: active ? "2px solid #00d4ff" : "2px solid transparent" }),
+  tab: (active, gold) => ({ padding: "10px 14px", cursor: "pointer", color: active ? (gold ? "#ffd700" : "#00d4ff") : "#4a6d8c", borderBottom: active ? `2px solid ${gold ? "#ffd700" : "#00d4ff"}` : "2px solid transparent", fontSize: 11, letterSpacing: 2, fontFamily: "monospace", background: active && gold ? "rgba(255,215,0,0.04)" : "none", border: "none" }),
   contentArea: { flex: 1, overflowY: "auto", padding: 16 },
   card: (cat, sel) => ({ background: sel ? "#0d1829" : "#080f1a", border: `1px solid ${sel ? "#00d4ff" : "#1a2d47"}`, borderLeft: `3px solid ${catColors[cat] || "#4a6d8c"}`, borderRadius: 4, padding: 14, cursor: "pointer", marginBottom: 10 }),
   badge: (sev) => ({ fontSize: 9, padding: "2px 7px", borderRadius: 2, fontFamily: "monospace", fontWeight: 700, background: `${sevColors[sev]}22`, color: sevColors[sev], border: `1px solid ${sevColors[sev]}55` }),
@@ -76,13 +100,13 @@ const S = {
   ticker: { borderTop: "1px solid #1a2d47", background: "#0d1829", height: 28, display: "flex", alignItems: "center", overflow: "hidden", flexShrink: 0 },
 };
 
-function Spinner() {
+function Spinner({ label = "PROCESSING..." }) {
   return (
     <div style={S.loading}>
       <div style={{ width: 180, height: 2, background: "#1a2d47", borderRadius: 1, overflow: "hidden", position: "relative" }}>
         <div style={{ position: "absolute", top: 0, height: "100%", width: "40%", background: "linear-gradient(90deg,transparent,#00d4ff,transparent)", animation: "slide 1.4s infinite" }} />
       </div>
-      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#4a6d8c", animation: "blink 1s step-end infinite" }}>PROCESSING...</div>
+      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#4a6d8c", animation: "blink 1s step-end infinite" }}>{label}</div>
     </div>
   );
 }
@@ -115,7 +139,73 @@ function AnalysisSection({ title, children }) {
   );
 }
 
-export default function NexusDashboard() {
+function OptionsPickCard({ pick, rank }) {
+  const isCall = pick.type === "CALL";
+  const typeColor = isCall ? "#39ff14" : "#ff2d55";
+  const confColor = pick.confidence === "HIGH" ? "#ff2d55" : pick.confidence === "MEDIUM" ? "#ffb800" : "#4a6d8c";
+  return (
+    <div style={{ background: "#080f1a", border: `1px solid ${typeColor}33`, borderLeft: `4px solid ${typeColor}`, borderRadius: 4, padding: 16, marginBottom: 14, position: "relative" }}>
+      <div style={{ position: "absolute", top: 12, right: 12, width: 28, height: 28, borderRadius: "50%", background: `${typeColor}22`, border: `1px solid ${typeColor}55`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: typeColor }}>#{rank}</div>
+
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10, paddingRight: 40 }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+            <span style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 900, color: "#e8f4ff" }}>{pick.ticker}</span>
+            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, fontFamily: "monospace", fontWeight: 700, background: `${typeColor}22`, color: typeColor, border: `1px solid ${typeColor}55` }}>{pick.type}</span>
+            <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 2, fontFamily: "monospace", fontWeight: 700, background: `${confColor}22`, color: confColor, border: `1px solid ${confColor}55` }}>{pick.confidence} CONF</span>
+          </div>
+          <div style={{ fontSize: 12, color: "#8aabb8", marginBottom: 2 }}>{pick.companyName}</div>
+          <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{pick.exchange} · {pick.sector}</div>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 12, background: "#0d1829", borderRadius: 3, padding: 10 }}>
+        {[
+          { label: "STRIKE", value: pick.strike, color: "#e8f4ff" },
+          { label: "EXPIRY", value: pick.expiry, color: "#ffb800" },
+          { label: "CLOSES", value: "3:30 PM ET", color: "#4a6d8c" },
+          { label: "EST. PREMIUM", value: pick.premium, color: typeColor },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", letterSpacing: 1, marginBottom: 3 }}>{label}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color, fontFamily: "monospace" }}>{value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
+        <div style={{ background: "#0d1829", borderRadius: 3, padding: "8px 10px", textAlign: "center" }}>
+          <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>TARGET RETURN</div>
+          <div style={{ fontSize: 18, fontWeight: 900, color: "#39ff14", fontFamily: "monospace" }}>{pick.targetReturn}</div>
+        </div>
+        <div style={{ background: "#0d1829", borderRadius: 3, padding: "8px 10px", textAlign: "center" }}>
+          <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>MAX LOSS</div>
+          <div style={{ fontSize: 18, fontWeight: 900, color: "#ff2d55", fontFamily: "monospace" }}>Premium</div>
+        </div>
+        <div style={{ background: "#0d1829", borderRadius: 3, padding: "8px 10px", textAlign: "center" }}>
+          <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>CATALYST</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#ffb800", fontFamily: "monospace" }}>{pick.catalystDate}</div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", letterSpacing: 2, marginBottom: 5 }}>TRADE THESIS</div>
+        <div style={{ fontSize: 11, lineHeight: 1.6, color: "#c8dff0" }}>{pick.thesis}</div>
+      </div>
+
+      <div style={{ background: `${typeColor}0d`, border: `1px solid ${typeColor}22`, borderRadius: 3, padding: "8px 10px", marginBottom: 10 }}>
+        <div style={{ fontSize: 9, color: typeColor, fontFamily: "monospace", letterSpacing: 2, marginBottom: 4 }}>NEXUS EVENT TRIGGER</div>
+        <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.5 }}>{pick.eventTrigger}</div>
+      </div>
+
+      <div style={{ fontSize: 10, color: "#4a6d8c", fontStyle: "italic", lineHeight: 1.5 }}>
+        ⚠ Risk: {pick.riskNote} · Max loss = premium paid.
+      </div>
+    </div>
+  );
+}
+
+export default function NexusDashboard({ user, onLogout }) {
   const [events, setEvents] = useState(seedEvents);
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState(null);
@@ -131,6 +221,13 @@ export default function NexusDashboard() {
   const [clock, setClock] = useState("");
   const [tickerItems, setTickerItems] = useState([]);
   const [apiError, setApiError] = useState(null);
+  const [optionsPicks, setOptionsPicks] = useState(null);
+  const [loadingOptions, setLoadingOptions] = useState(false);
+  const [optionsError, setOptionsError] = useState(null);
+  const [lastGenerated, setLastGenerated] = useState(null);
+  const [selectedExpiry, setSelectedExpiry] = useState("both");
+
+  const fridays = getUpcomingFridays();
 
   useEffect(() => {
     const tick = () => setClock(new Date().toUTCString().split(" ")[4] + " UTC");
@@ -142,45 +239,70 @@ export default function NexusDashboard() {
     setTickerItems(items);
   }, [events]);
 
+  // Load saved options on mount
+  useEffect(() => {
+    const saved = loadOptions();
+    const savedTime = loadOptionsTime();
+    if (saved && savedTime) { setOptionsPicks(saved); setLastGenerated(savedTime); }
+  }, []);
+
+  // Auto-generate at 8am if new day
+  useEffect(() => {
+    const check = () => {
+      const now = new Date();
+      const savedTime = loadOptionsTime();
+      if (now.getHours() >= 8 && (!savedTime || savedTime.toDateString() !== now.toDateString())) {
+        if (tab === "options") generateOptionsPicks();
+      }
+    };
+    check();
+    const iv = setInterval(check, 60000);
+    return () => clearInterval(iv);
+  }, [tab]);
+
   const filtered = filter === "all" ? events : events.filter(e => e.category === filter);
   const criticals = events.filter(e => e.severity === "critical").length;
 
+  const generateOptionsPicks = async () => {
+    if (loadingOptions) return;
+    setLoadingOptions(true); setOptionsError(null);
+    const evCtx = events.filter(e => ["critical","high"].includes(e.severity)).slice(0, 8)
+      .map(e => `[${e.category.toUpperCase()}] ${e.title} (${e.location}): ${e.summary} — affects: ${e.commodities.join(", ")}`).join("\n");
+    const today = new Date().toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    const prompt = `You are an aggressive options trading AI for a Canadian Questrade trader. Today is ${today}.
+
+Active high-impact global events:
+${evCtx}
+
+Generate exactly 5 aggressive, event-driven options picks for stocks on NYSE, NASDAQ, or TSX tradeable on Questrade. Prioritize maximum return potential.
+
+Requirements:
+- Aggressive: prefer OTM options with high leverage potential
+- Expiry: ${fridays.first} OR ${fridays.second} at 3:30 PM ET (choose whichever gives better risk/reward)
+- Mix calls AND puts based on event direction  
+- Only liquid, well-known tickers available on Questrade
+- Each pick must be directly driven by one of the listed global events
+- Target 100-500%+ return on aggressive moves
+- Include at least 1 TSX-listed stock
+- Rank by highest expected return potential
+
+Return ONLY a valid JSON array (no other text):
+[{"rank":1,"ticker":"SYMBOL","companyName":"Full Name","exchange":"NYSE or NASDAQ or TSX","sector":"Sector","type":"CALL or PUT","strike":"$XXX","expiry":"${fridays.first} or ${fridays.second}","premium":"$X.XX - $X.XX","targetReturn":"+XXX%","catalystDate":"Date or Ongoing","confidence":"HIGH or MEDIUM or LOW","thesis":"2-3 sentence explanation tied to the global event","eventTrigger":"Which event drives this and how","riskNote":"One sentence main risk"}]`;
+    try {
+      const text = await callClaude(prompt, 1200);
+      const parsed = parseJSON(text);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        setOptionsPicks(parsed); saveOptions(parsed); setLastGenerated(new Date());
+      } else throw new Error("AI returned unexpected format. Please try again.");
+    } catch (err) { setOptionsError(err.message); }
+    setLoadingOptions(false);
+  };
+
   const analyzeEvent = useCallback(async (ev) => {
     setSelected(ev); setLoading(true); setAnalysisHtml(null); setApiError(null);
-    const prompt = `You are NEXUS, a global intelligence AI. Analyze this world event for commodity/market impact:
-
-Event: ${ev.title}
-Location: ${ev.location}
-Category: ${ev.category} | Severity: ${ev.severity}
-Summary: ${ev.summary}
-Affected Commodities: ${ev.commodities.join(", ")}
-
-Respond with these sections (use ### header before each):
-
-### INTEL BRIEF
-2-3 sentences on geopolitical/economic significance with specific figures.
-
-### CRITICAL SHORTAGES
-3-4 specific items running short due to this event with % estimates.
-
-### SOURCE ANALYSIS
-For each shortage: Item → Primary Countries (share%) → Alternative Suppliers → Key Companies
-
-### PRICE PREDICTIONS (30-90 days)
-Format each line: CommodityName | UP/DOWN | +X% or -X% | High/Med/Low confidence
-List 4-5 commodities with realistic numbers.
-
-### SUPPLY CHAIN RISK
-Key sectors disrupted and cascade effects in 2-3 sentences.
-
-### INVESTMENT IMPLICATIONS
-Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
-    try {
-      const text = await callClaude(prompt, 850);
-      setAnalysisHtml(text);
-    } catch (err) {
-      setApiError(err.message);
-    }
+    const prompt = `You are NEXUS, a global intelligence AI. Analyze this world event:\n\nEvent: ${ev.title}\nLocation: ${ev.location}\nCategory: ${ev.category} | Severity: ${ev.severity}\nSummary: ${ev.summary}\nAffected Commodities: ${ev.commodities.join(", ")}\n\nUse ### headers for each section:\n\n### INTEL BRIEF\n2-3 sentences with specific figures.\n\n### CRITICAL SHORTAGES\n3-4 items running short with % estimates.\n\n### SOURCE ANALYSIS\nItem → Primary Countries (share%) → Alternatives → Key Companies\n\n### PRICE PREDICTIONS (30-90 days)\nCommodityName | UP/DOWN | +X% or -X% | High/Med/Low confidence\n\n### SUPPLY CHAIN RISK\nKey sectors disrupted, 2-3 sentences.\n\n### INVESTMENT IMPLICATIONS\nSpecific sectors/ETFs rising or falling.`;
+    try { const text = await callClaude(prompt, 850); setAnalysisHtml(text); }
+    catch (err) { setApiError(err.message); }
     setLoading(false);
   }, []);
 
@@ -189,60 +311,49 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
   const runQuery = async () => {
     if (!query.trim() || loading) return;
     setLoading(true); setAnalysisHtml(null); setApiError(null);
-    const ctx = events.map(e => `[${e.category.toUpperCase()}/${e.severity.toUpperCase()}] ${e.title} (${e.location}): ${e.commodities.join(", ")}`).join("\n");
-    const prompt = `You are NEXUS, a global intelligence AI. Answer this query based on current world events:\n\nQUERY: "${query}"\n\nACTIVE GLOBAL EVENTS:\n${ctx}\n\nProvide comprehensive intelligence analysis with ### headers. Include specific percentages, named source countries/companies, price predictions (Commodity | UP/DOWN | ±X% | Confidence), supply chain cascade effects, and actionable insights.`;
-    try {
-      const text = await callClaude(prompt, 900);
-      setAnalysisHtml(text);
-    } catch (err) {
-      setApiError(err.message);
-    }
+    const ctx = events.map(e => `[${e.category.toUpperCase()}] ${e.title} (${e.location}): ${e.commodities.join(", ")}`).join("\n");
+    const prompt = `NEXUS global intelligence query: "${query}"\n\nActive events:\n${ctx}\n\nAnalyze with ### headers. Include percentages, named countries/companies, price predictions (Commodity | UP/DOWN | ±X% | Confidence), and actionable insights.`;
+    try { const text = await callClaude(prompt, 900); setAnalysisHtml(text); }
+    catch (err) { setApiError(err.message); }
     setLoading(false);
   };
 
   const scanEvents = async () => {
     setScanning(true);
     try {
-      const prompt = `Generate a JSON array of 6 current world events (2025) affecting global commodities. Return ONLY valid JSON:\n[{"id":101,"category":"weather|conflict|diplomatic|economic|tech|health","severity":"critical|high|medium","title":"title","location":"location","summary":"2-3 sentences with specific data","commodities":["c1","c2","c3"],"region":"global|northamerica|europe|asia|middleeast|africa|latam"}]`;
-      const text = await callClaude(prompt, 700);
+      const text = await callClaude(`Generate 6 current 2025 world events affecting global commodities. Return ONLY JSON:\n[{"id":101,"category":"weather|conflict|diplomatic|economic|tech|health","severity":"critical|high|medium","title":"title","location":"location","summary":"2-3 sentences with data","commodities":["c1","c2","c3"],"region":"global|northamerica|europe|asia|middleeast|africa|latam"}]`, 700);
       const newEvs = parseJSON(text);
       if (Array.isArray(newEvs)) setEvents([...seedEvents, ...newEvs.map((e, i) => ({ ...e, id: 100 + i }))]);
-    } catch (err) { console.error(err); }
+    } catch {}
     setScanning(false);
   };
 
   const loadPredictions = async () => {
-    if (predictions) return;
-    setLoadingTab(true);
+    if (predictions) return; setLoadingTab(true);
     try {
       const ctx = events.slice(0, 8).map(e => `${e.title}: ${e.commodities.join(", ")}`).join("\n");
-      const prompt = `Based on these active world events:\n${ctx}\n\nReturn ONLY JSON:\n{"topCommodity":"name","topReason":"reason","priceIndex":"72","topRegion":"Middle East","regionReason":"reason","alerts":"5","items":[{"commodity":"name","direction":"up","change":"+8%","confidence":"high","driver":"brief driver","source":"country","timeframe":"45 days"}]}\nInclude 10 commodity items, realistic mix of up/down.`;
-      const text = await callClaude(prompt, 700);
+      const text = await callClaude(`Events:\n${ctx}\n\nReturn ONLY JSON:\n{"topCommodity":"name","topReason":"reason","priceIndex":"72","topRegion":"region","regionReason":"reason","alerts":"5","items":[{"commodity":"name","direction":"up","change":"+8%","confidence":"high","driver":"driver","source":"country","timeframe":"45 days"}]}\nInclude 10 items.`, 700);
       setPredictions(parseJSON(text));
-    } catch (err) { console.error(err); }
+    } catch {}
     setLoadingTab(false);
   };
 
   const loadSupply = async () => {
-    if (supplyData) return;
-    setLoadingTab(true);
+    if (supplyData) return; setLoadingTab(true);
     try {
-      const crit = events.filter(e => e.severity === "critical" || e.severity === "high").slice(0, 5);
-      const prompt = `Based on these critical events:\n${crit.map(e => `${e.title} (${e.location}): ${e.summary}`).join("\n")}\n\nReturn ONLY JSON:\n{"chains":[{"item":"item","risk":"critical|high|medium","shortage":"X%","primarySources":["Country A (60%)"],"alternatives":["Country C"],"companies":["Company X"],"priceImpact":"+X%","sectors":["Sector A"],"timeToShortage":"X weeks"}]}\nInclude 7 items.`;
-      const text = await callClaude(prompt, 700);
+      const crit = events.filter(e => ["critical","high"].includes(e.severity)).slice(0, 5);
+      const text = await callClaude(`Events:\n${crit.map(e => `${e.title}: ${e.summary}`).join("\n")}\n\nReturn ONLY JSON:\n{"chains":[{"item":"item","risk":"critical|high|medium","shortage":"X%","primarySources":["Country (60%)"],"alternatives":["Country"],"companies":["Company"],"priceImpact":"+X%","sectors":["Sector"],"timeToShortage":"X weeks"}]}\nInclude 7 items.`, 700);
       setSupplyData(parseJSON(text));
-    } catch (err) { console.error(err); }
+    } catch {}
     setLoadingTab(false);
   };
 
   const loadSources = async () => {
-    if (sourcesData) return;
-    setLoadingTab(true);
+    if (sourcesData) return; setLoadingTab(true);
     try {
-      const prompt = `Sourcing intelligence for key commodity-exporting countries. Return ONLY JSON:\n{"hotspots":[{"country":"name","risk":"critical|high|medium","exports":["item (share%)"],"activeEvent":"event","priceImpact":"impact","alternatives":["country"]}]}\nCover: Russia, Ukraine, China, Saudi Arabia, Brazil, DRC, Australia, Iran, India, Taiwan.`;
-      const text = await callClaude(prompt, 700);
+      const text = await callClaude(`Country sourcing intelligence. Return ONLY JSON:\n{"hotspots":[{"country":"name","risk":"critical|high|medium","exports":["item (share%)"],"activeEvent":"event","priceImpact":"impact","alternatives":["country"]}]}\nCover: Russia,Ukraine,China,Saudi Arabia,Brazil,DRC,Australia,Iran,India,Taiwan.`, 700);
       setSourcesData(parseJSON(text));
-    } catch (err) { console.error(err); }
+    } catch {}
     setLoadingTab(false);
   };
 
@@ -259,7 +370,6 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
       const lines = sec.trim().split("\n");
       const title = lines[0].trim().replace(/^#+\s*/, "");
       const body = lines.slice(1).join("\n").trim();
-
       if (title.includes("PRICE PREDICTIONS")) {
         const rows = body.split("\n").filter(l => l.includes("|"));
         const extra = body.split("\n").filter(l => l.trim() && !l.includes("|"));
@@ -282,7 +392,6 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
           </AnalysisSection>
         );
       }
-
       if (title.includes("SOURCE")) {
         return (
           <AnalysisSection key={si} title={title}>
@@ -297,12 +406,11 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
                   </div>
                 );
               }
-              return <p key={ii} style={{ fontSize: 11, lineHeight: 1.6 }}>{clean}</p>;
+              return clean ? <p key={ii} style={{ fontSize: 11, lineHeight: 1.6 }}>{clean}</p> : null;
             })}
           </AnalysisSection>
         );
       }
-
       return (
         <AnalysisSection key={si} title={title}>
           {body.split("\n").map((line, li) => {
@@ -316,6 +424,12 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
     });
   }
 
+  const filteredPicks = optionsPicks?.filter(p => {
+    if (selectedExpiry === "this") return p.expiry?.includes(fridays.first.slice(0, 6));
+    if (selectedExpiry === "next") return p.expiry?.includes(fridays.second.slice(0, 6));
+    return true;
+  });
+
   const suggestions = ["Commodities rising next 30 days", "Critical global shortages", "Red Sea shipping price impact", "Rare earth supply chain risk", "Food security by region", "Oil price predictions 90 days", "Tech supply chain vulnerabilities", "Stocks that benefit from conflicts"];
 
   return (
@@ -328,6 +442,7 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
         @keyframes blink { 50%{opacity:0} }
         @keyframes tickerMove { from{transform:translateX(0)} to{transform:translateX(-50%)} }
         @keyframes pulseDot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        @keyframes goldGlow { 0%,100%{text-shadow:0 0 6px rgba(255,215,0,0.3)} 50%{text-shadow:0 0 14px rgba(255,215,0,0.7)} }
       `}</style>
 
       {/* TOPBAR */}
@@ -342,7 +457,23 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
           <span>{events.length} EVENTS TRACKED</span>
           {!API_KEY && <span style={{ color: "#ff2d55" }}>⚠ NO API KEY</span>}
         </div>
-        <div style={{ fontFamily: "monospace", fontSize: 13, color: "#00d4ff" }}>{clock}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ fontFamily: "monospace", fontSize: 13, color: "#00d4ff" }}>{clock}</div>
+          {user && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: "50%", background: `${user.color}22`, border: `1px solid ${user.color}66`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: user.color }}>
+                {user.avatar}
+              </div>
+              <div>
+                <div style={{ fontFamily: "monospace", fontSize: 11, color: "#e8f4ff", lineHeight: 1 }}>{user.displayName}</div>
+                <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", letterSpacing: 1 }}>{user.role}</div>
+              </div>
+              <button onClick={onLogout} style={{ background: "transparent", border: "1px solid #1a2d47", borderRadius: 3, padding: "3px 8px", fontFamily: "monospace", fontSize: 10, color: "#4a6d8c", cursor: "pointer", letterSpacing: 1 }}>
+                EXIT
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div style={S.body}>
@@ -359,11 +490,25 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
                 </span>
               </button>
             ))}
+
+            <div style={S.sectionLabel}>OPTIONS SCHEDULE</div>
+            <div style={{ padding: "4px 16px 12px" }}>
+              <div style={{ fontSize: 11, color: "#ffb800", fontFamily: "monospace", marginBottom: 4 }}>📅 {fridays.first}</div>
+              <div style={{ fontSize: 11, color: "#ff6b35", fontFamily: "monospace", marginBottom: 8 }}>📅 {fridays.second}</div>
+              <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.6 }}>Closes 3:30 PM ET · Refreshes 8:00 AM daily</div>
+              {lastGenerated && <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginTop: 4 }}>Last: {lastGenerated.toLocaleTimeString()}</div>}
+            </div>
+
             <div style={S.sectionLabel}>QUICK QUERIES</div>
             <div style={{ padding: "0 10px", display: "flex", flexWrap: "wrap", gap: 5 }}>
               {suggestions.map(s => (
                 <button key={s} onClick={() => setQuery(s)} style={{ fontSize: 10, padding: "4px 8px", background: "#0d1829", border: "1px solid #1a2d47", borderRadius: 2, color: "#4a6d8c", cursor: "pointer", textAlign: "left", fontFamily: "monospace" }}>{s}</button>
               ))}
+            </div>
+
+            <div style={{ margin: "12px 10px 0", padding: "10px 12px", background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 3 }}>
+              <div style={{ fontSize: 9, color: "#ffb800", fontFamily: "monospace", marginBottom: 4, letterSpacing: 2 }}>⚠ NOT FINANCIAL ADVICE</div>
+              <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.6 }}>AI picks are educational only. Options carry substantial risk of total loss. Always verify on Questrade before trading.</div>
             </div>
           </div>
         </div>
@@ -371,18 +516,23 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
         {/* MAIN */}
         <div style={S.main}>
           <div style={S.queryBar}>
-            <input style={S.input} value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === "Enter" && runQuery()} placeholder="e.g. 'Analyze commodity impact of Red Sea tensions' or 'Which countries face grain shortages?'" />
+            <input style={S.input} value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === "Enter" && runQuery()} placeholder="e.g. 'Commodity impact of Red Sea tensions' or 'Which countries face grain shortages?'" />
             <button style={S.btnSecondary} onClick={scanEvents} disabled={scanning}>{scanning ? "SCANNING..." : "⟳ SCAN"}</button>
             <button style={S.btnPrimary(loading)} onClick={runQuery} disabled={loading}>{loading ? "ANALYZING..." : "ANALYZE ▶"}</button>
           </div>
 
           <div style={S.tabs}>
             {[["events","EVENTS FEED"],["predictions","PRICE PREDICTIONS"],["supply","SUPPLY CHAIN"],["sources","SOURCE MAP"]].map(([t,l]) => (
-              <button key={t} style={S.tab(tab === t)} onClick={() => handleTab(t)}>{l}</button>
+              <button key={t} style={S.tab(tab === t, false)} onClick={() => handleTab(t)}>{l}</button>
             ))}
+            <button style={{ ...S.tab(tab === "options", true), animation: tab !== "options" ? "goldGlow 3s infinite" : "none" }} onClick={() => handleTab("options")}>
+              ★ OPTIONS PICKS
+            </button>
           </div>
 
           <div style={S.contentArea}>
+
+            {/* EVENTS */}
             {tab === "events" && (
               <>
                 {criticals > 0 && (
@@ -395,6 +545,7 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
               </>
             )}
 
+            {/* PREDICTIONS */}
             {tab === "predictions" && (
               <>
                 {loadingTab && <Spinner />}
@@ -403,9 +554,9 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
                     <div style={S.grid2}>
                       {[
                         { label: "HIGHEST RISK COMMODITY", value: predictions.topCommodity, sub: predictions.topReason, col: "#e8f4ff" },
-                        { label: "PRICE PRESSURE INDEX", value: `${predictions.priceIndex}/100`, sub: "Global composite score", col: "#ff6b35" },
+                        { label: "PRICE PRESSURE INDEX", value: `${predictions.priceIndex}/100`, sub: "Global composite", col: "#ff6b35" },
                         { label: "MOST AT-RISK REGION", value: predictions.topRegion, sub: predictions.regionReason, col: "#ff2d55" },
-                        { label: "SUPPLY ALERTS", value: predictions.alerts, sub: "Critical disruptions active", col: "#ffb800" },
+                        { label: "SUPPLY ALERTS", value: predictions.alerts, sub: "Active disruptions", col: "#ffb800" },
                       ].map(({ label, value, sub, col }) => (
                         <div key={label} style={S.insightCard}>
                           <div style={{ fontSize: 9, letterSpacing: 3, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 5 }}>{label}</div>
@@ -416,7 +567,7 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
                     </div>
                     <div style={{ background: "#080f1a", border: "1px solid #1a2d47", borderRadius: 3, overflow: "hidden" }}>
                       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 3fr 2fr 2fr", padding: "8px 10px", borderBottom: "1px solid #1a2d47", fontSize: 9, letterSpacing: 2, color: "#4a6d8c", fontFamily: "monospace" }}>
-                        <span>COMMODITY</span><span>CHANGE</span><span>CONF.</span><span>DRIVER</span><span>SOURCE</span><span>TIMEFRAME</span>
+                        <span>COMMODITY</span><span>CHANGE</span><span>CONF</span><span>DRIVER</span><span>SOURCE</span><span>TIMEFRAME</span>
                       </div>
                       {(predictions.items || []).map((item, i) => (
                         <div key={i} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 3fr 2fr 2fr", padding: "7px 10px", borderBottom: i < predictions.items.length - 1 ? "1px solid #1a2d4733" : "none", fontSize: 11, fontFamily: "monospace" }}>
@@ -434,6 +585,7 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
               </>
             )}
 
+            {/* SUPPLY */}
             {tab === "supply" && (
               <>
                 {loadingTab && <Spinner />}
@@ -465,6 +617,7 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
               </>
             )}
 
+            {/* SOURCES */}
             {tab === "sources" && (
               <>
                 {loadingTab && <Spinner />}
@@ -488,6 +641,68 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
                 )}
               </>
             )}
+
+            {/* OPTIONS PICKS */}
+            {tab === "options" && (
+              <div>
+                {/* Header */}
+                <div style={{ background: "linear-gradient(135deg,rgba(184,134,11,0.15),rgba(255,215,0,0.04))", border: "1px solid rgba(255,215,0,0.25)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffd700", letterSpacing: 3, marginBottom: 4 }}>★ DAILY OPTIONS INTELLIGENCE — QUESTRADE</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>
+                      Aggressive event-driven picks · <span style={{ color: "#ffb800" }}>NYSE · NASDAQ · TSX</span> · Expires <span style={{ color: "#ffd700" }}>{fridays.first}</span> or <span style={{ color: "#ff6b35" }}>{fridays.second}</span> at 3:30 PM ET
+                    </div>
+                    {lastGenerated && <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginTop: 4 }}>Generated: {lastGenerated.toLocaleString()} · Auto-refreshes 8:00 AM daily</div>}
+                  </div>
+                  <button style={S.btnGold(loadingOptions)} onClick={generateOptionsPicks} disabled={loadingOptions}>
+                    {loadingOptions ? "GENERATING..." : optionsPicks ? "⟳ REFRESH PICKS" : "★ GENERATE PICKS"}
+                  </button>
+                </div>
+
+                {/* Expiry filter */}
+                {optionsPicks && !loadingOptions && (
+                  <div style={{ display: "flex", gap: 8, marginBottom: 14, alignItems: "center" }}>
+                    {[["both","Both Fridays"],["this",`This Fri (${fridays.first})`],["next",`Next Fri (${fridays.second})`]].map(([val, label]) => (
+                      <button key={val} onClick={() => setSelectedExpiry(val)} style={{ fontSize: 10, padding: "5px 12px", background: selectedExpiry === val ? "rgba(255,215,0,0.1)" : "#0d1829", border: `1px solid ${selectedExpiry === val ? "#ffd700" : "#1a2d47"}`, borderRadius: 2, color: selectedExpiry === val ? "#ffd700" : "#4a6d8c", cursor: "pointer", fontFamily: "monospace" }}>
+                        {label}
+                      </button>
+                    ))}
+                    <div style={{ marginLeft: "auto", fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{filteredPicks?.length || 0} picks</div>
+                  </div>
+                )}
+
+                {loadingOptions && <Spinner label="GENERATING OPTIONS INTELLIGENCE..." />}
+
+                {optionsError && !loadingOptions && (
+                  <div style={{ padding: 14, background: "rgba(255,45,85,0.08)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#ff2d55", marginBottom: 12 }}>⚠ {optionsError}</div>
+                )}
+
+                {!optionsPicks && !loadingOptions && !optionsError && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16, animation: "goldGlow 2s infinite" }}>★</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ffd700", marginBottom: 8, letterSpacing: 3 }}>DAILY OPTIONS PICKS</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", lineHeight: 1.8, maxWidth: 420, margin: "0 auto 24px" }}>
+                      5 aggressive, event-driven options recommendations for Questrade — tied to active global events tracked by NEXUS. Picks auto-generate every morning at 8:00 AM.
+                    </div>
+                    <button style={{ ...S.btnGold(false), fontSize: 14, padding: "12px 32px" }} onClick={generateOptionsPicks}>
+                      ★ GENERATE TODAY'S PICKS
+                    </button>
+                  </div>
+                )}
+
+                {filteredPicks && !loadingOptions && filteredPicks.map((pick, i) => (
+                  <OptionsPickCard key={i} pick={pick} rank={pick.rank || i + 1} />
+                ))}
+
+                {optionsPicks && !loadingOptions && (
+                  <div style={{ padding: "12px 16px", background: "rgba(255,184,0,0.04)", border: "1px solid rgba(255,184,0,0.15)", borderRadius: 3, marginTop: 6 }}>
+                    <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
+                      <span style={{ color: "#ffb800" }}>⚠ IMPORTANT:</span> These AI-generated picks are for educational and informational purposes only and do not constitute financial advice. Options trading involves substantial risk including total loss of premium paid. Always verify strikes, premiums and liquidity directly on Questrade before placing any trade. Consult a licensed financial advisor before investing.
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -497,14 +712,14 @@ Specific sectors/ETFs likely to rise or fall. Be concise and specific.`;
           <div style={S.panelBody}>
             {apiError && (
               <div style={{ padding: 12, background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#ff2d55", marginBottom: 12 }}>
-                ⚠ API ERROR: {apiError}
-                {!API_KEY && <div style={{ marginTop: 8, color: "#ffb800" }}>Missing VITE_ANTHROPIC_API_KEY environment variable.</div>}
+                ⚠ {apiError}
+                {!API_KEY && <div style={{ marginTop: 8, color: "#ffb800" }}>Set VITE_ANTHROPIC_API_KEY in Vercel environment variables.</div>}
               </div>
             )}
             {!analysisHtml && !loading && !apiError && (
               <div style={{ textAlign: "center", color: "#4a6d8c", padding: 20 }}>
                 <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", marginBottom: 10 }}>NEXUS READY</div>
-                <div style={{ fontSize: 11, lineHeight: 1.8 }}>Select an event card or type a query to generate live AI intelligence briefing with commodity price predictions.</div>
+                <div style={{ fontSize: 11, lineHeight: 1.8 }}>Select an event or run a query to generate a live AI intelligence briefing with commodity predictions.</div>
               </div>
             )}
             {loading && <Spinner />}
