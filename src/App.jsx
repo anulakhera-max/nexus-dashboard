@@ -318,13 +318,37 @@ Return ONLY a valid JSON array (no other text):
     setLoading(false);
   };
 
+  const [liveSource, setLiveSource] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  // Fetch live events from GDELT via NEXUS API
+  const fetchLiveEvents = async () => {
+    const nexusUrl = import.meta.env.VITE_NEXUS_URL;
+    const nexusKey = import.meta.env.VITE_NEXUS_API_KEY;
+    if (!nexusUrl || !nexusKey) return; // skip if not configured
+    try {
+      const res = await fetch(`${nexusUrl}/api/events`, {
+        headers: { "x-nexus-key": nexusKey }
+      });
+      const data = await res.json();
+      if (data.success && data.events?.length > 0) {
+        setEvents(data.events);
+        setLiveSource(data.source);
+        setLastUpdated(data.lastUpdated);
+      }
+    } catch {}
+  };
+
+  // Load live events on mount and every 15 minutes
+  useEffect(() => {
+    fetchLiveEvents();
+    const iv = setInterval(fetchLiveEvents, 15 * 60 * 1000);
+    return () => clearInterval(iv);
+  }, []);
+
   const scanEvents = async () => {
     setScanning(true);
-    try {
-      const text = await callClaude(`Generate 6 current 2025 world events affecting global commodities. Return ONLY JSON:\n[{"id":101,"category":"weather|conflict|diplomatic|economic|tech|health","severity":"critical|high|medium","title":"title","location":"location","summary":"2-3 sentences with data","commodities":["c1","c2","c3"],"region":"global|northamerica|europe|asia|middleeast|africa|latam"}]`, 700);
-      const newEvs = parseJSON(text);
-      if (Array.isArray(newEvs)) setEvents([...seedEvents, ...newEvs.map((e, i) => ({ ...e, id: 100 + i }))]);
-    } catch {}
+    await fetchLiveEvents();
     setScanning(false);
   };
 
@@ -452,7 +476,7 @@ Return ONLY a valid JSON array (no other text):
           <div style={{ fontSize: 11, color: "#4a6d8c", letterSpacing: 4, fontFamily: "monospace" }}>GLOBAL INTELLIGENCE</div>
         </div>
         <div style={{ display: "flex", gap: 20, alignItems: "center", fontFamily: "monospace", fontSize: 10, color: "#4a6d8c" }}>
-          <span><span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "#39ff14", marginRight: 4, animation: "pulseDot 2s infinite" }} />LIVE</span>
+          <span><span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: liveSource ? "#39ff14" : "#ffb800", marginRight: 4, animation: "pulseDot 2s infinite" }} />{liveSource ? "GDELT LIVE" : "SEED DATA"}</span>
           <span style={{ color: "#ff2d55" }}>{criticals} CRITICAL</span>
           <span>{events.length} EVENTS TRACKED</span>
           {!API_KEY && <span style={{ color: "#ff2d55" }}>⚠ NO API KEY</span>}
