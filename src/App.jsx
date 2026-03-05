@@ -276,36 +276,126 @@ export default function NexusDashboard({ user, onLogout }) {
   const generateOptionsPicks = async () => {
     if (loadingOptions) return;
     setLoadingOptions(true); setOptionsError(null);
-    const evCtx = events.filter(e => ["critical","high"].includes(e.severity)).slice(0, 8)
-      .map(e => `[${e.category.toUpperCase()}] ${e.title} (${e.location}): ${e.summary} — affects: ${e.commodities.join(", ")}`).join("\n");
+    const evCtx = events.filter(e => ["critical","high"].includes(e.severity)).slice(0, 5)
+      .map(e => `${e.title} (${e.location}): affects ${e.commodities.slice(0,2).join(", ")}`).join("\n");
     const today = new Date().toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-    const prompt = `You are an aggressive options trading AI for a Canadian Questrade trader. Today is ${today}.
 
-Active high-impact global events:
-${evCtx}
+    // Ask Claude to fill in a strict template — no JSON parsing needed
+    const prompt = `You are an aggressive options trading AI. Today is ${today}.
+Current global events: ${evCtx}
 
-Generate exactly 5 aggressive, event-driven options picks for stocks on NYSE, NASDAQ, or TSX tradeable on Questrade. Prioritize maximum return potential.
+Fill in this EXACT template for 5 options picks. Replace every VALUE in caps. Do not add any other text before or after.
 
-Requirements:
-- Aggressive: prefer OTM options with high leverage potential
-- Expiry: ${fridays.first} OR ${fridays.second} at 3:30 PM ET (choose whichever gives better risk/reward)
-- Mix calls AND puts based on event direction  
-- Only liquid, well-known tickers available on Questrade
-- Each pick must be directly driven by one of the listed global events
-- Target 100-500%+ return on aggressive moves
-- Include at least 1 TSX-listed stock
-- Rank by highest expected return potential
+PICK1_TICKER=VALUE
+PICK1_COMPANY=VALUE
+PICK1_EXCHANGE=VALUE
+PICK1_SECTOR=VALUE
+PICK1_TYPE=CALL or PUT
+PICK1_STRIKE=$VALUE
+PICK1_EXPIRY=${fridays.first}
+PICK1_PREMIUM=$VALUE-$VALUE
+PICK1_RETURN=+VALUE%
+PICK1_CONFIDENCE=HIGH or MEDIUM or LOW
+PICK1_CATALYST=VALUE
+PICK1_THESIS=VALUE
+PICK1_TRIGGER=VALUE
+PICK1_RISK=VALUE
 
-Return ONLY a valid JSON array (no other text):
-[{"rank":1,"ticker":"SYMBOL","companyName":"Full Name","exchange":"NYSE or NASDAQ or TSX","sector":"Sector","type":"CALL or PUT","strike":"$XXX","expiry":"${fridays.first} or ${fridays.second}","premium":"$X.XX - $X.XX","targetReturn":"+XXX%","catalystDate":"Date or Ongoing","confidence":"HIGH or MEDIUM or LOW","thesis":"2-3 sentence explanation tied to the global event","eventTrigger":"Which event drives this and how","riskNote":"One sentence main risk"}]`;
+PICK2_TICKER=VALUE
+PICK2_COMPANY=VALUE
+PICK2_EXCHANGE=VALUE
+PICK2_SECTOR=VALUE
+PICK2_TYPE=CALL or PUT
+PICK2_STRIKE=$VALUE
+PICK2_EXPIRY=${fridays.first}
+PICK2_PREMIUM=$VALUE-$VALUE
+PICK2_RETURN=+VALUE%
+PICK2_CONFIDENCE=HIGH or MEDIUM or LOW
+PICK2_CATALYST=VALUE
+PICK2_THESIS=VALUE
+PICK2_TRIGGER=VALUE
+PICK2_RISK=VALUE
+
+PICK3_TICKER=VALUE
+PICK3_COMPANY=VALUE
+PICK3_EXCHANGE=VALUE
+PICK3_SECTOR=VALUE
+PICK3_TYPE=CALL or PUT
+PICK3_STRIKE=$VALUE
+PICK3_EXPIRY=${fridays.second}
+PICK3_PREMIUM=$VALUE-$VALUE
+PICK3_RETURN=+VALUE%
+PICK3_CONFIDENCE=HIGH or MEDIUM or LOW
+PICK3_CATALYST=VALUE
+PICK3_THESIS=VALUE
+PICK3_TRIGGER=VALUE
+PICK3_RISK=VALUE
+
+PICK4_TICKER=VALUE
+PICK4_COMPANY=VALUE
+PICK4_EXCHANGE=VALUE
+PICK4_SECTOR=VALUE
+PICK4_TYPE=CALL or PUT
+PICK4_STRIKE=$VALUE
+PICK4_EXPIRY=${fridays.second}
+PICK4_PREMIUM=$VALUE-$VALUE
+PICK4_RETURN=+VALUE%
+PICK4_CONFIDENCE=HIGH or MEDIUM or LOW
+PICK4_CATALYST=VALUE
+PICK4_THESIS=VALUE
+PICK4_TRIGGER=VALUE
+PICK4_RISK=VALUE
+
+PICK5_TICKER=VALUE
+PICK5_COMPANY=VALUE
+PICK5_EXCHANGE=VALUE
+PICK5_SECTOR=VALUE
+PICK5_TYPE=CALL or PUT
+PICK5_STRIKE=$VALUE
+PICK5_EXPIRY=${fridays.second}
+PICK5_PREMIUM=$VALUE-$VALUE
+PICK5_RETURN=+VALUE%
+PICK5_CONFIDENCE=HIGH or MEDIUM or LOW
+PICK5_CATALYST=VALUE
+PICK5_THESIS=VALUE
+PICK5_TRIGGER=VALUE
+PICK5_RISK=VALUE`;
+
     try {
-      const text = await callClaude(prompt, 1200);
-      const parsed = parseJSON(text);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        setOptionsPicks(parsed); saveOptions(parsed); setLastGenerated(new Date());
+      const text = await callClaude(prompt, 1400);
+
+      // Parse the template format — extremely reliable
+      const picks = [];
+      for (let i = 1; i <= 5; i++) {
+        const get = (key) => {
+          const match = text.match(new RegExp(`PICK${i}_${key}=(.+)`));
+          return match ? match[1].trim() : "";
+        };
+        const ticker = get("TICKER");
+        if (!ticker || ticker === "VALUE") continue;
+        picks.push({
+          rank: i,
+          ticker,
+          companyName: get("COMPANY"),
+          exchange: get("EXCHANGE"),
+          sector: get("SECTOR"),
+          type: get("TYPE").includes("PUT") ? "PUT" : "CALL",
+          strike: get("STRIKE"),
+          expiry: get("EXPIRY"),
+          premium: get("PREMIUM"),
+          targetReturn: get("RETURN"),
+          confidence: get("CONFIDENCE").includes("HIGH") ? "HIGH" : get("CONFIDENCE").includes("LOW") ? "LOW" : "MEDIUM",
+          catalystDate: get("CATALYST"),
+          thesis: get("THESIS"),
+          eventTrigger: get("TRIGGER"),
+          riskNote: get("RISK"),
+        });
+      }
+
+      if (picks.length > 0) {
+        setOptionsPicks(picks); saveOptions(picks); setLastGenerated(new Date());
       } else {
-        console.error("Raw AI response:", text);
-        throw new Error("Could not parse picks — check console for details. Try again.");
+        throw new Error("No picks found in response. Please try again.");
       }
     } catch (err) { setOptionsError(err.message); }
     setLoadingOptions(false);
