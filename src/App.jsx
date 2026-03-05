@@ -43,8 +43,18 @@ async function callClaude(prompt, maxTokens = 900) {
 }
 
 function parseJSON(text) {
-  const m = text.match(/[\[{][\s\S]*[\]}]/);
-  try { return m ? JSON.parse(m[0]) : null; } catch { return null; }
+  if (!text) return null;
+  // Strip markdown code fences
+  let clean = text.replace(/```json[\s\S]*?```/gi, '').replace(/```/g, '').trim();
+  // Try direct parse
+  try { return JSON.parse(clean); } catch {}
+  // Try finding JSON array anywhere in text
+  const arrMatch = clean.match(/\[[\s\S]*\]/);
+  if (arrMatch) { try { return JSON.parse(arrMatch[0]); } catch {} }
+  // Try finding JSON object
+  const objMatch = clean.match(/\{[\s\S]*\}/);
+  if (objMatch) { try { return JSON.parse(objMatch[0]); } catch {} }
+  return null;
 }
 
 function getUpcomingFridays() {
@@ -293,7 +303,10 @@ Return ONLY a valid JSON array (no other text):
       const parsed = parseJSON(text);
       if (Array.isArray(parsed) && parsed.length > 0) {
         setOptionsPicks(parsed); saveOptions(parsed); setLastGenerated(new Date());
-      } else throw new Error("AI returned unexpected format. Please try again.");
+      } else {
+        console.error("Raw AI response:", text);
+        throw new Error("Could not parse picks — check console for details. Try again.");
+      }
     } catch (err) { setOptionsError(err.message); }
     setLoadingOptions(false);
   };
