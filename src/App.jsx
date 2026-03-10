@@ -236,6 +236,10 @@ export default function NexusDashboard({ user, onLogout }) {
   const [optionsError, setOptionsError] = useState(null);
   const [lastGenerated, setLastGenerated] = useState(null);
   const [selectedExpiry, setSelectedExpiry] = useState("both");
+  const [intelPicks, setIntelPicks] = useState(null);
+  const [loadingIntel, setLoadingIntel] = useState(false);
+  const [intelError, setIntelError] = useState(null);
+  const [intelMeta, setIntelMeta] = useState(null);
 
   const fridays = getUpcomingFridays();
 
@@ -401,6 +405,122 @@ PICK5_RISK=VALUE`;
     setLoadingOptions(false);
   };
 
+  const generateIntelPicks = async (force = false) => {
+    if (loadingIntel) return;
+    setLoadingIntel(true); setIntelError(null);
+    const nexusUrl = import.meta.env.VITE_NEXUS_URL;
+    const nexusKey = import.meta.env.VITE_NEXUS_API_KEY;
+    try {
+      let picks, meta;
+      if (nexusUrl && nexusKey) {
+        // Use backend API with real data sources
+        const res = await fetch(`${nexusUrl}/api/intelligence${force ? "?force=true" : ""}`, {
+          headers: { "x-nexus-key": nexusKey }
+        });
+        const data = await res.json();
+        if (data.success) { picks = data.picks; meta = data; }
+        else throw new Error(data.error || "API error");
+      } else {
+        // Fallback: call Claude directly from browser
+        const evCtx = events.filter(e => ["critical","high"].includes(e.severity)).slice(0, 5)
+          .map(e => `${e.title}: ${e.summary}`).join("\n");
+        const fridays = getUpcomingFridays();
+        const today = new Date().toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+        // Get next 4 fridays
+        const allFridays = [];
+        const now = new Date();
+        const day = now.getDay();
+        const daysToFri = day === 5 ? 7 : (5 - day + 7) % 7 || 7;
+        for (let i = 0; i < 4; i++) {
+          const f = new Date(now); f.setDate(now.getDate() + daysToFri + (i * 7));
+          allFridays.push(f.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" }));
+        }
+        const prompt = `You are NEXUS market intelligence AI. Today is ${today}.
+
+Current global events driving markets:
+${evCtx}
+
+Monitor these key sources mentally: CNBC, WSJ, Bloomberg, Reddit WSB/investing/options, SEC 13F filings, earnings calendar.
+Track these whales: Michael Burry, Michael Saylor (MSTR/BTC), Cathie Wood (ARK), Warren Buffett, Ryan Cohen.
+
+Available expiries (choose best fit per pick): ${allFridays.join(", ")}
+Use longer expiry when catalyst needs 2-4 weeks. Use shorter when move is imminent this week.
+
+Identify 5 stocks/commodities most likely to move +9% OR -9% (either direction) based on earnings, sentiment, whale activity, news catalysts, Reddit unusual activity, and macro events.
+
+Fill in EXACTLY:
+
+PICK1_TICKER=
+PICK1_NAME=
+PICK1_EXCHANGE=
+PICK1_DIRECTION=CALL or PUT
+PICK1_EXPIRY=
+PICK1_MOVE=e.g. +14%
+PICK1_CATALYST=one line reason
+PICK1_SOURCE=Reddit/Earnings/Whale/News/Macro
+PICK1_CONFIDENCE=HIGH or MEDIUM
+PICK1_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS
+
+PICK2_TICKER=
+PICK2_NAME=
+PICK2_EXCHANGE=
+PICK2_DIRECTION=CALL or PUT
+PICK2_EXPIRY=
+PICK2_MOVE=
+PICK2_CATALYST=
+PICK2_SOURCE=
+PICK2_CONFIDENCE=HIGH or MEDIUM
+PICK2_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS
+
+PICK3_TICKER=
+PICK3_NAME=
+PICK3_EXCHANGE=
+PICK3_DIRECTION=CALL or PUT
+PICK3_EXPIRY=
+PICK3_MOVE=
+PICK3_CATALYST=
+PICK3_SOURCE=
+PICK3_CONFIDENCE=HIGH or MEDIUM
+PICK3_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS
+
+PICK4_TICKER=
+PICK4_NAME=
+PICK4_EXCHANGE=
+PICK4_DIRECTION=CALL or PUT
+PICK4_EXPIRY=
+PICK4_MOVE=
+PICK4_CATALYST=
+PICK4_SOURCE=
+PICK4_CONFIDENCE=HIGH or MEDIUM
+PICK4_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS
+
+PICK5_TICKER=
+PICK5_NAME=
+PICK5_EXCHANGE=
+PICK5_DIRECTION=CALL or PUT
+PICK5_EXPIRY=
+PICK5_MOVE=
+PICK5_CATALYST=
+PICK5_SOURCE=
+PICK5_CONFIDENCE=HIGH or MEDIUM
+PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
+
+        const text = await callClaude(prompt, 1400);
+        picks = [];
+        for (let i = 1; i <= 5; i++) {
+          const get = (key) => { const m = text.match(new RegExp(`PICK${i}_${key}=(.+)`)); return m ? m[1].trim() : ""; };
+          const ticker = get("TICKER");
+          if (!ticker) continue;
+          picks.push({ rank: i, ticker, name: get("NAME"), exchange: get("EXCHANGE"), direction: get("DIRECTION").includes("PUT") ? "PUT" : "CALL", expiry: get("EXPIRY"), estimatedMove: get("MOVE"), catalyst: get("CATALYST"), source: get("SOURCE"), confidence: get("CONFIDENCE"), urgency: get("URGENCY") });
+        }
+        meta = { sourcesMonitored: ["CNBC","WSJ","Reddit WSB","r/investing","r/options","SEC 13F","Earnings"], whalesTracked: ["Michael Burry","Michael Saylor","Cathie Wood","Warren Buffett","Ryan Cohen"], headlinesAnalyzed: "AI synthesized" };
+      }
+      if (picks && picks.length > 0) { setIntelPicks(picks); setIntelMeta(meta); }
+      else throw new Error("No picks generated. Please try again.");
+    } catch (err) { setIntelError(err.message); }
+    setLoadingIntel(false);
+  };
+
   const analyzeEvent = useCallback(async (ev) => {
     setSelected(ev); setLoading(true); setAnalysisHtml(null); setApiError(null);
     const prompt = `You are NEXUS, a global intelligence AI. Analyze this world event:\n\nEvent: ${ev.title}\nLocation: ${ev.location}\nCategory: ${ev.category} | Severity: ${ev.severity}\nSummary: ${ev.summary}\nAffected Commodities: ${ev.commodities.join(", ")}\n\nUse ### headers for each section:\n\n### INTEL BRIEF\n2-3 sentences with specific figures.\n\n### CRITICAL SHORTAGES\n3-4 items running short with % estimates.\n\n### SOURCE ANALYSIS\nItem → Primary Countries (share%) → Alternatives → Key Companies\n\n### PRICE PREDICTIONS (30-90 days)\nCommodityName | UP/DOWN | +X% or -X% | High/Med/Low confidence\n\n### SUPPLY CHAIN RISK\nKey sectors disrupted, 2-3 sentences.\n\n### INVESTMENT IMPLICATIONS\nSpecific sectors/ETFs rising or falling.`;
@@ -487,6 +607,7 @@ PICK5_RISK=VALUE`;
   const handleTab = (t) => {
     setTab(t);
     if (t === "predictions") loadPredictions();
+    if (t === "intel" && !intelPicks) generateIntelPicks();
     if (t === "supply") loadSupply();
     if (t === "sources") loadSources();
   };
@@ -654,6 +775,9 @@ PICK5_RISK=VALUE`;
             ))}
             <button style={{ ...S.tab(tab === "options", true), animation: tab !== "options" ? "goldGlow 3s infinite" : "none" }} onClick={() => handleTab("options")}>
               ★ OPTIONS PICKS
+            </button>
+            <button style={{ ...S.tab(tab === "intel", true), color: tab === "intel" ? "#b24fff" : "#4a6d8c", borderBottom: tab === "intel" ? "2px solid #b24fff" : "2px solid transparent", animation: tab !== "intel" ? "none" : "none" }} onClick={() => handleTab("intel")}>
+              ⬡ INTEL PICKS
             </button>
           </div>
 
@@ -825,6 +949,107 @@ PICK5_RISK=VALUE`;
                   <div style={{ padding: "12px 16px", background: "rgba(255,184,0,0.04)", border: "1px solid rgba(255,184,0,0.15)", borderRadius: 3, marginTop: 6 }}>
                     <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
                       <span style={{ color: "#ffb800" }}>⚠ IMPORTANT:</span> These AI-generated picks are for educational and informational purposes only and do not constitute financial advice. Options trading involves substantial risk including total loss of premium paid. Always verify strikes, premiums and liquidity directly on Questrade before placing any trade. Consult a licensed financial advisor before investing.
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* INTEL PICKS TAB */}
+            {tab === "intel" && (
+              <div>
+                {/* Header */}
+                <div style={{ background: "linear-gradient(135deg,rgba(178,79,255,0.15),rgba(178,79,255,0.04))", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#b24fff", letterSpacing: 3, marginBottom: 4 }}>⬡ MULTI-SOURCE INTELLIGENCE PICKS</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 4 }}>
+                      Scanning: <span style={{ color: "#b24fff" }}>CNBC · WSJ · Reddit WSB · r/investing · r/options · SEC 13F · Earnings</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>
+                      Tracking: <span style={{ color: "#ff6b35" }}>Burry · Saylor · Cathie Wood · Buffett · Ryan Cohen</span>
+                    </div>
+                    {intelMeta && <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginTop: 4 }}>{intelMeta.headlinesAnalyzed} headlines analyzed · Up to 4 weekly expiries · ±9% move threshold (up or down)</div>}
+                  </div>
+                  <button onClick={() => generateIntelPicks(true)} disabled={loadingIntel} style={{ background: loadingIntel ? "#1a2d47" : "linear-gradient(135deg,#6a0dad,#b24fff)", color: loadingIntel ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 18px", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: loadingIntel ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                    {loadingIntel ? "SCANNING..." : intelPicks ? "⟳ REFRESH" : "⬡ SCAN NOW"}
+                  </button>
+                </div>
+
+                {loadingIntel && <Spinner label="SCANNING CNBC · WSJ · REDDIT · SEC · EARNINGS..." />}
+
+                {intelError && !loadingIntel && (
+                  <div style={{ padding: 14, background: "rgba(178,79,255,0.08)", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#b24fff", marginBottom: 12 }}>⚠ {intelError}</div>
+                )}
+
+                {!intelPicks && !loadingIntel && !intelError && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16, color: "#b24fff" }}>⬡</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#b24fff", marginBottom: 8, letterSpacing: 3 }}>MULTI-SOURCE INTELLIGENCE</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", lineHeight: 1.8, maxWidth: 460, margin: "0 auto 24px" }}>
+                      Scans CNBC, WSJ, Reddit threads, SEC whale filings, and earnings calendars. Identifies stocks and commodities likely to move +9% or -9% with CALL or PUT and best expiry up to 4 Fridays out.
+                    </div>
+                    <button onClick={() => generateIntelPicks(false)} style={{ background: "linear-gradient(135deg,#6a0dad,#b24fff)", color: "#fff", border: "none", borderRadius: 3, padding: "12px 32px", fontSize: 14, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: "pointer", fontFamily: "monospace" }}>
+                      ⬡ SCAN ALL SOURCES NOW
+                    </button>
+                  </div>
+                )}
+
+                {intelPicks && !loadingIntel && (
+                  <div>
+                    {intelPicks.map((pick, i) => {
+                      const isCall = pick.direction === "CALL";
+                      const col = isCall ? "#39ff14" : "#ff2d55";
+                      const urgencyCol = pick.urgency === "THIS WEEK" ? "#ff2d55" : pick.urgency === "NEXT WEEK" ? "#ffb800" : "#00d4ff";
+                      return (
+                        <div key={i} style={{ background: "#080f1a", border: `1px solid ${col}33`, borderLeft: `4px solid ${col}`, borderRadius: 4, padding: 16, marginBottom: 12, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                          {/* Rank */}
+                          <div style={{ width: 32, height: 32, borderRadius: "50%", background: `${col}22`, border: `1px solid ${col}55`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: col, flexShrink: 0 }}>
+                            {pick.rank}
+                          </div>
+                          {/* Ticker + name */}
+                          <div style={{ minWidth: 120 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 900, color: "#e8f4ff", lineHeight: 1 }}>{pick.ticker}</div>
+                            <div style={{ fontSize: 11, color: "#4a6d8c", marginTop: 2 }}>{pick.name}</div>
+                            <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{pick.exchange}</div>
+                          </div>
+                          {/* Direction */}
+                          <div style={{ textAlign: "center", minWidth: 70 }}>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>DIRECTION</div>
+                            <div style={{ fontSize: 18, fontWeight: 900, color: col, fontFamily: "monospace" }}>{pick.direction}</div>
+                          </div>
+                          {/* Expiry */}
+                          <div style={{ textAlign: "center", minWidth: 100 }}>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>EXPIRY</div>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: "#ffb800", fontFamily: "monospace" }}>{pick.expiry}</div>
+                          </div>
+                          {/* Move */}
+                          <div style={{ textAlign: "center", minWidth: 70 }}>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>EST. MOVE</div>
+                            <div style={{ fontSize: 18, fontWeight: 900, color: col, fontFamily: "monospace" }}>{pick.estimatedMove}</div>
+                          </div>
+                          {/* Urgency */}
+                          <div style={{ textAlign: "center", minWidth: 90 }}>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>URGENCY</div>
+                            <div style={{ fontSize: 10, fontWeight: 700, color: urgencyCol, fontFamily: "monospace", padding: "2px 6px", background: `${urgencyCol}11`, border: `1px solid ${urgencyCol}44`, borderRadius: 2 }}>{pick.urgency}</div>
+                          </div>
+                          {/* Confidence */}
+                          <div style={{ textAlign: "center", minWidth: 80 }}>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>CONFIDENCE</div>
+                            <div style={{ fontSize: 10, fontWeight: 700, color: pick.confidence === "HIGH" ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>{pick.confidence}</div>
+                          </div>
+                          {/* Catalyst + source */}
+                          <div style={{ flex: 1, minWidth: 200 }}>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>CATALYST</div>
+                            <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.5, marginBottom: 4 }}>{pick.catalyst}</div>
+                            <div style={{ fontSize: 10, color: "#b24fff", fontFamily: "monospace" }}>SOURCE: {pick.source}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div style={{ padding: "12px 16px", background: "rgba(178,79,255,0.04)", border: "1px solid rgba(178,79,255,0.15)", borderRadius: 3, marginTop: 6 }}>
+                      <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
+                        <span style={{ color: "#b24fff" }}>⚠ RESEARCH ONLY:</span> Intelligence picks are AI-synthesized from public sources for educational purposes. Not financial advice. Always verify on Questrade before trading. Options can expire worthless.
+                      </div>
                     </div>
                   </div>
                 )}
