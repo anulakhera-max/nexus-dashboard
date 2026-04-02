@@ -248,6 +248,12 @@ export default function NexusDashboard({ user, onLogout }) {
   const [intelError, setIntelError] = useState(null);
   const [intelMeta, setIntelMeta] = useState(null);
 
+  // Questrade live data
+  const [qtBalance, setQtBalance] = useState(null);
+  const [qtQuotes, setQtQuotes] = useState({});
+  const [qtConnected, setQtConnected] = useState(false);
+  const [qtLoading, setQtLoading] = useState(false);
+
   // Credit usage counter
   const [sessionCalls, setSessionCalls] = useState(0);
   const [sessionCost, setSessionCost] = useState(0);
@@ -412,7 +418,7 @@ PICK5_RISK=VALUE`;
       }
 
       if (picks.length > 0) {
-        setOptionsPicks(picks); saveOptions(picks); setLastGenerated(new Date()); trackCall(900, 1400);
+        setOptionsPicks(picks); saveOptions(picks); setLastGenerated(new Date()); trackCall(900, 1400); enrichPicksWithLiveData(picks);
       } else {
         throw new Error("No picks found in response. Please try again.");
       }
@@ -530,7 +536,7 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
         }
         meta = { sourcesMonitored: ["CNBC","WSJ","Reddit WSB","r/investing","r/options","SEC 13F","Earnings"], whalesTracked: ["Michael Burry","Michael Saylor","Cathie Wood","Warren Buffett","Ryan Cohen"], headlinesAnalyzed: "AI synthesized" };
       }
-      if (picks && picks.length > 0) { setIntelPicks(picks); setIntelMeta(meta); trackCall(1200, 1400); }
+      if (picks && picks.length > 0) { setIntelPicks(picks); setIntelMeta(meta); trackCall(1200, 1400); enrichPicksWithLiveData(picks); }
       else throw new Error("No picks generated. Please try again.");
     } catch (err) { setIntelError(err.message); }
     setLoadingIntel(false);
@@ -622,6 +628,50 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
     } catch {}
     setLoadingTab(false);
   };
+
+  // ── Questrade API helpers ──────────────────────────────────
+  const nexusUrl = import.meta.env.VITE_NEXUS_URL;
+  const nexusKey = import.meta.env.VITE_NEXUS_API_KEY;
+
+  const qtFetch = async (action, params = {}) => {
+    if (!nexusUrl || !nexusKey) return null;
+    const qs = new URLSearchParams({ action, ...params }).toString();
+    const res = await fetch(`${nexusUrl}/api/questrade?${qs}`, {
+      headers: { "x-nexus-key": nexusKey }
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || "Questrade error");
+    return data;
+  };
+
+  const connectQuestrade = async () => {
+    setQtLoading(true);
+    try {
+      await qtFetch("auth");
+      const balData = await qtFetch("balance");
+      setQtBalance(balData.balance);
+      setQtConnected(true);
+    } catch (err) {
+      console.error("Questrade connect error:", err.message);
+    }
+    setQtLoading(false);
+  };
+
+  const enrichPicksWithLiveData = async (picks) => {
+    if (!qtConnected || !picks?.length) return;
+    try {
+      const tickers = picks.map(p => p.ticker).join(",");
+      const data = await qtFetch("enrich", { picks: tickers });
+      const quoteMap = {};
+      data.quotes.forEach(q => { if (q.quote) quoteMap[q.ticker] = q.quote; });
+      setQtQuotes(prev => ({ ...prev, ...quoteMap }));
+    } catch (err) {
+      console.error("Enrich error:", err.message);
+    }
+  };
+
+  // Auto-connect Questrade on load
+  useEffect(() => { connectQuestrade(); }, []);
 
   const trackCall = (promptLen, maxTokens) => {
     const cost = estimateCost(promptLen, maxTokens);
@@ -730,6 +780,21 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
           <span style={{ fontFamily: "monospace", fontSize: 10, color: sessionCost > 0.05 ? "#ff2d55" : "#4a6d8c", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: `1px solid ${sessionCost > 0.05 ? "#ff2d5544" : "#1a3a5c"}` }}>
             ⚡ {sessionCalls} calls · ~${sessionCost.toFixed(4)} used
           </span>
+          {qtConnected && qtBalance && (
+            <span style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: "1px solid #39ff1444" }}>
+              🏦 CAD ${qtBalance.CAD.totalEquity.toLocaleString("en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · USD ${qtBalance.USD.totalEquity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+          )}
+          {!qtConnected && !qtLoading && (
+            <span style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d8c", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: "1px solid #1a3a5c", cursor: "pointer" }} onClick={connectQuestrade}>
+              🏦 Connect Questrade
+            </span>
+          )}
+          {qtLoading && (
+            <span style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: "1px solid #ffb80044" }}>
+              🏦 Connecting...
+            </span>
+          )}
           <span style={{ color: "#ff2d55" }}>{criticals} CRITICAL</span>
           <span>{events.length} EVENTS TRACKED</span>
           {!API_KEY && <span style={{ color: "#ff2d55" }}>⚠ NO API KEY</span>}
@@ -1041,6 +1106,14 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
                             <div style={{ fontSize: 11, color: "#4a6d8c", marginTop: 2 }}>{pick.name}</div>
                             <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{pick.exchange}</div>
                           </div>
+                          {/* Live price from Questrade */}
+                          {qtQuotes[pick.ticker] && (
+                            <div style={{ textAlign: "center", minWidth: 80 }}>
+                              <div style={{ fontSize: 9, color: "#39ff14", fontFamily: "monospace", marginBottom: 3 }}>LIVE PRICE</div>
+                              <div style={{ fontSize: 16, fontWeight: 900, color: "#39ff14", fontFamily: "monospace" }}>${qtQuotes[pick.ticker].lastPrice?.toFixed(2)}</div>
+                              <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>bid ${qtQuotes[pick.ticker].bidPrice?.toFixed(2)} · ask ${qtQuotes[pick.ticker].askPrice?.toFixed(2)}</div>
+                            </div>
+                          )}
                           {/* Direction */}
                           <div style={{ textAlign: "center", minWidth: 70 }}>
                             <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>DIRECTION</div>
