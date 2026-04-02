@@ -22,6 +22,13 @@ const catColors = { weather: "#00d4ff", conflict: "#ff2d55", diplomatic: "#ffb80
 const catLabels = { weather: "🌊 WEATHER", conflict: "⚔ CONFLICT", diplomatic: "🏛 DIPLOMATIC", economic: "💹 ECONOMIC", tech: "⚡ TECH", health: "🧬 HEALTH" };
 const sevColors = { critical: "#ff2d55", high: "#ffb800", medium: "#00d4ff", low: "#39ff14" };
 
+// Estimate cost: ~$3 per 1M input tokens, ~$15 per 1M output tokens (Sonnet)
+function estimateCost(promptLen, maxTokens) {
+  const inputTokens = Math.ceil(promptLen / 4);
+  const outputTokens = maxTokens;
+  return (inputTokens * 0.000003) + (outputTokens * 0.000015);
+}
+
 async function callClaude(prompt, maxTokens = 900) {
   const res = await fetch(API_URL, {
     method: "POST",
@@ -241,6 +248,14 @@ export default function NexusDashboard({ user, onLogout }) {
   const [intelError, setIntelError] = useState(null);
   const [intelMeta, setIntelMeta] = useState(null);
 
+  // Credit usage counter
+  const [sessionCalls, setSessionCalls] = useState(0);
+  const [sessionCost, setSessionCost] = useState(0);
+  // Hard cache flags — tabs never reload unless manually refreshed
+  const [predictionsLoaded, setPredictionsLoaded] = useState(false);
+  const [supplyLoaded, setSupplyLoaded] = useState(false);
+  const [sourcesLoaded, setSourcesLoaded] = useState(false);
+
   const fridays = getUpcomingFridays();
 
   useEffect(() => {
@@ -397,7 +412,7 @@ PICK5_RISK=VALUE`;
       }
 
       if (picks.length > 0) {
-        setOptionsPicks(picks); saveOptions(picks); setLastGenerated(new Date());
+        setOptionsPicks(picks); saveOptions(picks); setLastGenerated(new Date()); trackCall(900, 1400);
       } else {
         throw new Error("No picks found in response. Please try again.");
       }
@@ -515,7 +530,7 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
         }
         meta = { sourcesMonitored: ["CNBC","WSJ","Reddit WSB","r/investing","r/options","SEC 13F","Earnings"], whalesTracked: ["Michael Burry","Michael Saylor","Cathie Wood","Warren Buffett","Ryan Cohen"], headlinesAnalyzed: "AI synthesized" };
       }
-      if (picks && picks.length > 0) { setIntelPicks(picks); setIntelMeta(meta); }
+      if (picks && picks.length > 0) { setIntelPicks(picks); setIntelMeta(meta); trackCall(1200, 1400); }
       else throw new Error("No picks generated. Please try again.");
     } catch (err) { setIntelError(err.message); }
     setLoadingIntel(false);
@@ -524,12 +539,13 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
   const analyzeEvent = useCallback(async (ev) => {
     setSelected(ev); setLoading(true); setAnalysisHtml(null); setApiError(null);
     const prompt = `You are NEXUS, a global intelligence AI. Analyze this world event:\n\nEvent: ${ev.title}\nLocation: ${ev.location}\nCategory: ${ev.category} | Severity: ${ev.severity}\nSummary: ${ev.summary}\nAffected Commodities: ${ev.commodities.join(", ")}\n\nUse ### headers for each section:\n\n### INTEL BRIEF\n2-3 sentences with specific figures.\n\n### CRITICAL SHORTAGES\n3-4 items running short with % estimates.\n\n### SOURCE ANALYSIS\nItem → Primary Countries (share%) → Alternatives → Key Companies\n\n### PRICE PREDICTIONS (30-90 days)\nCommodityName | UP/DOWN | +X% or -X% | High/Med/Low confidence\n\n### SUPPLY CHAIN RISK\nKey sectors disrupted, 2-3 sentences.\n\n### INVESTMENT IMPLICATIONS\nSpecific sectors/ETFs rising or falling.`;
-    try { const text = await callClaude(prompt, 850); setAnalysisHtml(text); }
+    try { const text = await callClaude(prompt, 850); setAnalysisHtml(text); trackCall(600, 850); }
     catch (err) { setApiError(err.message); }
     setLoading(false);
   }, []);
 
-  useEffect(() => { analyzeEvent(events[0]); }, []);
+  // Don't auto-load analysis on mount — wait for user to click an event
+  // useEffect(() => { analyzeEvent(events[0]); }, []);
 
   const runQuery = async () => {
     if (!query.trim() || loading) return;
@@ -575,41 +591,51 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
     setScanning(false);
   };
 
-  const loadPredictions = async () => {
+  const loadPredictions = async (force = false) => {
+    if (predictionsLoaded && !force) return;
     if (predictions) return; setLoadingTab(true);
     try {
       const ctx = events.slice(0, 8).map(e => `${e.title}: ${e.commodities.join(", ")}`).join("\n");
       const text = await callClaude(`Events:\n${ctx}\n\nReturn ONLY JSON:\n{"topCommodity":"name","topReason":"reason","priceIndex":"72","topRegion":"region","regionReason":"reason","alerts":"5","items":[{"commodity":"name","direction":"up","change":"+8%","confidence":"high","driver":"driver","source":"country","timeframe":"45 days"}]}\nInclude 10 items.`, 700);
-      setPredictions(parseJSON(text));
+      setPredictions(parseJSON(text)); setPredictionsLoaded(true); trackCall(500, 700);
     } catch {}
     setLoadingTab(false);
   };
 
-  const loadSupply = async () => {
+  const loadSupply = async (force = false) => {
+    if (supplyLoaded && !force) return;
     if (supplyData) return; setLoadingTab(true);
     try {
       const crit = events.filter(e => ["critical","high"].includes(e.severity)).slice(0, 5);
       const text = await callClaude(`Events:\n${crit.map(e => `${e.title}: ${e.summary}`).join("\n")}\n\nReturn ONLY JSON:\n{"chains":[{"item":"item","risk":"critical|high|medium","shortage":"X%","primarySources":["Country (60%)"],"alternatives":["Country"],"companies":["Company"],"priceImpact":"+X%","sectors":["Sector"],"timeToShortage":"X weeks"}]}\nInclude 7 items.`, 700);
-      setSupplyData(parseJSON(text));
+      setSupplyData(parseJSON(text)); setSupplyLoaded(true); trackCall(400, 700);
     } catch {}
     setLoadingTab(false);
   };
 
-  const loadSources = async () => {
+  const loadSources = async (force = false) => {
+    if (sourcesLoaded && !force) return;
     if (sourcesData) return; setLoadingTab(true);
     try {
       const text = await callClaude(`Country sourcing intelligence. Return ONLY JSON:\n{"hotspots":[{"country":"name","risk":"critical|high|medium","exports":["item (share%)"],"activeEvent":"event","priceImpact":"impact","alternatives":["country"]}]}\nCover: Russia,Ukraine,China,Saudi Arabia,Brazil,DRC,Australia,Iran,India,Taiwan.`, 700);
-      setSourcesData(parseJSON(text));
+      setSourcesData(parseJSON(text)); setSourcesLoaded(true); trackCall(300, 700);
     } catch {}
     setLoadingTab(false);
+  };
+
+  const trackCall = (promptLen, maxTokens) => {
+    const cost = estimateCost(promptLen, maxTokens);
+    setSessionCalls(c => c + 1);
+    setSessionCost(c => c + cost);
   };
 
   const handleTab = (t) => {
     setTab(t);
-    if (t === "predictions") loadPredictions();
+    // Hard cache — only load once per session, never reload automatically
+    if (t === "predictions" && !predictionsLoaded) loadPredictions();
     if (t === "intel" && !intelPicks) generateIntelPicks();
-    if (t === "supply") loadSupply();
-    if (t === "sources") loadSources();
+    if (t === "supply" && !supplyLoaded) loadSupply();
+    if (t === "sources" && !sourcesLoaded) loadSources();
   };
 
   function renderAnalysis(text) {
@@ -701,6 +727,9 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
         </div>
         <div style={{ display: "flex", gap: 20, alignItems: "center", fontFamily: "monospace", fontSize: 10, color: "#4a6d8c" }}>
           <span><span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: liveSource ? "#39ff14" : "#ffb800", marginRight: 4, animation: "pulseDot 2s infinite" }} />{liveSource ? "GDELT LIVE" : "SEED DATA"}</span>
+          <span style={{ fontFamily: "monospace", fontSize: 10, color: sessionCost > 0.05 ? "#ff2d55" : "#4a6d8c", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: `1px solid ${sessionCost > 0.05 ? "#ff2d5544" : "#1a3a5c"}` }}>
+            ⚡ {sessionCalls} calls · ~${sessionCost.toFixed(4)} used
+          </span>
           <span style={{ color: "#ff2d55" }}>{criticals} CRITICAL</span>
           <span>{events.length} EVENTS TRACKED</span>
           {!API_KEY && <span style={{ color: "#ff2d55" }}>⚠ NO API KEY</span>}
