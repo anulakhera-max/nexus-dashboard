@@ -644,15 +644,34 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
     return data;
   };
 
+  const [qtError, setQtError] = useState(null);
+
   const connectQuestrade = async () => {
     setQtLoading(true);
+    setQtError(null);
+    // Check env vars first
+    if (!nexusUrl || nexusUrl === "undefined") {
+      setQtError("VITE_NEXUS_URL not set");
+      setQtLoading(false);
+      return;
+    }
+    if (!nexusKey || nexusKey === "undefined") {
+      setQtError("VITE_NEXUS_API_KEY not set");
+      setQtLoading(false);
+      return;
+    }
     try {
-      await qtFetch("auth");
+      const authData = await qtFetch("auth");
+      if (!authData) { setQtError("qtFetch returned null — env vars missing"); setQtLoading(false); return; }
       const balData = await qtFetch("balance");
-      setQtBalance(balData.balance);
-      setQtConnected(true);
+      if (balData?.balance) {
+        setQtBalance(balData.balance);
+        setQtConnected(true);
+      } else {
+        setQtError("Balance data missing from response");
+      }
     } catch (err) {
-      console.error("Questrade connect error:", err.message);
+      setQtError(err.message);
     }
     setQtLoading(false);
   };
@@ -785,7 +804,7 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
               🏦 CAD ${qtBalance.CAD.totalEquity.toLocaleString("en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · USD ${qtBalance.USD.totalEquity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           )}
-          {!qtConnected && !qtLoading && (
+          {!qtConnected && !qtLoading && !qtError && (
             <span style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d8c", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: "1px solid #1a3a5c", cursor: "pointer" }} onClick={connectQuestrade}>
               🏦 Connect Questrade
             </span>
@@ -793,6 +812,11 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
           {qtLoading && (
             <span style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: "1px solid #ffb80044" }}>
               🏦 Connecting...
+            </span>
+          )}
+          {qtError && !qtLoading && (
+            <span style={{ fontFamily: "monospace", fontSize: 10, color: "#ff2d55", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: "1px solid #ff2d5544", cursor: "pointer", maxWidth: 300 }} onClick={connectQuestrade} title={qtError}>
+              🏦 QT Error: {qtError.slice(0, 40)}{qtError.length > 40 ? "..." : ""}
             </span>
           )}
           <span style={{ color: "#ff2d55" }}>{criticals} CRITICAL</span>
