@@ -1,15 +1,18 @@
-// /api/questrade — Single-file Questrade integration for NEXUS
-// All Questrade logic merged into one file for Vercel compatibility
-//
-// GET /api/questrade?action=auth
-// GET /api/questrade?action=balance
-// GET /api/questrade?action=positions
-// GET /api/questrade?action=quote&symbol=AAPL
-// GET /api/questrade?action=enrich&picks=AAPL,TSLA,NVDA
+// /api/questrade — Fully self-contained, zero external imports
 
-import { corsHeaders, validateApiKey } from "./_shared.js";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, x-nexus-key",
+  "Content-Type": "application/json",
+};
 
-// ── Questrade auth state ──────────────────────────────────────
+function validateApiKey(req) {
+  const key = req.headers["x-nexus-key"];
+  const validKey = process.env.NEXUS_API_KEY || "nexus-axl-agent-key";
+  return key === validKey;
+}
+
 let qtToken = null;
 let qtApiUrl = null;
 let authenticated = false;
@@ -27,7 +30,6 @@ async function qtAuth(refreshToken) {
 }
 
 async function qtCall(path) {
-  if (!qtToken || !qtApiUrl) throw new Error("Not authenticated");
   const res = await fetch(`${qtApiUrl}v1/${path}`, {
     headers: { Authorization: `Bearer ${qtToken}` },
     signal: AbortSignal.timeout(8000),
@@ -44,7 +46,6 @@ async function ensureAuth() {
   authenticated = true;
 }
 
-// ── Quote ─────────────────────────────────────────────────────
 async function getQuote(symbol) {
   const search = await qtCall(`symbols/search?prefix=${symbol}&offset=0`);
   const equity = search.symbols?.find(s =>
@@ -69,7 +70,6 @@ async function getQuote(symbol) {
   };
 }
 
-// ── Balance ───────────────────────────────────────────────────
 async function getAccountBalance() {
   const accounts = await qtCall("accounts");
   const account = accounts.accounts?.[0];
@@ -85,7 +85,6 @@ async function getAccountBalance() {
   };
 }
 
-// ── Positions ─────────────────────────────────────────────────
 async function getPositions() {
   const accounts = await qtCall("accounts");
   const account = accounts.accounts?.[0];
@@ -102,11 +101,17 @@ async function getPositions() {
   }));
 }
 
-// ── Main handler ──────────────────────────────────────────────
 export default async function handler(req, res) {
-  if (req.method === "OPTIONS") return res.status(200).set(corsHeaders).end();
-  if (!validateApiKey(req)) return res.status(401).json({ error: "Unauthorized." });
+  if (req.method === "OPTIONS") {
+    Object.entries(corsHeaders).forEach(([k, v]) => res.setHeader(k, v));
+    return res.status(200).end();
+  }
+
   Object.entries(corsHeaders).forEach(([k, v]) => res.setHeader(k, v));
+
+  if (!validateApiKey(req)) {
+    return res.status(401).json({ error: "Unauthorized. Include x-nexus-key header." });
+  }
 
   const { action, symbol, picks } = req.query;
 
@@ -145,7 +150,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, quotes });
     }
 
-    return res.status(400).json({ error: `Unknown action: ${action}` });
+    return res.status(400).json({ error: `Unknown action: ${action}. Use: auth, balance, positions, quote, enrich` });
 
   } catch (err) {
     if (err.message.includes("401") || err.message.includes("auth")) authenticated = false;
