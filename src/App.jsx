@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 
 const API_URL = "https://api.anthropic.com/v1/messages";
@@ -630,8 +631,8 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
   };
 
   // ── Questrade API helpers ──────────────────────────────────
-  const nexusUrl = import.meta.env.VITE_NEXUS_URL;
-  const nexusKey = import.meta.env.VITE_NEXUS_API_KEY;
+  const nexusUrl = import.meta.env.VITE_NEXUS_URL || "https://nexus-dashboard-blue.vercel.app";
+  const nexusKey = import.meta.env.VITE_NEXUS_API_KEY || "nexus-axl-agent-key";
 
   const qtFetch = async (action, params = {}) => {
     if (!nexusUrl || !nexusKey) return null;
