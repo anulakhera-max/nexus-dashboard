@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 
 const API_URL = "https://api.anthropic.com/v1/messages";
@@ -637,12 +636,20 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
   const qtFetch = async (action, params = {}) => {
     if (!nexusUrl || !nexusKey) return null;
     const qs = new URLSearchParams({ action, ...params }).toString();
-    const res = await fetch(`${nexusUrl}/api/questrade?${qs}`, {
-      headers: { "x-nexus-key": nexusKey }
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || "Questrade error");
-    return data;
+    try {
+      const res = await fetch(`${nexusUrl}/api/questrade?${qs}`, {
+        headers: { "x-nexus-key": nexusKey }
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); }
+      catch { throw new Error(`Server error: ${text.slice(0, 80)}`); }
+      if (!data.success) throw new Error(data.error || "Questrade error");
+      return data;
+    } catch (err) {
+      console.error("qtFetch error:", action, err.message);
+      throw err;
+    }
   };
 
   const [qtError, setQtError] = useState(null);
