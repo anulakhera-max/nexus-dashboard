@@ -1,5 +1,5 @@
-// /api/questrade — Self-contained with auto token refresh
-// Stores refreshed token in Vercel env via Vercel API
+// /api/questrade — With Vercel Edge Config token persistence
+// Token auto-saves after each auth so it survives serverless restarts
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,10 +14,49 @@ function validateApiKey(req) {
   return key === validKey;
 }
 
-// In-memory token cache (lives for duration of serverless instance)
+// ── Edge Config token storage ─────────────────────────────────
+async function edgeGet(key) {
+  try {
+    const edgeUrl = process.env.EDGE_CONFIG;
+    if (!edgeUrl) return null;
+    const token = process.env.VERCEL_ACCESS_TOKEN;
+    // Parse the Edge Config ID from the connection string
+    const match = edgeUrl.match(/ecfg_[a-zA-Z0-9]+/);
+    if (!match) return null;
+    const configId = match[0];
+    const res = await fetch(`https://api.vercel.com/v1/edge-config/${configId}/item/${key}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.value || null;
+  } catch { return null; }
+}
+
+async function edgeSet(key, value) {
+  try {
+    const edgeUrl = process.env.EDGE_CONFIG;
+    const token = process.env.VERCEL_ACCESS_TOKEN;
+    if (!edgeUrl || !token) return;
+    const match = edgeUrl.match(/ecfg_[a-zA-Z0-9]+/);
+    if (!match) return;
+    const configId = match[0];
+    await fetch(`https://api.vercel.com/v1/edge-config/${configId}/items`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        items: [{ operation: "upsert", key, value }]
+      })
+    });
+  } catch {}
+}
+
+// ── Questrade auth ────────────────────────────────────────────
 let qtToken = null;
 let qtApiUrl = null;
-let qtRefreshToken = null;
 let authenticated = false;
 
 async function qtAuth(refreshToken) {
@@ -32,7 +71,10 @@ async function qtAuth(refreshToken) {
   const data = await res.json();
   qtToken = data.access_token;
   qtApiUrl = data.api_server;
-  qtRefreshToken = data.refresh_token; // Save the NEW token for next time
+  // Save new refresh token to Edge Config immediately
+  if (data.refresh_token) {
+    await edgeSet("questrade_refresh_token", data.refresh_token);
+  }
   return data;
 }
 
@@ -47,36 +89,13 @@ async function qtCall(path) {
 
 async function ensureAuth() {
   if (authenticated && qtToken && qtApiUrl) return;
-  const token = process.env.QUESTRADE_TOKEN;
-  if (!token) throw new Error("QUESTRADE_TOKEN not set in Vercel environment variables");
-  await qtAuth(token);
+  // Try Edge Config first (most recent token), fall back to env var
+  const edgeToken = await edgeGet("questrade_refresh_token");
+  const envToken = process.env.QUESTRADE_TOKEN;
+  const tokenToUse = edgeToken || envToken;
+  if (!tokenToUse) throw new Error("No Questrade token found. Set QUESTRADE_TOKEN in Vercel env vars.");
+  await qtAuth(tokenToUse);
   authenticated = true;
-}
-
-// ── Update token in Vercel env automatically ──────────────────
-async function saveNewTokenToVercel(newToken) {
-  const vercelToken = process.env.VERCEL_ACCESS_TOKEN;
-  const projectId = process.env.VERCEL_PROJECT_ID;
-  const teamId = process.env.VERCEL_TEAM_ID;
-  if (!vercelToken || !projectId) return; // Skip if not configured
-
-  try {
-    const url = `https://api.vercel.com/v10/projects/${projectId}/env${teamId ? `?teamId=${teamId}` : ""}`;
-    // Get existing env vars to find the ID of QUESTRADE_TOKEN
-    const listRes = await fetch(url, {
-      headers: { Authorization: `Bearer ${vercelToken}` }
-    });
-    const listData = await listRes.json();
-    const envVar = listData.envs?.find(e => e.key === "QUESTRADE_TOKEN");
-    if (!envVar) return;
-
-    // Update it with new token
-    await fetch(`https://api.vercel.com/v10/projects/${projectId}/env/${envVar.id}${teamId ? `?teamId=${teamId}` : ""}`, {
-      method: "PATCH",
-      headers: { Authorization: `Bearer ${vercelToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ value: newToken })
-    });
-  } catch {} // Silent fail — token update is best-effort
 }
 
 async function getQuote(symbol) {
@@ -149,35 +168,27 @@ export default async function handler(req, res) {
   try {
     await ensureAuth();
 
-    // After successful auth, save new refresh token to Vercel for next time
-    if (qtRefreshToken && qtRefreshToken !== process.env.QUESTRADE_TOKEN) {
-      saveNewTokenToVercel(qtRefreshToken); // fire and forget
-    }
-
     if (action === "auth") {
+      const savedToken = await edgeGet("questrade_refresh_token");
       return res.status(200).json({
         success: true,
         message: "Questrade connected",
-        newTokenSaved: !!qtRefreshToken,
+        tokenSource: savedToken ? "EdgeConfig" : "env"
       });
     }
-
     if (action === "balance") {
       const balance = await getAccountBalance();
       return res.status(200).json({ success: true, balance });
     }
-
     if (action === "positions") {
       const positions = await getPositions();
       return res.status(200).json({ success: true, positions });
     }
-
     if (action === "quote") {
       if (!symbol) return res.status(400).json({ error: "symbol required" });
       const quote = await getQuote(symbol.toUpperCase());
       return res.status(200).json({ success: true, quote });
     }
-
     if (action === "enrich") {
       if (!picks) return res.status(400).json({ error: "picks required" });
       const tickers = picks.split(",").map(t => t.trim().toUpperCase()).slice(0, 5);
