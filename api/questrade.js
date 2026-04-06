@@ -157,18 +157,31 @@ async function getQuote(symbol) {
 
 // ── Options chain ─────────────────────────────────────────────
 async function getOptionsChain(symbolId, expiryFilter) {
-  const data = await qtCall(`symbols/${symbolId}/options`);
+  // Questrade requires POST with filters for options chain
+  const body = { underlyingId: symbolId };
+  const res = await fetch(`${qtApiUrl}v1/markets/options`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${qtToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Options chain error ${res.status}: ${text}`);
+  }
+  const data = await res.json();
   const chain = data.optionChain || [];
 
   // Filter by expiry if provided
   let filtered = chain;
   if (expiryFilter) {
-    filtered = chain.filter(exp => {
-      const expDate = new Date(exp.expiryDate);
-      const expStr = expDate.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
-      return expStr.includes(expiryFilter) || exp.expiryDate?.includes(expiryFilter);
-    });
-    if (filtered.length === 0) filtered = chain.slice(0, 4); // fallback to first 4 expiries
+    filtered = chain.filter(exp =>
+      exp.expiryDate?.includes(expiryFilter)
+    );
+    if (filtered.length === 0) filtered = chain.slice(0, 4);
   } else {
     filtered = chain.slice(0, 4); // next 4 expiries
   }
