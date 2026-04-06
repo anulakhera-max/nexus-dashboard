@@ -247,6 +247,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingIntel, setLoadingIntel] = useState(false);
   const [intelError, setIntelError] = useState(null);
   const [intelMeta, setIntelMeta] = useState(null);
+  const [powerIntel, setPowerIntel] = useState(null);
+  const [loadingPower, setLoadingPower] = useState(false);
+  const [powerError, setPowerError] = useState(null);
 
   // Questrade live data
   const [qtBalance, setQtBalance] = useState(null);
@@ -700,6 +703,26 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
   // Auto-connect Questrade on load
   useEffect(() => { connectQuestrade(); }, []);
 
+  const generatePowerIntel = async (force = false) => {
+    if (loadingPower) return;
+    setLoadingPower(true); setPowerError(null);
+    try {
+      if (nexusUrl && nexusKey) {
+        const res = await fetch(`${nexusUrl}/api/power-intel${force ? "?force=true" : ""}`, {
+          headers: { "x-nexus-key": nexusKey }
+        });
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch { throw new Error("Server error — check Vercel logs"); }
+        if (data.success) { setPowerIntel(data); trackCall(2000, 2800); }
+        else throw new Error(data.error || "Power Intel API error");
+      } else {
+        throw new Error("NEXUS API not configured");
+      }
+    } catch (err) { setPowerError(err.message); }
+    setLoadingPower(false);
+  };
+
   const trackCall = (promptLen, maxTokens) => {
     const cost = estimateCost(promptLen, maxTokens);
     setSessionCalls(c => c + 1);
@@ -711,6 +734,7 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
     // Hard cache — only load once per session, never reload automatically
     if (t === "predictions" && !predictionsLoaded) loadPredictions();
     if (t === "intel" && !intelPicks) generateIntelPicks();
+    if (t === "power" && !powerIntel) generatePowerIntel();
     if (t === "supply" && !supplyLoaded) loadSupply();
     if (t === "sources" && !sourcesLoaded) loadSources();
   };
@@ -904,6 +928,9 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
             </button>
             <button style={{ ...S.tab(tab === "intel", true), color: tab === "intel" ? "#b24fff" : "#4a6d8c", borderBottom: tab === "intel" ? "2px solid #b24fff" : "2px solid transparent", animation: tab !== "intel" ? "none" : "none" }} onClick={() => handleTab("intel")}>
               ⬡ INTEL PICKS
+            </button>
+            <button style={{ ...S.tab(tab === "power", true), color: tab === "power" ? "#ff6b35" : "#4a6d8c", borderBottom: tab === "power" ? "2px solid #ff6b35" : "2px solid transparent" }} onClick={() => handleTab("power")}>
+              ◈ POWER INTEL
             </button>
           </div>
 
@@ -1187,6 +1214,656 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* POWER INTEL TAB */}
+            {tab === "power" && (
+              <div>
+                {/* Header */}
+                <div style={{ background: "linear-gradient(135deg,rgba(255,107,53,0.15),rgba(255,107,53,0.04))", border: "1px solid rgba(255,107,53,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff6b35", letterSpacing: 3, marginBottom: 4 }}>◈ POWER NETWORK INTELLIGENCE</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Profiling: <span style={{ color: "#ff6b35" }}>Trump · Netanyahu · Putin · Xi · Kushner · Trump Family</span></div>
+                    <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginTop: 4 }}>Psychographic analysis · Scenario engine · 4-week predictions · Power network mapping</div>
+                  </div>
+                  <button onClick={() => generatePowerIntel(true)} disabled={loadingPower} style={{ background: loadingPower ? "#1a2d47" : "linear-gradient(135deg,#8b2500,#ff6b35)", color: loadingPower ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 18px", fontSize: 12, fontWeight: 700, letterSpacing: 2, cursor: loadingPower ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                    {loadingPower ? "ANALYZING..." : powerIntel ? "⟳ REFRESH" : "◈ ANALYZE NOW"}
+                  </button>
+                </div>
+
+                {loadingPower && <div style={{ textAlign: "center", padding: 40, color: "#ff6b35", fontFamily: "monospace", fontSize: 12 }}>◈ Running psychographic analysis on world leaders...<br/>Building scenario engine...<br/>Mapping power network...<br/><br/>This takes 20-30 seconds.</div>}
+
+                {powerError && !loadingPower && (
+                  <div style={{ padding: 14, background: "rgba(255,107,53,0.08)", border: "1px solid rgba(255,107,53,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#ff6b35" }}>⚠ {powerError}</div>
+                )}
+
+                {!powerIntel && !loadingPower && !powerError && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>◈</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ff6b35", marginBottom: 8, letterSpacing: 3 }}>POWER NETWORK ENGINE</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", lineHeight: 1.8, maxWidth: 500, margin: "0 auto 24px" }}>Psychoanalyzes Trump, Netanyahu, Putin, Xi, Kushner. Maps their hidden connections. Runs 4 geopolitical scenarios with weekly predictions. Generates specific options plays from each scenario.</div>
+                    <button onClick={() => generatePowerIntel(false)} style={{ background: "linear-gradient(135deg,#8b2500,#ff6b35)", color: "#fff", border: "none", borderRadius: 3, padding: "12px 32px", fontSize: 14, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace" }}>
+                      ◈ ACTIVATE POWER INTEL
+                    </button>
+                  </div>
+                )}
+
+                {powerIntel && !loadingPower && (() => {
+                  const { profiles, network, scenarios, topPlay, aiEcosystem, mining, pharma, pennyStocks, macro, microstructure, seasonal, cryptoSignal, psychology, community, probabilityScores, riseFallPairs, highestConviction } = powerIntel;
+                  const sigCol = (s) => s === "BULLISH" ? "#39ff14" : s === "BEARISH" ? "#ff2d55" : "#ffb800";
+                  const dirCol = (d) => d === "CALL" ? "#39ff14" : d === "PUT" ? "#ff2d55" : "#00d4ff";
+
+                  return (
+                    <div>
+                      {/* TOP PLAY THIS WEEK */}
+                      {topPlay?.ticker && (
+                        <div style={{ background: "linear-gradient(135deg,rgba(255,107,53,0.2),rgba(255,45,85,0.1))", border: "2px solid #ff6b35", borderRadius: 4, padding: 16, marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 8 }}>⚡ TOP PLAY THIS WEEK — POWER DRIVEN</div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 32, fontWeight: 900, color: "#e8f4ff" }}>{topPlay.ticker}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 900, color: topPlay.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{topPlay.direction}</div>
+                            <div style={{ textAlign: "center" }}>
+                              <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>EXPIRY</div>
+                              <div style={{ fontSize: 13, color: "#ffb800", fontFamily: "monospace", fontWeight: 700 }}>{topPlay.expiry}</div>
+                            </div>
+                            <div style={{ textAlign: "center" }}>
+                              <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>CONFIDENCE</div>
+                              <div style={{ fontSize: 13, color: topPlay.confidence === "HIGH" ? "#ff2d55" : "#ffb800", fontFamily: "monospace", fontWeight: 700 }}>{topPlay.confidence}</div>
+                            </div>
+                            <div style={{ flex: 1, fontSize: 11, color: "#c8dff0", lineHeight: 1.6 }}>{topPlay.thesis}</div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* WHALE NETWORK */}
+                      <div style={{ marginBottom: 20 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3, marginBottom: 12 }}>🐋 WHALE NETWORK — 13F INTELLIGENCE</div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 10, marginBottom: 12 }}>
+                          {/* Burry */}
+                          <div style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: 14 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ff2d55" }}>🐻 MICHAEL BURRY — Q3 2025</div>
+                              <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>$1.38B</div>
+                            </div>
+                            {[{t:"PLTR",d:"PUT",r:"300x+ sales — AI bubble"},{t:"NVDA",d:"PUT",r:"AI hardware overvalued"},{t:"PFE",d:"CALL",r:"Pharma recovery"},{t:"HAL",d:"CALL",r:"Energy services"}].map((p,i) => (
+                              <div key={i} style={{ display:"flex", gap:8, alignItems:"center", marginBottom:5 }}>
+                                <span style={{ fontFamily:"monospace", fontSize:13, fontWeight:900, color:"#e8f4ff", minWidth:45 }}>{p.t}</span>
+                                <span style={{ fontSize:10, fontWeight:700, color:p.d==="PUT"?"#ff2d55":"#39ff14", fontFamily:"monospace", padding:"1px 6px", background:p.d==="PUT"?"#ff2d5511":"#39ff1411", borderRadius:2 }}>{p.d}</span>
+                                <span style={{ fontSize:10, color:"#8aabb8" }}>{p.r}</span>
+                              </div>
+                            ))}
+                            <div style={{ marginTop:8, fontSize:9, color:"#ff2d55", fontStyle:"italic" }}>Called: 2008 crash, 2021 meme bubble, 2022 correction</div>
+                          </div>
+                          {/* Buffett */}
+                          <div style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.3)", borderRadius: 4, padding: 14 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#39ff14" }}>📈 WARREN BUFFETT — Q4 2025</div>
+                              <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>$274B</div>
+                            </div>
+                            {[{t:"AAPL",d:"LONG",r:"Core forever hold"},{t:"AXP",d:"LONG",r:"Premium consumer"},{t:"BAC",d:"LONG",r:"Rate normalization"},{t:"NUE+LEN",d:"NEW",r:"Steel + homebuilders"}].map((p,i) => (
+                              <div key={i} style={{ display:"flex", gap:8, alignItems:"center", marginBottom:5 }}>
+                                <span style={{ fontFamily:"monospace", fontSize:13, fontWeight:900, color:"#e8f4ff", minWidth:55 }}>{p.t}</span>
+                                <span style={{ fontSize:10, fontWeight:700, color:p.d==="NEW"?"#ffb800":"#39ff14", fontFamily:"monospace", padding:"1px 6px", background:p.d==="NEW"?"#ffb80011":"#39ff1411", borderRadius:2 }}>{p.d}</span>
+                                <span style={{ fontSize:10, color:"#8aabb8" }}>{p.r}</span>
+                              </div>
+                            ))}
+                            <div style={{ marginTop:8, fontSize:9, color:"#39ff14", fontStyle:"italic" }}>New Q1 2025: Homebuilders = rates dropping signal</div>
+                          </div>
+                        </div>
+                        {/* Convergence signal */}
+                        <div style={{ background: "linear-gradient(135deg,rgba(0,212,255,0.08),rgba(255,107,53,0.05))", border: "1px solid rgba(0,212,255,0.25)", borderRadius: 4, padding: 14, marginBottom: 10 }}>
+                          <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>⚡ CURRENT CONVERGENCE SIGNAL</div>
+                          <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.6 }}>
+                            Burry <span style={{ color:"#ff2d55", fontWeight:700 }}>BEARISH AI</span> (NVDA/PLTR puts) + Buffett <span style={{ color:"#39ff14", fontWeight:700 }}>BULLISH HOUSING</span> (LEN/DHI) + Energy recovery
+                          </div>
+                          <div style={{ fontSize: 11, color: "#ffb800", marginTop: 8, fontFamily: "monospace" }}>
+                            → ROTATE: Out of AI/tech overvaluation → Into housing, energy, pharma
+                          </div>
+                          <div style={{ display:"flex", gap:16, marginTop:10, flexWrap:"wrap" }}>
+                            {[{label:"AVOID",tickers:"NVDA, PLTR, SMCI, ARM",col:"#ff2d55"},{label:"BUY",tickers:"DHI, LEN, NUE, PFE, HAL",col:"#39ff14"},{label:"WATCH",tickers:"DJT, MSTR, COIN",col:"#ffb800"}].map((g,i) => (
+                              <div key={i}>
+                                <div style={{ fontSize:9, color:"#4a6d8c", fontFamily:"monospace" }}>{g.label}</div>
+                                <div style={{ fontSize:11, fontWeight:700, color:g.col, fontFamily:"monospace" }}>{g.tickers}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        {/* 13F timing edge */}
+                        <div style={{ fontSize: 10, color: "#4a6d8c", padding: "8px 12px", background: "rgba(0,0,0,0.3)", borderRadius: 3, fontFamily: "monospace" }}>
+                          📅 13F Filing dates: Feb 14 · May 15 · Aug 14 · Nov 14 — Market moves WHEN filings released. Source: 13f.info
+                        </div>
+                      </div>
+
+
+                      {/* HIGHEST CONVICTION PLAY */}
+                      {highestConviction?.ticker && (
+                        <div style={{ background: "linear-gradient(135deg,rgba(57,255,20,0.15),rgba(0,212,255,0.08))", border: "2px solid #39ff14", borderRadius: 4, padding: 16, marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 10 }}>🎯 HIGHEST CONVICTION PLAY — MULTI-SIGNAL CONVERGENCE</div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 36, fontWeight: 900, color: "#e8f4ff" }}>{highestConviction.ticker}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 900, color: highestConviction.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{highestConviction.direction}</div>
+                            <div style={{ textAlign: "center" }}>
+                              <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>EXPIRY</div>
+                              <div style={{ fontSize: 14, color: "#ffb800", fontFamily: "monospace", fontWeight: 700 }}>{highestConviction.expiry}</div>
+                            </div>
+                            <div style={{ textAlign: "center" }}>
+                              <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>PROBABILITY</div>
+                              <div style={{ fontSize: 20, fontWeight: 900, color: "#39ff14", fontFamily: "monospace" }}>{highestConviction.probability}</div>
+                            </div>
+                            <div style={{ flex: 1, minWidth: 200 }}>
+                              <div style={{ fontSize: 10, color: "#39ff14", fontFamily: "monospace", marginBottom: 4 }}>CONVERGING SIGNALS: {highestConviction.signals}</div>
+                              <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.6 }}>{highestConviction.thesis}</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* PROBABILITY SCORES */}
+                      {probabilityScores?.length > 0 && (
+                        <div style={{ marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3, marginBottom: 12 }}>📊 PROBABILITY SCORES — SIGNAL CONVERGENCE</div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 10 }}>
+                            {probabilityScores.map((p,i) => {
+                              const confNum = parseInt(p.confidence) || 50;
+                              const col = confNum >= 75 ? "#39ff14" : confNum >= 65 ? "#ffb800" : "#8aabb8";
+                              return (
+                                <div key={i} style={{ background: "#080f1a", border: `1px solid ${col}44`, borderRadius: 4, padding: 14 }}>
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                                    <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 900, color: "#e8f4ff" }}>{p.ticker}</div>
+                                    <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: col }}>{p.confidence}</div>
+                                  </div>
+                                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: p.direction === "CALL" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{p.direction}</span>
+                                    <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>{p.expiry}</span>
+                                    <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{p.signals} signals</span>
+                                  </div>
+                                  <div style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.4 }}>{p.reason}</div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* RISE/FALL PAIRS */}
+                      {riseFallPairs?.length > 0 && (
+                        <div style={{ marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 3, marginBottom: 12 }}>↕ RISE/FALL PAIRS — MATHEMATICAL INVERSE RELATIONSHIPS</div>
+                          {riseFallPairs.map((p,i) => (
+                            <div key={i} style={{ display: "flex", gap: 12, alignItems: "center", padding: "10px 14px", background: "#080f1a", border: "1px solid #1a3a5c", borderRadius: 4, marginBottom: 8, flexWrap: "wrap" }}>
+                              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>▲ RISES</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 900, color: "#39ff14" }}>{p.rise}</span>
+                              </div>
+                              <span style={{ color: "#4a6d8c", fontSize: 16 }}>⟵→</span>
+                              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>▼ FALLS</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 900, color: "#ff2d55" }}>{p.fall}</span>
+                              </div>
+                              <span style={{ flex: 1, fontSize: 11, color: "#8aabb8" }}>{p.catalyst}</span>
+                              <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>⏱ {p.timing}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* PSYCHOLOGY PLAYS */}
+                      {psychology && (
+                        <div style={{ marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 3, marginBottom: 12 }}>🧠 PSYCHOLOGY-DRIVEN PLAYS</div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 10 }}>
+                            {psychology.trump?.trigger && (
+                              <div style={{ background: "#080f1a", border: "1px solid rgba(255,107,53,0.3)", borderRadius: 4, padding: 14 }}>
+                                <div style={{ fontSize: 10, color: "#ff6b35", fontFamily: "monospace", marginBottom: 8 }}>🇺🇸 TRUMP PSYCHOLOGICAL PLAY</div>
+                                <div style={{ fontSize: 11, color: "#c8dff0", marginBottom: 6 }}><span style={{ color: "#4a6d8c" }}>Trigger:</span> {psychology.trump.trigger}</div>
+                                <div style={{ fontSize: 11, color: "#c8dff0", marginBottom: 8 }}><span style={{ color: "#4a6d8c" }}>Window:</span> {psychology.trump.window}</div>
+                                {psychology.trump.play && <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "6px 10px", background: `${psychology.trump.direction === "CALL" ? "#39ff1411" : "#ff2d5511"}`, borderRadius: 3 }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#e8f4ff" }}>{psychology.trump.play}</span>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: psychology.trump.direction === "CALL" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{psychology.trump.direction}</span>
+                                  <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>{psychology.trump.expiry}</span>
+                                  <span style={{ fontSize: 9, color: psychology.trump.confidence === "HIGH" ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>{psychology.trump.confidence}</span>
+                                </div>}
+                              </div>
+                            )}
+                            {psychology.netanyahu?.trigger && (
+                              <div style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: 14 }}>
+                                <div style={{ fontSize: 10, color: "#ff2d55", fontFamily: "monospace", marginBottom: 8 }}>🇮🇱 NETANYAHU DESPERATION INDEX</div>
+                                <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                                  <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>DESPERATION:</span>
+                                  <span style={{ fontSize: 12, fontWeight: 700, color: psychology.netanyahu.desperation === "CRITICAL" ? "#ff2d55" : psychology.netanyahu.desperation === "HIGH" ? "#ffb800" : "#39ff14", fontFamily: "monospace" }}>{psychology.netanyahu.desperation}</span>
+                                </div>
+                                <div style={{ fontSize: 11, color: "#c8dff0", marginBottom: 8 }}>{psychology.netanyahu.trigger}</div>
+                                {psychology.netanyahu.play && <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "6px 10px", background: "#39ff1411", borderRadius: 3 }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 900, color: "#e8f4ff" }}>{psychology.netanyahu.play}</span>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: psychology.netanyahu.direction === "CALL" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{psychology.netanyahu.direction}</span>
+                                  <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>{psychology.netanyahu.expiry}</span>
+                                </div>}
+                              </div>
+                            )}
+                            {psychology.putin?.trigger && (
+                              <div style={{ background: "#080f1a", border: "1px solid rgba(24,95,165,0.3)", borderRadius: 4, padding: 14 }}>
+                                <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>🇷🇺 PUTIN ECONOMIC DESPERATION</div>
+                                <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                                  <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>PRESSURE:</span>
+                                  <span style={{ fontSize: 12, fontWeight: 700, color: psychology.putin.desperation === "CRITICAL" ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>{psychology.putin.desperation}</span>
+                                </div>
+                                <div style={{ fontSize: 11, color: "#c8dff0", marginBottom: 8 }}>{psychology.putin.trigger}</div>
+                                {psychology.putin.play && <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "6px 10px", background: "#39ff1411", borderRadius: 3 }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 900, color: "#e8f4ff" }}>{psychology.putin.play}</span>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: psychology.putin.direction === "CALL" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{psychology.putin.direction}</span>
+                                  <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>{psychology.putin.expiry}</span>
+                                </div>}
+                              </div>
+                            )}
+                          </div>
+                          {psychology.timingEdge && <div style={{ marginTop: 10, padding: "10px 14px", background: "rgba(178,79,255,0.06)", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 3, fontSize: 11, color: "#b24fff" }}>⏱ TIMING EDGE: {psychology.timingEdge}</div>}
+                        </div>
+                      )}
+
+                      {/* COMMUNITY INTELLIGENCE */}
+                      {community && (community.topDD?.ticker || community.consensus?.ticker) && (
+                        <div style={{ marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 12 }}>👥 COMMUNITY INTELLIGENCE — PEER-VALIDATED ANALYSIS</div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 10 }}>
+                            {community.topDD?.ticker && (
+                              <div style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.25)", borderRadius: 4, padding: 14 }}>
+                                <div style={{ fontSize: 10, color: "#39ff14", fontFamily: "monospace", marginBottom: 8 }}>🔥 TOP DD — MOST UPVOTED</div>
+                                <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 900, color: "#e8f4ff" }}>{community.topDD.ticker}</span>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: community.topDD.direction === "CALL" || community.topDD.direction === "LONG" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{community.topDD.direction}</span>
+                                  {community.topDD.upvotes && <span style={{ fontSize: 10, color: "#b24fff", fontFamily: "monospace" }}>↑{community.topDD.upvotes}</span>}
+                                </div>
+                                <div style={{ fontSize: 11, color: "#8aabb8", lineHeight: 1.5 }}>{community.topDD.thesis}</div>
+                              </div>
+                            )}
+                            {community.consensus?.ticker && (
+                              <div style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 14 }}>
+                                <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 8 }}>📊 COMMUNITY CONSENSUS</div>
+                                <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 900, color: "#e8f4ff" }}>{community.consensus.ticker}</span>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: community.consensus.direction === "CALL" || community.consensus.direction === "LONG" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{community.consensus.direction}</span>
+                                </div>
+                                {community.contrarian?.signal && (
+                                  <div style={{ marginTop: 8, padding: "6px 10px", background: "rgba(255,184,0,0.08)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 3 }}>
+                                    <div style={{ fontSize: 9, color: "#ffb800", fontFamily: "monospace", marginBottom: 3 }}>⚠ CONTRARIAN SIGNAL</div>
+                                    <div style={{ fontSize: 10, color: "#8aabb8" }}>{community.contrarian.signal}</div>
+                                    {community.contrarian.ticker && <div style={{ fontSize: 11, fontWeight: 700, color: "#ffb800", fontFamily: "monospace", marginTop: 4 }}>{community.contrarian.ticker}</div>}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {psychology.networkRising && (
+                              <div style={{ background: "#080f1a", border: "1px solid #1a3a5c", borderRadius: 4, padding: 14 }}>
+                                <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 8 }}>↕ NETWORK FLOWS</div>
+                                <div style={{ fontSize: 10, color: "#4a6d8c", marginBottom: 3 }}>▲ RISING</div>
+                                <div style={{ fontSize: 11, color: "#39ff14", fontFamily: "monospace", marginBottom: 8 }}>{psychology.networkRising}</div>
+                                <div style={{ fontSize: 10, color: "#4a6d8c", marginBottom: 3 }}>▼ FALLING</div>
+                                <div style={{ fontSize: 11, color: "#ff2d55", fontFamily: "monospace" }}>{psychology.networkFalling}</div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* PSYCHOGRAPHIC PROFILES */}
+                      <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 12 }}>◈ PSYCHOGRAPHIC PROFILES</div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 12, marginBottom: 20 }}>
+                        {[
+                          { name: "DONALD TRUMP", emoji: "🇺🇸", data: profiles.trump, fields: [["Core Driver", "coreDriver"], ["Vanity Trigger", "vanityTrigger"], ["Announcement Pattern", "announcementPattern"], ["Current Play", "currentPlay"], ["Next Move", "nextMoveProbability"]] },
+                          { name: "BENJAMIN NETANYAHU", emoji: "🇮🇱", data: profiles.netanyahu, fields: [["Core Driver", "coreDriver"], ["Survival Play", "survivalPlay"], ["Trump Leverage", "trumpLeverage"], ["Next Move", "nextMove"]] },
+                          { name: "VLADIMIR PUTIN", emoji: "🇷🇺", data: profiles.putin, fields: [["Core Driver", "coreDriver"], ["Economic Pressure", "economicPressure"], ["Iran Connection", "iranConnection"], ["Sanctions Play", "sanctionsPlay"]] },
+                          { name: "XI JINPING", emoji: "🇨🇳", data: profiles.xi, fields: [["Core Driver", "coreDriver"], ["Taiwan Timeline", "taiwanTimeline"], ["Trade Play", "trumpTradePlay"], ["Next Move", "nextMove"]] },
+                        ].map((p, i) => p.data && (
+                          <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(255,107,53,0.25)", borderRadius: 4, padding: 14 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ff6b35" }}>{p.emoji} {p.name}</div>
+                              {p.data.marketSignal && (
+                                <div style={{ fontSize: 10, fontWeight: 700, color: sigCol(p.data.marketSignal), fontFamily: "monospace", padding: "2px 8px", background: `${sigCol(p.data.marketSignal)}11`, border: `1px solid ${sigCol(p.data.marketSignal)}44`, borderRadius: 2 }}>
+                                  {p.data.marketSignal}
+                                </div>
+                              )}
+                            </div>
+                            {p.fields.map(([label, key], j) => p.data[key] && (
+                              <div key={j} style={{ marginBottom: 6 }}>
+                                <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>{label.toUpperCase()}</div>
+                                <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.4 }}>{p.data[key]}</div>
+                              </div>
+                            ))}
+                            {p.data.signalReason && <div style={{ marginTop: 8, fontSize: 10, color: sigCol(p.data.marketSignal), fontStyle: "italic" }}>{p.data.signalReason}</div>}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* KUSHNER + TRUMP FAMILY */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+                        {profiles.kushner && (
+                          <div style={{ background: "#080f1a", border: "1px solid rgba(255,184,0,0.25)", borderRadius: 4, padding: 14 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffb800", marginBottom: 10 }}>💰 JARED KUSHNER</div>
+                            {[["Key Investments", "keyInvestments"], ["Saudi PIF Play", "saudiPlay"], ["Benefiting From", "benefitingFrom"], ["Watch Sectors", "watchSectors"]].map(([label, key], j) => profiles.kushner[key] && (
+                              <div key={j} style={{ marginBottom: 6 }}>
+                                <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>{label.toUpperCase()}</div>
+                                <div style={{ fontSize: 11, color: "#c8dff0" }}>{profiles.kushner[key]}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {profiles.trumpFamily && (
+                          <div style={{ background: "#080f1a", border: "1px solid rgba(255,184,0,0.25)", borderRadius: 4, padding: 14 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffb800", marginBottom: 10 }}>🏛️ TRUMP FAMILY WATCH</div>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 4 }}>STOCKS/SECTORS SINCE NOV 2024</div>
+                            <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.6 }}>{profiles.trumpFamily.watchList}</div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* NETWORK CONNECTIONS */}
+                      {network && (
+                        <div style={{ background: "#080f1a", border: "1px solid rgba(255,107,53,0.25)", borderRadius: 4, padding: 14, marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 12 }}>◈ HIDDEN POWER CONNECTIONS</div>
+                          {[network.connection1, network.connection2, network.connection3].filter(Boolean).map((c, i) => (
+                            <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8 }}>
+                              <div style={{ color: "#ff6b35", fontFamily: "monospace", fontSize: 12, flexShrink: 0 }}>⟶</div>
+                              <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.5 }}>{c}</div>
+                            </div>
+                          ))}
+                          <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr", gap: 10 }}>
+                            {[["🛢️ IRAN WAR THESIS", network.iranWarThesis], ["🇷🇺 RUSSIA SANCTIONS THESIS", network.russiaSanctionsThesis], ["⚖️ NETANYAHU SURVIVAL THESIS", network.netanyahuSurvivalThesis]].map(([title, text], i) => text && (
+                              <div key={i} style={{ padding: 12, background: "rgba(255,107,53,0.05)", border: "1px solid rgba(255,107,53,0.15)", borderRadius: 3 }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", marginBottom: 6 }}>{title}</div>
+                                <div style={{ fontSize: 11, color: "#8aabb8", lineHeight: 1.6 }}>{text}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SCENARIO ENGINE */}
+                      <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 12 }}>◈ 4-WEEK SCENARIO ENGINE</div>
+                      {scenarios.filter(s => s.name).map((sc, si) => (
+                        <div key={si} style={{ background: "#080f1a", border: "1px solid rgba(255,107,53,0.2)", borderLeft: "4px solid #ff6b35", borderRadius: 4, padding: 16, marginBottom: 12 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff6b35" }}>
+                              {String.fromCharCode(65+si)}. {sc.name}
+                            </div>
+                            <div style={{ fontFamily: "monospace", fontSize: 12, color: "#ffb800", padding: "2px 10px", background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 2 }}>
+                              {sc.probability} probability
+                            </div>
+                          </div>
+                          <div style={{ fontSize: 11, color: "#4a6d8c", marginBottom: 10 }}>TRIGGER: {sc.trigger}</div>
+                          {/* Weekly timeline */}
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 14 }}>
+                            {sc.weeks.map((w, wi) => w && (
+                              <div key={wi} style={{ padding: 8, background: "rgba(255,107,53,0.05)", border: "1px solid rgba(255,107,53,0.15)", borderRadius: 3 }}>
+                                <div style={{ fontSize: 9, color: "#ff6b35", fontFamily: "monospace", marginBottom: 4 }}>WEEK {wi+1}</div>
+                                <div style={{ fontSize: 10, color: "#c8dff0", lineHeight: 1.4 }}>{w}</div>
+                              </div>
+                            ))}
+                          </div>
+                          {/* Plays */}
+                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                            {sc.plays.map((p, pi) => (
+                              <div key={pi} style={{ flex: 1, minWidth: 160, padding: 10, background: `${p.direction === "CALL" ? "#39ff1411" : "#ff2d5511"}`, border: `1px solid ${p.direction === "CALL" ? "#39ff1444" : "#ff2d5544"}`, borderRadius: 3 }}>
+                                <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4 }}>
+                                  <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#e8f4ff" }}>{p.ticker}</div>
+                                  <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: p.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{p.direction}</div>
+                                  <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800" }}>{p.expiry}</div>
+                                </div>
+                                <div style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.4 }}>{p.reason}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+
+
+                      {/* AI ECOSYSTEM */}
+                      {aiEcosystem && (
+                        <div style={{ marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3, marginBottom: 12 }}>🤖 AI ECOSYSTEM INTELLIGENCE</div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 10, marginBottom: 12 }}>
+                            {/* Hardware Winners */}
+                            <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 4, padding: 12 }}>
+                              <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>⚡ HARDWARE WINNERS</div>
+                              {aiEcosystem.hardwareWinners?.map((h,i) => h.ticker && <div key={i} style={{ marginBottom: 6 }}><span style={{ color: "#39ff14", fontFamily: "monospace", fontWeight: 700 }}>{h.ticker}</span><span style={{ fontSize: 10, color: "#8aabb8", marginLeft: 8 }}>{h.reason}</span></div>)}
+                              {aiEcosystem.hardwareLosers?.map((h,i) => h.ticker && <div key={i} style={{ marginBottom: 6 }}><span style={{ color: "#ff2d55", fontFamily: "monospace", fontWeight: 700 }}>↓{h.ticker}</span><span style={{ fontSize: 10, color: "#8aabb8", marginLeft: 8 }}>{h.reason}</span></div>)}
+                            </div>
+                            {/* Energy + Data Centers */}
+                            <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 4, padding: 12 }}>
+                              <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>⚡ ENERGY + DATA CENTERS</div>
+                              {aiEcosystem.energyPlays?.map((e,i) => e.ticker && <div key={i} style={{ marginBottom: 6 }}><span style={{ color: "#39ff14", fontFamily: "monospace", fontWeight: 700 }}>{e.ticker}</span><span style={{ fontSize: 10, color: "#8aabb8", marginLeft: 8 }}>{e.reason}</span></div>)}
+                              {aiEcosystem.datacenterPlay?.ticker && <div style={{ marginBottom: 6 }}><span style={{ color: "#ffb800", fontFamily: "monospace", fontWeight: 700 }}>{aiEcosystem.datacenterPlay.ticker}</span><span style={{ fontSize: 10, color: "#8aabb8", marginLeft: 8 }}>{aiEcosystem.datacenterPlay.reason}</span></div>}
+                            </div>
+                            {/* Minerals */}
+                            <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 4, padding: 12 }}>
+                              <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>⛏ CRITICAL MINERALS</div>
+                              {aiEcosystem.mineralPlays?.map((m,i) => m.ticker && <div key={i} style={{ marginBottom: 6 }}><span style={{ color: "#ffb800", fontFamily: "monospace", fontWeight: 700 }}>{m.mineral}</span><span style={{ color: "#39ff14", fontFamily: "monospace", marginLeft: 6 }}>{m.ticker}</span><span style={{ fontSize: 10, color: "#8aabb8", marginLeft: 8 }}>{m.reason}</span></div>)}
+                            </div>
+                          </div>
+                          {/* Inverse pairs */}
+                          {aiEcosystem.inversePairs?.length > 0 && (
+                            <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 4, padding: 12, marginBottom: 10 }}>
+                              <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>↕ INVERSE PAIRS — When one rises the other falls</div>
+                              {aiEcosystem.inversePairs.map((p,i) => <div key={i} style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 6 }}>
+                                <span style={{ color: "#39ff14", fontFamily: "monospace", fontWeight: 700 }}>▲{p.up}</span>
+                                <span style={{ color: "#4a6d8c" }}>→</span>
+                                <span style={{ color: "#ff2d55", fontFamily: "monospace", fontWeight: 700 }}>▼{p.down}</span>
+                                <span style={{ fontSize: 10, color: "#8aabb8" }}>{p.reason}</span>
+                              </div>)}
+                            </div>
+                          )}
+                          {aiEcosystem.historicalPattern && <div style={{ fontSize: 10, color: "#4a6d8c", fontStyle: "italic", padding: "8px 12px", background: "rgba(0,212,255,0.03)", borderRadius: 3 }}>📊 Historical Pattern: {aiEcosystem.historicalPattern}</div>}
+                          {/* AI top plays */}
+                          <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                            {aiEcosystem.topCall?.ticker && <div style={{ flex:1, padding: 10, background: "#39ff1411", border: "1px solid #39ff1444", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>AI TOP CALL</div><div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#39ff14" }}>{aiEcosystem.topCall.ticker}</div><div style={{ fontSize: 10, color: "#ffb800" }}>{aiEcosystem.topCall.expiry}</div></div>}
+                            {aiEcosystem.topPut?.ticker && <div style={{ flex:1, padding: 10, background: "#ff2d5511", border: "1px solid #ff2d5544", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>AI TOP PUT</div><div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#ff2d55" }}>{aiEcosystem.topPut.ticker}</div><div style={{ fontSize: 10, color: "#ffb800" }}>{aiEcosystem.topPut.expiry}</div></div>}
+                            {aiEcosystem.ma?.target && <div style={{ flex:2, padding: 10, background: "rgba(255,184,0,0.08)", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>M&A WATCH</div><div style={{ fontSize: 12, fontWeight: 700, color: "#ffb800", fontFamily: "monospace" }}>{aiEcosystem.ma.acquirer} → {aiEcosystem.ma.target}</div><div style={{ fontSize: 10, color: "#8aabb8" }}>{aiEcosystem.ma.reason}</div></div>}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* MINING */}
+                      {mining && (
+                        <div style={{ marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 3, marginBottom: 12 }}>⛏️ MINING INTELLIGENCE</div>
+                          {/* Metal outlooks */}
+                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+                            {mining.outlooks?.filter(o=>o.metal).map((o,i) => (
+                              <div key={i} style={{ padding: "6px 12px", background: `${sigCol(o.outlook)}11`, border: `1px solid ${sigCol(o.outlook)}33`, borderRadius: 3, minWidth: 100 }}>
+                                <div style={{ fontSize: 10, fontFamily: "monospace", fontWeight: 700, color: sigCol(o.outlook) }}>{o.metal}</div>
+                                <div style={{ fontSize: 9, color: sigCol(o.outlook) }}>{o.outlook}</div>
+                                <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>{o.driver}</div>
+                              </div>
+                            ))}
+                          </div>
+                          {/* Hot mining picks */}
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 8, marginBottom: 10 }}>
+                            {mining.hotPicks?.map((p,i) => (
+                              <div key={i} style={{ background: "#080f1a", border: `1px solid ${dirCol(p.direction)}33`, borderLeft: `3px solid ${dirCol(p.direction)}`, borderRadius: 3, padding: 10 }}>
+                                <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4 }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#e8f4ff" }}>{p.ticker}</span>
+                                  <span style={{ fontSize: 10, fontWeight: 700, color: dirCol(p.direction), fontFamily: "monospace" }}>{p.direction}</span>
+                                  <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>{p.expiry}</span>
+                                </div>
+                                <div style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.4 }}>{p.reason}</div>
+                              </div>
+                            ))}
+                          </div>
+                          {mining.maTarget && <div style={{ fontSize: 11, color: "#ffb800", padding: "8px 12px", background: "rgba(255,184,0,0.06)", borderRadius: 3 }}>🎯 M&A Target: <strong>{mining.maTarget}</strong> — {mining.maReason}</div>}
+                          {mining.redditBuzz && <div style={{ fontSize: 10, color: "#b24fff", marginTop: 6, fontStyle: "italic" }}>Reddit Buzz: {mining.redditBuzz}</div>}
+                        </div>
+                      )}
+
+                      {/* PHARMA */}
+                      {pharma && (
+                        <div style={{ marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 12 }}>💊 PHARMA CATALYST WATCH</div>
+                          {pharma.pdufa?.length > 0 && (
+                            <div style={{ marginBottom: 12 }}>
+                              <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 8 }}>FDA PDUFA DATES</div>
+                              {pharma.pdufa.map((p,i) => (
+                                <div key={i} style={{ display: "flex", gap: 12, alignItems: "center", padding: "8px 12px", background: "#080f1a", border: `1px solid ${dirCol(p.play)}33`, borderRadius: 3, marginBottom: 6, flexWrap: "wrap" }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#e8f4ff", minWidth: 60 }}>{p.ticker}</span>
+                                  <span style={{ fontSize: 11, color: "#c8dff0", flex: 1 }}>{p.drug}</span>
+                                  <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>📅 {p.date}</span>
+                                  <span style={{ fontSize: 10, fontWeight: 700, color: dirCol(p.play), fontFamily: "monospace", padding: "2px 8px", background: `${dirCol(p.play)}11`, border: `1px solid ${dirCol(p.play)}44`, borderRadius: 2 }}>{p.play}</span>
+                                  <span style={{ fontSize: 10, color: "#8aabb8", flex: 2 }}>{p.reason}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {pharma.maTargets?.length > 0 && (
+                            <div style={{ marginBottom: 8 }}>
+                              <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 6 }}>M&A ACQUISITION TARGETS</div>
+                              {pharma.maTargets.map((t,i) => <div key={i} style={{ fontSize: 11, color: "#c8dff0", marginBottom: 4 }}>🎯 <strong style={{ color: "#ffb800" }}>{t.ticker}</strong> — {t.reason}</div>)}
+                            </div>
+                          )}
+                          {pharma.redditBuzz && <div style={{ fontSize: 10, color: "#b24fff", fontStyle: "italic" }}>Reddit Buzz: {pharma.redditBuzz}</div>}
+                        </div>
+                      )}
+
+                      {/* PENNY STOCKS */}
+                      {pennyStocks && (
+                        <div style={{ marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff2d55", letterSpacing: 3, marginBottom: 12 }}>🎯 PENNY STOCK RADAR</div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 8, marginBottom: 10 }}>
+                            {pennyStocks.picks?.map((p,i) => (
+                              <div key={i} style={{ background: "#080f1a", border: `1px solid ${dirCol(p.direction)}33`, borderRadius: 4, padding: 12 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                                  <div>
+                                    <span style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 900, color: "#e8f4ff" }}>{p.ticker}</span>
+                                    {p.price && <span style={{ fontSize: 11, color: "#ffb800", marginLeft: 8, fontFamily: "monospace" }}>${p.price}</span>}
+                                  </div>
+                                  <span style={{ fontSize: 10, fontWeight: 700, color: dirCol(p.direction), fontFamily: "monospace", padding: "2px 6px", background: `${dirCol(p.direction)}11`, border: `1px solid ${dirCol(p.direction)}44`, borderRadius: 2 }}>{p.direction}</span>
+                                </div>
+                                <div style={{ fontSize: 10, color: "#ff2d55", fontFamily: "monospace", marginBottom: 4 }}>⚡ {p.catalyst}</div>
+                                <div style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.4 }}>{p.reason}</div>
+                                {p.redditScore && <div style={{ fontSize: 9, color: "#b24fff", marginTop: 4, fontFamily: "monospace" }}>Reddit: {p.redditScore}</div>}
+                              </div>
+                            ))}
+                          </div>
+                          <div style={{ display: "flex", gap: 10 }}>
+                            {pennyStocks.squeezeCandidate && <div style={{ flex:1, padding: 10, background: "rgba(255,45,85,0.08)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#ff2d55", fontFamily: "monospace", marginBottom: 4 }}>🚀 SQUEEZE CANDIDATE</div><div style={{ fontFamily: "monospace", fontWeight: 700, color: "#e8f4ff" }}>{pennyStocks.squeezeCandidate}</div><div style={{ fontSize: 10, color: "#8aabb8" }}>{pennyStocks.squeezeReason}</div></div>}
+                            {pennyStocks.avoid && <div style={{ flex:1, padding: 10, background: "rgba(255,184,0,0.06)", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#ffb800", fontFamily: "monospace", marginBottom: 4 }}>⚠ AVOID</div><div style={{ fontFamily: "monospace", fontWeight: 700, color: "#e8f4ff" }}>{pennyStocks.avoid}</div><div style={{ fontSize: 10, color: "#8aabb8" }}>{pennyStocks.avoidReason}</div></div>}
+                          </div>
+                        </div>
+                      )}
+
+
+                      {/* MACRO & FED */}
+                      {macro && macro.nextEvent && (
+                        <div style={{ marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 12 }}>📅 MACRO CALENDAR & FED SIGNALS</div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 10 }}>
+                            <div style={{ background: "#080f1a", border: `1px solid ${macro.fedSignal === "DOVISH" ? "#39ff1444" : macro.fedSignal === "HAWKISH" ? "#ff2d5544" : "#1a3a5c"}`, borderRadius: 4, padding: 14 }}>
+                              <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 6 }}>FED SIGNAL</div>
+                              <div style={{ fontSize: 16, fontWeight: 900, color: macro.fedSignal === "DOVISH" ? "#39ff14" : macro.fedSignal === "HAWKISH" ? "#ff2d55" : "#ffb800", fontFamily: "monospace", marginBottom: 6 }}>{macro.fedSignal}</div>
+                              <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.5 }}>{macro.fedReason}</div>
+                            </div>
+                            <div style={{ background: "#080f1a", border: "1px solid #1a3a5c", borderRadius: 4, padding: 14 }}>
+                              <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 6 }}>NEXT MARKET EVENT</div>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: "#ffb800", fontFamily: "monospace" }}>{macro.nextEvent}</div>
+                              <div style={{ fontSize: 11, color: "#4a6d8c", fontFamily: "monospace", marginTop: 4 }}>{macro.nextEventDate}</div>
+                              <div style={{ fontSize: 11, color: "#c8dff0", marginTop: 6 }}>{macro.marketImpact}</div>
+                            </div>
+                            {macro.rateTrade?.ticker && (
+                              <div style={{ background: `${macro.rateTrade.direction === "CALL" ? "#39ff1411" : "#ff2d5511"}`, border: `1px solid ${macro.rateTrade.direction === "CALL" ? "#39ff1444" : "#ff2d5544"}`, borderRadius: 4, padding: 14 }}>
+                                <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 6 }}>MACRO RATE TRADE</div>
+                                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 900, color: "#e8f4ff" }}>{macro.rateTrade.ticker}</span>
+                                  <span style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: macro.rateTrade.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{macro.rateTrade.direction}</span>
+                                  <span style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800" }}>{macro.rateTrade.expiry}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* MARKET MICROSTRUCTURE */}
+                      {microstructure && (microstructure.squeezeTicker || microstructure.insiderTicker || microstructure.optionsTicker) && (
+                        <div style={{ marginBottom: 20 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3, marginBottom: 12 }}>⚡ MARKET MICROSTRUCTURE SIGNALS</div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 10 }}>
+                            {microstructure.pcRatio && (
+                              <div style={{ background: "#080f1a", border: `1px solid ${microstructure.pcSignal === "BEARISH" ? "#ff2d5544" : "#39ff1444"}`, borderRadius: 4, padding: 12 }}>
+                                <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 4 }}>PUT/CALL RATIO</div>
+                                <div style={{ fontSize: 14, fontWeight: 700, color: microstructure.pcSignal === "BEARISH" ? "#ff2d55" : "#39ff14", fontFamily: "monospace" }}>{microstructure.pcRatio}</div>
+                                <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 4 }}>{microstructure.pcSignal} signal</div>
+                              </div>
+                            )}
+                            {microstructure.squeezeTicker && (
+                              <div style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: 12 }}>
+                                <div style={{ fontSize: 9, color: "#ff2d55", fontFamily: "monospace", marginBottom: 4 }}>🚀 SHORT SQUEEZE WATCH</div>
+                                <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#e8f4ff" }}>{microstructure.squeezeTicker}</div>
+                                <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 4 }}>{microstructure.squeezeReason}</div>
+                              </div>
+                            )}
+                            {microstructure.insiderTicker && (
+                              <div style={{ background: "#080f1a", border: `1px solid ${microstructure.insiderDirection === "BULLISH" ? "#39ff1444" : "#ff2d5544"}`, borderRadius: 4, padding: 12 }}>
+                                <div style={{ fontSize: 9, color: "#ffb800", fontFamily: "monospace", marginBottom: 4 }}>👤 INSIDER SIGNAL</div>
+                                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#e8f4ff" }}>{microstructure.insiderTicker}</span>
+                                  <span style={{ fontSize: 10, color: microstructure.insiderDirection === "BULLISH" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{microstructure.insiderDirection}</span>
+                                </div>
+                                <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 4 }}>{microstructure.insiderSignal}</div>
+                              </div>
+                            )}
+                            {microstructure.optionsTicker && (
+                              <div style={{ background: `${microstructure.optionsDirection === "CALL" ? "#39ff1411" : "#ff2d5511"}`, border: `1px solid ${microstructure.optionsDirection === "CALL" ? "#39ff1444" : "#ff2d5544"}`, borderRadius: 4, padding: 12 }}>
+                                <div style={{ fontSize: 9, color: "#00d4ff", fontFamily: "monospace", marginBottom: 4 }}>⚡ UNUSUAL OPTIONS FLOW</div>
+                                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#e8f4ff" }}>{microstructure.optionsTicker}</span>
+                                  <span style={{ fontSize: 10, fontWeight: 700, color: microstructure.optionsDirection === "CALL" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{microstructure.optionsDirection}</span>
+                                </div>
+                                <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 4 }}>{microstructure.unusualOptions}</div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SEASONAL + CRYPTO */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+                        {seasonal && seasonal.pattern && (
+                          <div style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.25)", borderRadius: 4, padding: 14 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 2, marginBottom: 10 }}>📊 SEASONAL PATTERN</div>
+                            <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.6, marginBottom: 10 }}>{seasonal.pattern}</div>
+                            {seasonal.ticker && (
+                              <div style={{ display: "flex", gap: 10, alignItems: "center", padding: "8px 10px", background: `${seasonal.direction === "CALL" ? "#39ff1411" : "#ff2d5511"}`, borderRadius: 3 }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#e8f4ff" }}>{seasonal.ticker}</span>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: seasonal.direction === "CALL" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{seasonal.direction}</span>
+                                <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>{seasonal.expiry}</span>
+                                <span style={{ fontSize: 9, color: seasonal.confidence === "HIGH" ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>{seasonal.confidence}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {cryptoSignal && cryptoSignal.btcSignal && (
+                          <div style={{ background: "#080f1a", border: "1px solid rgba(178,79,255,0.25)", borderRadius: 4, padding: 14 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 2, marginBottom: 10 }}>₿ CRYPTO → EQUITY SIGNAL</div>
+                            <div style={{ fontSize: 14, fontWeight: 700, color: cryptoSignal.btcSignal === "BULLISH" ? "#39ff14" : cryptoSignal.btcSignal === "BEARISH" ? "#ff2d55" : "#ffb800", fontFamily: "monospace", marginBottom: 6 }}>BTC {cryptoSignal.btcSignal}</div>
+                            <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 8 }}>{cryptoSignal.btcReason}</div>
+                            <div style={{ fontSize: 11, color: "#c8dff0", marginBottom: 8 }}>{cryptoSignal.equityImpact}</div>
+                            {cryptoSignal.play?.ticker && (
+                              <div style={{ display: "flex", gap: 10, alignItems: "center", padding: "6px 10px", background: `${cryptoSignal.play.direction === "CALL" ? "#39ff1411" : "#ff2d5511"}`, borderRadius: 3 }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 900, color: "#e8f4ff" }}>{cryptoSignal.play.ticker}</span>
+                                <span style={{ fontSize: 10, fontWeight: 700, color: cryptoSignal.play.direction === "CALL" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{cryptoSignal.play.direction}</span>
+                                <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>{cryptoSignal.play.expiry}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div style={{ padding: "12px 16px", background: "rgba(255,107,53,0.04)", border: "1px solid rgba(255,107,53,0.15)", borderRadius: 3, marginTop: 6 }}>
+                        <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
+                          <span style={{ color: "#ff6b35" }}>⚠ IMPORTANT:</span> Power Intel analysis is AI-synthesized geopolitical research for educational purposes only. Psychographic profiles are analytical models, not definitive statements of intent. Not financial advice. Always verify on Questrade before trading.
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
