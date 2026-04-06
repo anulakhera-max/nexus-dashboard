@@ -254,6 +254,8 @@ export default function NexusDashboard({ user, onLogout }) {
   // Questrade live data
   const [qtBalance, setQtBalance] = useState(null);
   const [qtQuotes, setQtQuotes] = useState({});
+  const [qtChains, setQtChains] = useState({});
+  const [loadingChain, setLoadingChain] = useState({});
   const [qtConnected, setQtConnected] = useState(false);
   const [qtLoading, setQtLoading] = useState(false);
 
@@ -690,13 +692,49 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
   const enrichPicksWithLiveData = async (picks) => {
     if (!qtConnected || !picks?.length) return;
     try {
+      // Step 1: Get live stock prices for all picks
       const tickers = picks.map(p => p.ticker).join(",");
       const data = await qtFetch("enrich", { picks: tickers });
       const quoteMap = {};
       data.quotes.forEach(q => { if (q.quote) quoteMap[q.ticker] = q.quote; });
       setQtQuotes(prev => ({ ...prev, ...quoteMap }));
+
+      // Step 2: Fetch real options chain for each pick
+      for (const pick of picks.slice(0, 3)) { // top 3 to save API calls
+        if (!pick.ticker || !pick.direction) continue;
+        setLoadingChain(prev => ({ ...prev, [pick.ticker]: true }));
+        try {
+          const chainData = await qtFetch("chain", {
+            symbol: pick.ticker,
+            direction: pick.direction === "PUT" ? "PUT" : "CALL",
+          });
+          if (chainData?.strikes?.length > 0) {
+            setQtChains(prev => ({ ...prev, [pick.ticker]: chainData }));
+          }
+        } catch (err) {
+          console.error("Chain error for", pick.ticker, err.message);
+        } finally {
+          setLoadingChain(prev => ({ ...prev, [pick.ticker]: false }));
+        }
+      }
     } catch (err) {
       console.error("Enrich error:", err.message);
+    }
+  };
+
+  // Fetch chain for a single ticker on demand
+  const fetchChain = async (ticker, direction) => {
+    if (!qtConnected || !ticker) return;
+    setLoadingChain(prev => ({ ...prev, [ticker]: true }));
+    try {
+      const chainData = await qtFetch("chain", { symbol: ticker, direction: direction || "CALL" });
+      if (chainData?.strikes?.length > 0) {
+        setQtChains(prev => ({ ...prev, [ticker]: chainData }));
+      }
+    } catch (err) {
+      console.error("Chain fetch error:", err.message);
+    } finally {
+      setLoadingChain(prev => ({ ...prev, [ticker]: false }));
     }
   };
 
@@ -1173,6 +1211,15 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
                               <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>bid ${qtQuotes[pick.ticker].bidPrice?.toFixed(2)} · ask ${qtQuotes[pick.ticker].askPrice?.toFixed(2)}</div>
                             </div>
                           )}
+                          {/* Load chain button if not loaded */}
+                          {qtConnected && !qtChains[pick.ticker] && !loadingChain[pick.ticker] && (
+                            <button onClick={() => fetchChain(pick.ticker, pick.direction)} style={{ fontSize: 9, fontFamily: "monospace", color: "#00d4ff", background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.3)", borderRadius: 3, padding: "4px 8px", cursor: "pointer" }}>
+                              ⛓ CHAIN
+                            </button>
+                          )}
+                          {loadingChain[pick.ticker] && (
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>loading...</div>
+                          )}
                           {/* Direction */}
                           <div style={{ textAlign: "center", minWidth: 70 }}>
                             <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>DIRECTION</div>
@@ -1205,6 +1252,26 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
                             <div style={{ fontSize: 10, color: "#b24fff", fontFamily: "monospace" }}>SOURCE: {pick.source}</div>
                           </div>
                         </div>
+                        {/* Real options chain from Questrade */}
+                        {qtChains[pick.ticker] && (
+                          <div style={{ marginTop: 10, padding: "10px 12px", background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 3 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", marginBottom: 8, letterSpacing: 2 }}>
+                              ⛓ LIVE {qtChains[pick.ticker].direction?.toUpperCase()} CHAIN — {pick.ticker} @ ${qtChains[pick.ticker].currentPrice?.toFixed(2)} — Exp: {new Date(qtChains[pick.ticker].expiryDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                            </div>
+                            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                              {qtChains[pick.ticker].strikes?.slice(0, 6).map((s, si) => (
+                                <div key={si} style={{ padding: "6px 10px", background: "#080f1a", border: `1px solid ${Math.abs(s.strikePrice - qtChains[pick.ticker].currentPrice) < 5 ? "#00d4ff55" : "#1a3a5c"}`, borderRadius: 3, minWidth: 90, textAlign: "center" }}>
+                                  <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: Math.abs(s.strikePrice - qtChains[pick.ticker].currentPrice) < 5 ? "#00d4ff" : "#e8f4ff" }}>${s.strikePrice?.toFixed(2)}</div>
+                                  <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>bid ${s.bidPrice?.toFixed(2)}</div>
+                                  <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>ask ${s.askPrice?.toFixed(2)}</div>
+                                  <div style={{ fontSize: 9, color: "#8aabb8", fontFamily: "monospace", marginTop: 2 }}>Δ {s.delta?.toFixed(2)}</div>
+                                  <div style={{ fontSize: 9, color: s.impliedVolatility > 100 ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>IV {s.impliedVolatility?.toFixed(0)}%</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                       );
                     })}
                     <div style={{ padding: "12px 16px", background: "rgba(178,79,255,0.04)", border: "1px solid rgba(178,79,255,0.15)", borderRadius: 3, marginTop: 6 }}>
