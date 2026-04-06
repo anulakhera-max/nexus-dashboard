@@ -45,11 +45,19 @@ async function edgeSet(key, value) {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ items: [{ operation: "upsert", key, value }] }),
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(8000),
       }
     );
-    return res.ok;
-  } catch { return false; }
+    if (!res.ok) {
+      const txt = await res.text();
+      console.error("Edge Config save failed:", res.status, txt);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("Edge Config save error:", e.message);
+    return false;
+  }
 }
 
 // ── Questrade auth — always fresh per request ─────────────────
@@ -72,9 +80,10 @@ async function qtAuth(refreshToken) {
   qtApiUrl = data.api_server;
   qtTokenTime = Date.now();
 
-  // Save new refresh token to Edge Config — fire and forget
+  // Save new refresh token to Edge Config — await it so it actually saves
   if (data.refresh_token) {
-    edgeSet("questrade_refresh_token", data.refresh_token).catch(() => {});
+    const saved = await edgeSet("questrade_refresh_token", data.refresh_token);
+    console.log("Token saved to Edge Config:", saved, "new token prefix:", data.refresh_token.slice(0, 8));
   }
   return data;
 }
@@ -371,10 +380,25 @@ export default async function handler(req, res) {
         return res.status(200).json({ success: true, quotes });
       }
 
+      case "token-status": {
+        const edgeTok = await edgeGet("questrade_refresh_token");
+        const envTok = process.env.QUESTRADE_TOKEN;
+        return res.status(200).json({
+          success: true,
+          edgeConfigHasToken: !!edgeTok,
+          edgeTokenPrefix: edgeTok ? edgeTok.slice(0, 8) + "..." : null,
+          envTokenPrefix: envTok ? envTok.slice(0, 8) + "..." : null,
+          edgeConfigUrl: !!process.env.EDGE_CONFIG,
+          vercelToken: !!process.env.VERCEL_ACCESS_TOKEN,
+          qtConnected: !!qtToken,
+          tokenAge: qtTokenTime ? Math.round((Date.now() - qtTokenTime) / 1000) + "s" : "none",
+        });
+      }
+
       default:
         return res.status(400).json({
           error: `Unknown action: ${action}`,
-          available: ["auth", "balance", "positions", "quote", "chain", "enrich"]
+          available: ["auth", "balance", "positions", "quote", "chain", "enrich", "token-status"]
         });
     }
 
