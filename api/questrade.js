@@ -10,7 +10,7 @@ const corsHeaders = {
 };
 
 function validateApiKey(req) {
-  const key = req.headers["x-nexus-key"];
+  const key = req.headers["x-nexus-key"] || req.query?.["x-nexus-key"];
   return key === (process.env.NEXUS_API_KEY || "nexus-axl-agent-key");
 }
 
