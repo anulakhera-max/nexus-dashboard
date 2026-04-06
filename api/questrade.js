@@ -166,22 +166,8 @@ async function getQuote(symbol) {
 
 // ── Options chain ─────────────────────────────────────────────
 async function getOptionsChain(symbolId, expiryFilter) {
-  // Questrade requires POST with filters for options chain
-  const body = { underlyingId: symbolId };
-  const res = await fetch(`${qtApiUrl}v1/markets/options`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${qtToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(10000),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Options chain error ${res.status}: ${text}`);
-  }
-  const data = await res.json();
+  // Correct Questrade endpoint: GET /v1/symbols/{id}/options
+  const data = await qtCall(`symbols/${symbolId}/options`);
   const chain = data.optionChain || [];
 
   // Filter by expiry if provided
@@ -203,6 +189,50 @@ async function getOptionsChain(symbolId, expiryFilter) {
       callSymbolId: s.callSymbolId,
       putSymbolId: s.putSymbolId,
     }))
+  }));
+}
+
+// Get option quotes with Greeks via POST /v1/markets/quotes/options
+async function getOptionQuotesWithGreeks(underlyingId, expiryDate, optionType, minStrike, maxStrike) {
+  const body = {
+    filters: [{
+      optionType: optionType, // "Call" or "Put"
+      underlyingId: underlyingId,
+      expiryDate: expiryDate,
+      minstrikePrice: minStrike,
+      maxstrikePrice: maxStrike,
+    }]
+  };
+  const res = await fetch(`${qtApiUrl}v1/markets/quotes/options`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${qtToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Options quotes error ${res.status}: ${text}`);
+  }
+  const data = await res.json();
+  return (data.optionQuotes || []).map(o => ({
+    symbol: o.symbol,
+    symbolId: o.symbolId,
+    strikePrice: o.strikePrice,
+    expiryDate: o.expiryDate,
+    optionType: o.optionType,
+    lastPrice: o.lastTradePriceTrHrs || o.lastTradePrice || 0,
+    bidPrice: o.bidPrice || 0,
+    askPrice: o.askPrice || 0,
+    openInterest: o.openInterest || 0,
+    volume: o.volume || 0,
+    impliedVolatility: o.volatility || 0,
+    delta: o.delta || 0,
+    gamma: o.gamma || 0,
+    theta: o.theta || 0,
+    vega: o.vega || 0,
   }));
 }
 
@@ -234,36 +264,38 @@ async function getOptionsQuotes(optionIds) {
 async function getBestStrikes(symbol, direction, expiryHint) {
   const quote = await getQuote(symbol);
   const currentPrice = quote.lastPrice;
-  const chain = await getOptionsChain(quote.symbolId, expiryHint);
-
   const optionType = direction === "PUT" ? "Put" : "Call";
-  const allContracts = [];
 
-  for (const exp of chain) {
-    for (const strike of exp.strikes) {
-      const symbolId = direction === "PUT" ? strike.putSymbolId : strike.callSymbolId;
-      if (!symbolId) continue;
-      allContracts.push({
-        symbolId,
-        strikePrice: strike.strikePrice,
-        expiryDate: exp.expiryDate,
-        distFromATM: Math.abs(strike.strikePrice - currentPrice),
-      });
-    }
-  }
+  // Step 1: Get option chain to find expiry dates and strike range
+  const chain = await getOptionsChain(quote.symbolId, expiryHint);
+  if (!chain.length) throw new Error(`No options chain for ${symbol}`);
 
-  // Sort by distance from current price, take 10 closest
-  const closest = allContracts
-    .sort((a, b) => a.distFromATM - b.distFromATM)
-    .slice(0, 10);
+  // Use first available expiry
+  const exp = chain[0];
+  const expiryDate = exp.expiryDate;
 
-  const quotes = await getOptionsQuotes(closest.map(c => c.symbolId));
+  // Find strikes within 15% of current price
+  const buffer = currentPrice * 0.15;
+  const minStrike = Math.floor(currentPrice - buffer);
+  const maxStrike = Math.ceil(currentPrice + buffer);
 
-  // Merge quote data back
-  const enriched = closest.map(c => {
-    const q = quotes.find(q => q.symbolId === c.symbolId) || {};
-    return { ...c, ...q };
-  }).filter(c => c.bidPrice > 0 || c.lastPrice > 0);
+  // Step 2: Get real quotes with Greeks via POST endpoint
+  const quotes = await getOptionQuotesWithGreeks(
+    quote.symbolId,
+    expiryDate,
+    optionType,
+    minStrike,
+    maxStrike
+  );
+
+  // Sort by proximity to ATM
+  const sorted = quotes
+    .filter(q => q.bidPrice > 0 || q.lastPrice > 0)
+    .sort((a, b) => Math.abs(a.strikePrice - currentPrice) - Math.abs(b.strikePrice - currentPrice))
+    .slice(0, 8);
+
+  // Also get all available expiries for reference
+  const expiries = chain.map(e => e.expiryDate);
 
   return {
     symbol: quote.symbol,
@@ -271,7 +303,9 @@ async function getBestStrikes(symbol, direction, expiryHint) {
     exchange: quote.exchange,
     currency: quote.currency,
     direction: optionType,
-    strikes: enriched,
+    expiryDate,
+    availableExpiries: expiries,
+    strikes: sorted,
   };
 }
 
