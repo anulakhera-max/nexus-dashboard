@@ -40,7 +40,7 @@ const CACHE_TTL = 4 * 60 * 60 * 1000; // 4 hours
 async function fetchGDELT(query, days = 7) {
   try {
     const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}&mode=artlist&maxrecords=6&format=json&timespan=${days}d&sort=hybridrel`;
-    const res = await fetch(url, { headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(6000) });
+    const res = await fetch(url, { headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(4000) });
     if (!res.ok) return [];
     const data = await res.json();
     return (data.articles || []).map(a => a.title).filter(Boolean);
@@ -51,7 +51,7 @@ async function fetchGDELT(query, days = 7) {
 async function fetchReddit(subreddit, limit = 8) {
   try {
     const res = await fetch(`https://www.reddit.com/r/${subreddit}/hot.json?limit=${limit}`, {
-      headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(6000)
+      headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(4000)
     });
     const data = await res.json();
     return (data?.data?.children || []).map(p =>
@@ -65,7 +65,7 @@ async function fetchSEC8K() {
   try {
     const date = new Date(Date.now() - 7 * 864e5).toISOString().split("T")[0];
     const url = `https://efts.sec.gov/LATEST/search-index?q=%228-K%22&dateRange=custom&startdt=${date}&forms=8-K`;
-    const res = await fetch(url, { headers: { "User-Agent": "NEXUS/1.0 nexus@nexus.ai" }, signal: AbortSignal.timeout(6000) });
+    const res = await fetch(url, { headers: { "User-Agent": "NEXUS/1.0 nexus@nexus.ai" }, signal: AbortSignal.timeout(4000) });
     const data = await res.json();
     return (data?.hits?.hits || []).slice(0, 8).map(h =>
       `[8-K] ${h._source?.entity_name}: ${h._source?.file_date}`
@@ -133,7 +133,7 @@ async function fetchMacroData() {
   try {
     // Fed calendar and statements from FRED RSS
     const fedRes = await fetch("https://feeds.federalreserve.gov/feeds/press_monetary.xml", {
-      headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(6000)
+      headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(4000)
     });
     const fedText = await fedRes.text();
     const fedTitles = [...fedText.matchAll(/<title>([^<]+)<\/title>/g)].slice(1,6).map(m => `[FED] ${m[1]}`);
@@ -143,7 +143,7 @@ async function fetchMacroData() {
   try {
     // EIA energy inventory
     const eiaRes = await fetch("https://www.eia.gov/rss/todayinenergy.xml", {
-      headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(6000)
+      headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(4000)
     });
     const eiaText = await eiaRes.text();
     const eiaTitles = [...eiaText.matchAll(/<title>([^<]+)<\/title>/g)].slice(1,5).map(m => `[EIA] ${m[1]}`);
@@ -153,7 +153,7 @@ async function fetchMacroData() {
   try {
     // Upcoming economic events from public calendar
     const calRes = await fetch("https://api.gdeltproject.org/api/v2/doc/doc?query=federal+reserve+interest+rates+CPI+inflation&mode=artlist&maxrecords=5&format=json&timespan=3d", {
-      headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(6000)
+      headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(4000)
     });
     const calData = await calRes.json();
     const calTitles = (calData.articles||[]).map(a => `[MACRO] ${a.title}`);
@@ -168,7 +168,7 @@ async function fetchSentimentSignals() {
   try {
     // Stocktwits public trending via GDELT proxy
     const res = await fetch("https://api.gdeltproject.org/api/v2/doc/doc?query=stock+market+sentiment+rally+crash+options&mode=artlist&maxrecords=8&format=json&timespan=2d", {
-      headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(6000)
+      headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(4000)
     });
     const data = await res.json();
     (data.articles||[]).forEach(a => results.push(`[SENTIMENT] ${a.title}`));
@@ -177,7 +177,7 @@ async function fetchSentimentSignals() {
   try {
     // Analyst upgrades/downgrades news
     const res2 = await fetch("https://api.gdeltproject.org/api/v2/doc/doc?query=analyst+upgrade+downgrade+price+target+stock&mode=artlist&maxrecords=8&format=json&timespan=2d", {
-      headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(6000)
+      headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(4000)
     });
     const data2 = await res2.json();
     (data2.articles||[]).forEach(a => results.push(`[ANALYST] ${a.title}`));
@@ -198,7 +198,7 @@ async function fetchPhysicalSignals() {
   await Promise.allSettled(queries.map(async ([q, label]) => {
     try {
       const url = `https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(q)}&mode=artlist&maxrecords=4&format=json&timespan=3d`;
-      const res = await fetch(url, { headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(6000) });
+      const res = await fetch(url, { headers: { "User-Agent": "NEXUS/1.0" }, signal: AbortSignal.timeout(4000) });
       const data = await res.json();
       (data.articles||[]).forEach(a => results.push(`[${label}] ${a.title}`));
     } catch {}
@@ -309,20 +309,11 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Fast fetch — 3 sources only, 4s timeout each
     const headlines = await Promise.allSettled([
-      fetchGDELT("AI data center nvidia partnership acquisition"),
-      fetchGDELT("semiconductor chip energy power grid AI"),
-      fetchGDELT("gold silver copper mining announcement"),
-      fetchGDELT("uranium lithium junior mining discovery"),
-      fetchGDELT("FDA approval PDUFA drug biotech"),
-      fetchGDELT("clinical trial phase 3 results biotech"),
-      fetchGDELT("insider buying selling SEC Form 4 executive"),
-      fetchGDELT("bitcoin crypto on-chain whale exchange"),
-      fetchReddit("pennystocks", 8),
-      fetchReddit("biotech", 6),
-      fetchReddit("MiningStocks", 6),
+      fetchGDELT("AI mining pharma biotech FDA stocks"),
+      fetchReddit("pennystocks", 6),
       fetchReddit("options", 6),
-      fetchSEC8K(),
     ]);
     const headlineList = headlines.map(r => r.status === "fulfilled" ? r.value : []).flat();
     const today = new Date().toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
