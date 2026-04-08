@@ -52,7 +52,7 @@ async function callClaude(prompt, maxTokens = 900) {
 function parseJSON(text) {
   if (!text) return null;
   // Strip markdown code fences
-  let clean = text.replace(/```json[\s\S]*?```/gi, '').replace(/```/g, '').trim();
+  let clean = text.replace(/`{3}json[\s\S]*?`{3}/gi, '').replace(/`{3}/g, '').trim();
   // Try direct parse
   try { return JSON.parse(clean); } catch {}
   // Try finding JSON array anywhere in text
