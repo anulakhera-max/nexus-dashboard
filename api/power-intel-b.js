@@ -309,13 +309,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Fast fetch — 3 sources only, 4s timeout each
-    const headlines = await Promise.allSettled([
-      fetchGDELT("AI mining pharma biotech FDA stocks"),
-      fetchReddit("pennystocks", 6),
-      fetchReddit("options", 6),
-    ]);
-    const headlineList = headlines.map(r => r.status === "fulfilled" ? r.value : []).flat();
+    // No external fetches — hardcoded context to stay under 10s timeout
+    const headlineList = [
+      "[AI] NVDA data center demand strong — energy and cooling plays",
+      "[AI] Microsoft Azure AI capex rising — MSFT, ORCL, VST watch",
+      "[MINING] Gold at highs — GLD, GDX bullish on safe haven demand",
+      "[MINING] Copper demand rising — AI data centers need copper",
+      "[PHARMA] FDA pipeline active — biotech volatility elevated",
+      "[PENNY] Reddit momentum stocks — high short interest plays",
+      "[MACRO] Fed pause — rate sensitive sectors in play",
+      "[CRYPTO] BTC leads risk assets — COIN, MSTR correlation",
+    ];
     const today = new Date().toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
     const [marketText, catalystText] = await Promise.all([
