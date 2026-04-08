@@ -1262,12 +1262,12 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
                       </div>
                     );
                   })}
-                    <div style={{ padding: "12px 16px", background: "rgba(178,79,255,0.04)", border: "1px solid rgba(178,79,255,0.15)", borderRadius: 3, marginTop: 6 }}>
-                      <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
-                        <span style={{ color: "#b24fff" }}>⚠ RESEARCH ONLY:</span> Intelligence picks are AI-synthesized from public sources for educational purposes. Not financial advice. Always verify on Questrade before trading. Options can expire worthless.
-                      </div>
+                  <div style={{ padding: "12px 16px", background: "rgba(178,79,255,0.04)", border: "1px solid rgba(178,79,255,0.15)", borderRadius: 3, marginTop: 6 }}>
+                    <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
+                      <span style={{ color: "#b24fff" }}>⚠ RESEARCH ONLY:</span> Intelligence picks are AI-synthesized from public sources for educational purposes. Not financial advice. Always verify on Questrade before trading. Options can expire worthless.
                     </div>
                   </div>
+                </div>
                 )}
               </div>
             )}
