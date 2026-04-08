@@ -311,85 +311,7 @@ export default function NexusDashboard({ user, onLogout }) {
     const today = new Date().toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
     // Ask Claude to fill in a strict template — no JSON parsing needed
-    const prompt = "You are an aggressive options trading AI. Today is " + today + ".
-Current global events: " + evCtx + "
-
-Fill in this EXACT template for 5 options picks. Replace every VALUE in caps. Do not add any other text before or after.
-
-PICK1_TICKER=VALUE
-PICK1_COMPANY=VALUE
-PICK1_EXCHANGE=VALUE
-PICK1_SECTOR=VALUE
-PICK1_TYPE=CALL or PUT
-PICK1_STRIKE=$VALUE
-PICK1_EXPIRY=" + fridays.first + "
-PICK1_PREMIUM=$VALUE-$VALUE
-PICK1_RETURN=+VALUE%
-PICK1_CONFIDENCE=HIGH or MEDIUM or LOW
-PICK1_CATALYST=VALUE
-PICK1_THESIS=VALUE
-PICK1_TRIGGER=VALUE
-PICK1_RISK=VALUE
-
-PICK2_TICKER=VALUE
-PICK2_COMPANY=VALUE
-PICK2_EXCHANGE=VALUE
-PICK2_SECTOR=VALUE
-PICK2_TYPE=CALL or PUT
-PICK2_STRIKE=$VALUE
-PICK2_EXPIRY=" + fridays.first + "
-PICK2_PREMIUM=$VALUE-$VALUE
-PICK2_RETURN=+VALUE%
-PICK2_CONFIDENCE=HIGH or MEDIUM or LOW
-PICK2_CATALYST=VALUE
-PICK2_THESIS=VALUE
-PICK2_TRIGGER=VALUE
-PICK2_RISK=VALUE
-
-PICK3_TICKER=VALUE
-PICK3_COMPANY=VALUE
-PICK3_EXCHANGE=VALUE
-PICK3_SECTOR=VALUE
-PICK3_TYPE=CALL or PUT
-PICK3_STRIKE=$VALUE
-PICK3_EXPIRY=" + fridays.second + "
-PICK3_PREMIUM=$VALUE-$VALUE
-PICK3_RETURN=+VALUE%
-PICK3_CONFIDENCE=HIGH or MEDIUM or LOW
-PICK3_CATALYST=VALUE
-PICK3_THESIS=VALUE
-PICK3_TRIGGER=VALUE
-PICK3_RISK=VALUE
-
-PICK4_TICKER=VALUE
-PICK4_COMPANY=VALUE
-PICK4_EXCHANGE=VALUE
-PICK4_SECTOR=VALUE
-PICK4_TYPE=CALL or PUT
-PICK4_STRIKE=$VALUE
-PICK4_EXPIRY=" + fridays.second + "
-PICK4_PREMIUM=$VALUE-$VALUE
-PICK4_RETURN=+VALUE%
-PICK4_CONFIDENCE=HIGH or MEDIUM or LOW
-PICK4_CATALYST=VALUE
-PICK4_THESIS=VALUE
-PICK4_TRIGGER=VALUE
-PICK4_RISK=VALUE
-
-PICK5_TICKER=VALUE
-PICK5_COMPANY=VALUE
-PICK5_EXCHANGE=VALUE
-PICK5_SECTOR=VALUE
-PICK5_TYPE=CALL or PUT
-PICK5_STRIKE=$VALUE
-PICK5_EXPIRY=" + fridays.second + "
-PICK5_PREMIUM=$VALUE-$VALUE
-PICK5_RETURN=+VALUE%
-PICK5_CONFIDENCE=HIGH or MEDIUM or LOW
-PICK5_CATALYST=VALUE
-PICK5_THESIS=VALUE
-PICK5_TRIGGER=VALUE
-PICK5_RISK=VALUE"
+    const prompt = "You are an aggressive options trading AI. Today is " + today + ".\nCurrent global events: " + evCtx + "\n\nFill in this EXACT template for 5 options picks. Replace every VALUE in caps. Do not add any other text before or after.\n\nPICK1_TICKER=VALUE\nPICK1_COMPANY=VALUE\nPICK1_EXCHANGE=VALUE\nPICK1_SECTOR=VALUE\nPICK1_TYPE=CALL or PUT\nPICK1_STRIKE=$VALUE\nPICK1_EXPIRY=" + fridays.first + "\nPICK1_PREMIUM=$VALUE-$VALUE\nPICK1_RETURN=+VALUE%\nPICK1_CONFIDENCE=HIGH or MEDIUM or LOW\nPICK1_CATALYST=VALUE\nPICK1_THESIS=VALUE\nPICK1_TRIGGER=VALUE\nPICK1_RISK=VALUE\n\nPICK2_TICKER=VALUE\nPICK2_COMPANY=VALUE\nPICK2_EXCHANGE=VALUE\nPICK2_SECTOR=VALUE\nPICK2_TYPE=CALL or PUT\nPICK2_STRIKE=$VALUE\nPICK2_EXPIRY=" + fridays.first + "\nPICK2_PREMIUM=$VALUE-$VALUE\nPICK2_RETURN=+VALUE%\nPICK2_CONFIDENCE=HIGH or MEDIUM or LOW\nPICK2_CATALYST=VALUE\nPICK2_THESIS=VALUE\nPICK2_TRIGGER=VALUE\nPICK2_RISK=VALUE\n\nPICK3_TICKER=VALUE\nPICK3_COMPANY=VALUE\nPICK3_EXCHANGE=VALUE\nPICK3_SECTOR=VALUE\nPICK3_TYPE=CALL or PUT\nPICK3_STRIKE=$VALUE\nPICK3_EXPIRY=" + fridays.second + "\nPICK3_PREMIUM=$VALUE-$VALUE\nPICK3_RETURN=+VALUE%\nPICK3_CONFIDENCE=HIGH or MEDIUM or LOW\nPICK3_CATALYST=VALUE\nPICK3_THESIS=VALUE\nPICK3_TRIGGER=VALUE\nPICK3_RISK=VALUE\n\nPICK4_TICKER=VALUE\nPICK4_COMPANY=VALUE\nPICK4_EXCHANGE=VALUE\nPICK4_SECTOR=VALUE\nPICK4_TYPE=CALL or PUT\nPICK4_STRIKE=$VALUE\nPICK4_EXPIRY=" + fridays.second + "\nPICK4_PREMIUM=$VALUE-$VALUE\nPICK4_RETURN=+VALUE%\nPICK4_CONFIDENCE=HIGH or MEDIUM or LOW\nPICK4_CATALYST=VALUE\nPICK4_THESIS=VALUE\nPICK4_TRIGGER=VALUE\nPICK4_RISK=VALUE\n\nPICK5_TICKER=VALUE\nPICK5_COMPANY=VALUE\nPICK5_EXCHANGE=VALUE\nPICK5_SECTOR=VALUE\nPICK5_TYPE=CALL or PUT\nPICK5_STRIKE=$VALUE\nPICK5_EXPIRY=" + fridays.second + "\nPICK5_PREMIUM=$VALUE-$VALUE\nPICK5_RETURN=+VALUE%\nPICK5_CONFIDENCE=HIGH or MEDIUM or LOW\nPICK5_CATALYST=VALUE\nPICK5_THESIS=VALUE\nPICK5_TRIGGER=VALUE\nPICK5_RISK=VALUE"
 
     try {
       const text = await callClaude(prompt, 1400);
@@ -461,75 +383,7 @@ PICK5_RISK=VALUE"
           const f = new Date(now); f.setDate(now.getDate() + daysToFri + (i * 7));
           allFridays.push(f.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" }));
         }
-        const prompt = "You are NEXUS market intelligence AI. Today is " + today + ".
-
-Current global events driving markets:
-" + evCtx + "
-
-Monitor these key sources mentally: CNBC, WSJ, Bloomberg, Reddit WSB/investing/options, SEC 13F filings, earnings calendar.
-Track these whales: Michael Burry, Michael Saylor (MSTR/BTC), Cathie Wood (ARK), Warren Buffett, Ryan Cohen.
-
-Available expiries (choose best fit per pick): ${allFridays.join(\", \")}
-Use longer expiry when catalyst needs 2-4 weeks. Use shorter when move is imminent this week.
-
-Identify 5 stocks/commodities most likely to move +9% OR -9% (either direction) based on earnings, sentiment, whale activity, news catalysts, Reddit unusual activity, and macro events.
-
-Fill in EXACTLY:
-
-PICK1_TICKER=
-PICK1_NAME=
-PICK1_EXCHANGE=
-PICK1_DIRECTION=CALL or PUT
-PICK1_EXPIRY=
-PICK1_MOVE=e.g. +14%
-PICK1_CATALYST=one line reason
-PICK1_SOURCE=Reddit/Earnings/Whale/News/Macro
-PICK1_CONFIDENCE=HIGH or MEDIUM
-PICK1_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS
-
-PICK2_TICKER=
-PICK2_NAME=
-PICK2_EXCHANGE=
-PICK2_DIRECTION=CALL or PUT
-PICK2_EXPIRY=
-PICK2_MOVE=
-PICK2_CATALYST=
-PICK2_SOURCE=
-PICK2_CONFIDENCE=HIGH or MEDIUM
-PICK2_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS
-
-PICK3_TICKER=
-PICK3_NAME=
-PICK3_EXCHANGE=
-PICK3_DIRECTION=CALL or PUT
-PICK3_EXPIRY=
-PICK3_MOVE=
-PICK3_CATALYST=
-PICK3_SOURCE=
-PICK3_CONFIDENCE=HIGH or MEDIUM
-PICK3_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS
-
-PICK4_TICKER=
-PICK4_NAME=
-PICK4_EXCHANGE=
-PICK4_DIRECTION=CALL or PUT
-PICK4_EXPIRY=
-PICK4_MOVE=
-PICK4_CATALYST=
-PICK4_SOURCE=
-PICK4_CONFIDENCE=HIGH or MEDIUM
-PICK4_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS
-
-PICK5_TICKER=
-PICK5_NAME=
-PICK5_EXCHANGE=
-PICK5_DIRECTION=CALL or PUT
-PICK5_EXPIRY=
-PICK5_MOVE=
-PICK5_CATALYST=
-PICK5_SOURCE=
-PICK5_CONFIDENCE=HIGH or MEDIUM
-PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS"
+        const prompt = "You are NEXUS market intelligence AI. Today is " + today + ".\n\nCurrent global events driving markets:\n" + evCtx + "\n\nMonitor these key sources mentally: CNBC, WSJ, Bloomberg, Reddit WSB/investing/options, SEC 13F filings, earnings calendar.\nTrack these whales: Michael Burry, Michael Saylor (MSTR/BTC), Cathie Wood (ARK), Warren Buffett, Ryan Cohen.\n\nAvailable expiries (choose best fit per pick): ${allFridays.join(\", \")}\nUse longer expiry when catalyst needs 2-4 weeks. Use shorter when move is imminent this week.\n\nIdentify 5 stocks/commodities most likely to move +9% OR -9% (either direction) based on earnings, sentiment, whale activity, news catalysts, Reddit unusual activity, and macro events.\n\nFill in EXACTLY:\n\nPICK1_TICKER=\nPICK1_NAME=\nPICK1_EXCHANGE=\nPICK1_DIRECTION=CALL or PUT\nPICK1_EXPIRY=\nPICK1_MOVE=e.g. +14%\nPICK1_CATALYST=one line reason\nPICK1_SOURCE=Reddit/Earnings/Whale/News/Macro\nPICK1_CONFIDENCE=HIGH or MEDIUM\nPICK1_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS\n\nPICK2_TICKER=\nPICK2_NAME=\nPICK2_EXCHANGE=\nPICK2_DIRECTION=CALL or PUT\nPICK2_EXPIRY=\nPICK2_MOVE=\nPICK2_CATALYST=\nPICK2_SOURCE=\nPICK2_CONFIDENCE=HIGH or MEDIUM\nPICK2_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS\n\nPICK3_TICKER=\nPICK3_NAME=\nPICK3_EXCHANGE=\nPICK3_DIRECTION=CALL or PUT\nPICK3_EXPIRY=\nPICK3_MOVE=\nPICK3_CATALYST=\nPICK3_SOURCE=\nPICK3_CONFIDENCE=HIGH or MEDIUM\nPICK3_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS\n\nPICK4_TICKER=\nPICK4_NAME=\nPICK4_EXCHANGE=\nPICK4_DIRECTION=CALL or PUT\nPICK4_EXPIRY=\nPICK4_MOVE=\nPICK4_CATALYST=\nPICK4_SOURCE=\nPICK4_CONFIDENCE=HIGH or MEDIUM\nPICK4_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS\n\nPICK5_TICKER=\nPICK5_NAME=\nPICK5_EXCHANGE=\nPICK5_DIRECTION=CALL or PUT\nPICK5_EXPIRY=\nPICK5_MOVE=\nPICK5_CATALYST=\nPICK5_SOURCE=\nPICK5_CONFIDENCE=HIGH or MEDIUM\nPICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS"
 
         const text = await callClaude(prompt, 1400);
         picks = [];
@@ -607,7 +461,7 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS"
     if (predictions) return; setLoadingTab(true);
     try {
       const ctx = events.slice(0, 8).map(e => `${e.title}: ${e.commodities.join(", ")}`).join("\n");
-      const text = await callClaude(`Events:\n${ctx}\n\nReturn ONLY JSON:\n{"topCommodity":"name","topReason":"reason","priceIndex":"72","topRegion":"region","regionReason":"reason","alerts":"5","items":[{"commodity":"name","direction":"up","change":"+8%","confidence":"high","driver":"driver","source":"country","timeframe":"45 days"}]}\nInclude 10 items.`, 700);
+      const text = await callClaude("Events:\n" + ctx + "\n\nReturn ONLY JSON:\n{\"topCommodity\":\"name\",\"topReason\":\"reason\",\"priceIndex\":\"72\",\"topRegion\":\"region\",\"regionReason\":\"reason\",\"alerts\":\"5\",\"items\":[{\"commodity\":\"name\",\"direction\":\"up\",\"change\":\"+8%\",\"confidence\":\"high\",\"driver\":\"driver\",\"source\":\"country\",\"timeframe\":\"45 days\"}]}\nInclude 10 items.", 700);
       setPredictions(parseJSON(text)); setPredictionsLoaded(true); trackCall(500, 700);
     } catch {}
     setLoadingTab(false);
@@ -618,7 +472,7 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS"
     if (supplyData) return; setLoadingTab(true);
     try {
       const crit = events.filter(e => ["critical","high"].includes(e.severity)).slice(0, 5);
-      const text = await callClaude(`Events:\n${crit.map(e => `${e.title}: ${e.summary}`).join("\n")}\n\nReturn ONLY JSON:\n{"chains":[{"item":"item","risk":"critical|high|medium","shortage":"X%","primarySources":["Country (60%)"],"alternatives":["Country"],"companies":["Company"],"priceImpact":"+X%","sectors":["Sector"],"timeToShortage":"X weeks"}]}\nInclude 7 items.`, 700);
+      const text = await callClaude("Events:\n" + crit.map(e => e.title + ": " + e.summary).join("\n") + "\n\nReturn ONLY JSON:\n{\"chains\":[{\"item\":\"item\",\"risk\":\"critical|high|medium\",\"shortage\":\"X%\",\"primarySources\":[\"Country (60%)\"],\"alternatives\":[\"Country\"],\"companies\":[\"Company\"],\"priceImpact\":\"+X%\",\"sectors\":[\"Sector\"],\"timeToShortage\":\"X weeks\"}]}\nInclude 7 items.", 700);
       setSupplyData(parseJSON(text)); setSupplyLoaded(true); trackCall(400, 700);
     } catch {}
     setLoadingTab(false);
@@ -1194,74 +1048,9 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS"
 
                 {intelPicks && !loadingIntel && (
                   <div>
-                    {intelPicks.map((pick, i) => {
-                      const isCall = pick.direction === "CALL";
-                      const col = isCall ? "#39ff14" : "#ff2d55";
-                      const urgencyCol = pick.urgency === "THIS WEEK" ? "#ff2d55" : pick.urgency === "NEXT WEEK" ? "#ffb800" : "#00d4ff";
-                      return (
-                        <div key={i} style={{ background: "#080f1a", border: `1px solid ${col}33`, borderLeft: `4px solid ${col}`, borderRadius: 4, padding: 16, marginBottom: 12, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                          {/* Rank */}
-                          <div style={{ width: 32, height: 32, borderRadius: "50%", background: `${col}22`, border: `1px solid ${col}55`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: col, flexShrink: 0 }}>
-                            {pick.rank}
-                          </div>
-                          {/* Ticker + name */}
-                          <div style={{ minWidth: 120 }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 900, color: "#e8f4ff", lineHeight: 1 }}>{pick.ticker}</div>
-                            <div style={{ fontSize: 11, color: "#4a6d8c", marginTop: 2 }}>{pick.name}</div>
-                            <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{pick.exchange}</div>
-                          </div>
-                          {/* Live price from Questrade */}
-                          {qtQuotes[pick.ticker] && (
-                            <div style={{ textAlign: "center", minWidth: 80 }}>
-                              <div style={{ fontSize: 9, color: "#39ff14", fontFamily: "monospace", marginBottom: 3 }}>LIVE PRICE</div>
-                              <div style={{ fontSize: 16, fontWeight: 900, color: "#39ff14", fontFamily: "monospace" }}>${qtQuotes[pick.ticker].lastPrice?.toFixed(2)}</div>
-                              <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>bid ${qtQuotes[pick.ticker].bidPrice?.toFixed(2)} · ask ${qtQuotes[pick.ticker].askPrice?.toFixed(2)}</div>
-                            </div>
-                          )}
-                          {/* Load chain button if not loaded */}
-                          {qtConnected && !qtChains[pick.ticker] && !loadingChain[pick.ticker] && (
-                            <button onClick={() => fetchChain(pick.ticker, pick.direction)} style={{ fontSize: 9, fontFamily: "monospace", color: "#00d4ff", background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.3)", borderRadius: 3, padding: "4px 8px", cursor: "pointer" }}>
-                              ⛓ CHAIN
-                            </button>
-                          )}
-                          {loadingChain[pick.ticker] && (
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>loading...</div>
-                          )}
-                          {/* Direction */}
-                          <div style={{ textAlign: "center", minWidth: 70 }}>
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>DIRECTION</div>
-                            <div style={{ fontSize: 18, fontWeight: 900, color: col, fontFamily: "monospace" }}>{pick.direction}</div>
-                          </div>
-                          {/* Expiry */}
-                          <div style={{ textAlign: "center", minWidth: 100 }}>
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>EXPIRY</div>
-                            <div style={{ fontSize: 13, fontWeight: 700, color: "#ffb800", fontFamily: "monospace" }}>{pick.expiry}</div>
-                          </div>
-                          {/* Move */}
-                          <div style={{ textAlign: "center", minWidth: 70 }}>
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>EST. MOVE</div>
-                            <div style={{ fontSize: 18, fontWeight: 900, color: col, fontFamily: "monospace" }}>{pick.estimatedMove}</div>
-                          </div>
-                          {/* Urgency */}
-                          <div style={{ textAlign: "center", minWidth: 90 }}>
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>URGENCY</div>
-                            <div style={{ fontSize: 10, fontWeight: 700, color: urgencyCol, fontFamily: "monospace", padding: "2px 6px", background: `${urgencyCol}11`, border: `1px solid ${urgencyCol}44`, borderRadius: 2 }}>{pick.urgency}</div>
-                          </div>
-                          {/* Confidence */}
-                          <div style={{ textAlign: "center", minWidth: 80 }}>
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>CONFIDENCE</div>
-                            <div style={{ fontSize: 10, fontWeight: 700, color: pick.confidence === "HIGH" ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>{pick.confidence}</div>
-                          </div>
-                          {/* Catalyst + source */}
-                          <div style={{ flex: 1, minWidth: 200 }}>
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>CATALYST</div>
-                            <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.5, marginBottom: 4 }}>{pick.catalyst}</div>
-                            <div style={{ fontSize: 10, color: "#b24fff", fontFamily: "monospace" }}>SOURCE: {pick.source}</div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                    {intelPicks.map((pick, i) => (
+                      <IntelPickCard key={i} pick={pick} i={i} qtConnected={qtConnected} qtQuotes={qtQuotes} qtChains={qtChains} loadingChain={loadingChain} fetchChain={fetchChain} />
+                    ))}
                   <div style={{ padding: "12px 16px", background: "rgba(178,79,255,0.04)", border: "1px solid rgba(178,79,255,0.15)", borderRadius: 3, marginTop: 6 }}>
                     <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
                       <span style={{ color: "#b24fff" }}>⚠ RESEARCH ONLY:</span> Intelligence picks are AI-synthesized from public sources for educational purposes. Not financial advice. Always verify on Questrade before trading. Options can expire worthless.
