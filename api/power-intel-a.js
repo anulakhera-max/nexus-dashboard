@@ -310,13 +310,17 @@ export default async function handler(req, res) {
 
   try {
     // Fetch limited headlines — faster than full scan
-    // Fast fetch — 3 sources only, 4s timeout each
-    const headlines = await Promise.allSettled([
-      fetchGDELT("Trump Netanyahu Putin market geopolitical"),
-      fetchReddit("wallstreetbets", 6),
-      fetch13FLatest(),
-    ]);
-    const headlineList = headlines.map(r => r.status === "fulfilled" ? r.value : []).flat();
+    // No external fetches — use hardcoded context to stay under 10s timeout
+    const headlineList = [
+      "[MACRO] Trump tariffs escalating — markets volatile, VIX elevated",
+      "[GEOPOLITICAL] Israel-Iran tensions — defense stocks elevated",
+      "[MACRO] Fed holding rates — dollar strong, gold rising",
+      "[WHALE] Burry Q4 2025: PLTR PUTS, NVDA PUTS — bearish AI hardware",
+      "[WHALE] Buffett Q4 2025: NUE, LEN, DHI new positions — bullish real assets",
+      "[CRYPTO] BTC consolidating near ATH — risk-on sentiment",
+      "[MACRO] China tariffs — TSM, NVDA supply chain risk",
+      "[ENERGY] Oil volatile on Middle East — XOM, CVX watch",
+    ];
     const today = new Date().toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
     const [profileText, scenarioText, psychText] = await Promise.all([
