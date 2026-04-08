@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+function bc(col, alpha) { return "1px solid " + col + (alpha || ""); }
+function bg(col, alpha) { return col + (alpha || ""); }
 
 const API_URL = "https://api.anthropic.com/v1/messages";
 const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
@@ -219,6 +221,74 @@ function OptionsPickCard({ pick, rank }) {
         ⚠ Risk: {pick.riskNote} · Max loss = premium paid.
       </div>
     </div>
+  );
+}
+
+function IntelPickCard({ pick, i, qtConnected, qtQuotes, qtChains, loadingChain, fetchChain }) {
+  const isCall = pick.direction === "CALL";
+  const col = isCall ? "#39ff14" : "#ff2d55";
+  const urgencyCol = pick.urgency === "THIS WEEK" ? "#ff2d55" : pick.urgency === "NEXT WEEK" ? "#ffb800" : "#00d4ff";
+  return (
+                        <div key={i} style={{ background: "#080f1a", border: bc(col, "33"), borderLeft: "4px solid " + col, borderRadius: 4, padding: 16, marginBottom: 12, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                          {/* Rank */}
+                          <div style={{ width: 32, height: 32, borderRadius: "50%", background: bg(col, "22"), border: bc(col, "55"), display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: col, flexShrink: 0 }}>
+                            {pick.rank}
+                          </div>
+                          {/* Ticker + name */}
+                          <div style={{ minWidth: 120 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 900, color: "#e8f4ff", lineHeight: 1 }}>{pick.ticker}</div>
+                            <div style={{ fontSize: 11, color: "#4a6d8c", marginTop: 2 }}>{pick.name}</div>
+                            <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{pick.exchange}</div>
+                          </div>
+                          {/* Live price from Questrade */}
+                          {qtQuotes[pick.ticker] && (
+                            <div style={{ textAlign: "center", minWidth: 80 }}>
+                              <div style={{ fontSize: 9, color: "#39ff14", fontFamily: "monospace", marginBottom: 3 }}>LIVE PRICE</div>
+                              <div style={{ fontSize: 16, fontWeight: 900, color: "#39ff14", fontFamily: "monospace" }}>${qtQuotes[pick.ticker].lastPrice?.toFixed(2)}</div>
+                              <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>bid ${qtQuotes[pick.ticker].bidPrice?.toFixed(2)} · ask ${qtQuotes[pick.ticker].askPrice?.toFixed(2)}</div>
+                            </div>
+                          )}
+                          {/* Load chain button if not loaded */}
+                          {qtConnected && !qtChains[pick.ticker] && !loadingChain[pick.ticker] && (
+                            <button onClick={() => fetchChain(pick.ticker, pick.direction)} style={{ fontSize: 9, fontFamily: "monospace", color: "#00d4ff", background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.3)", borderRadius: 3, padding: "4px 8px", cursor: "pointer" }}>
+                              ⛓ CHAIN
+                            </button>
+                          )}
+                          {loadingChain[pick.ticker] && (
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>loading...</div>
+                          )}
+                          {/* Direction */}
+                          <div style={{ textAlign: "center", minWidth: 70 }}>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>DIRECTION</div>
+                            <div style={{ fontSize: 18, fontWeight: 900, color: col, fontFamily: "monospace" }}>{pick.direction}</div>
+                          </div>
+                          {/* Expiry */}
+                          <div style={{ textAlign: "center", minWidth: 100 }}>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>EXPIRY</div>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: "#ffb800", fontFamily: "monospace" }}>{pick.expiry}</div>
+                          </div>
+                          {/* Move */}
+                          <div style={{ textAlign: "center", minWidth: 70 }}>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>EST. MOVE</div>
+                            <div style={{ fontSize: 18, fontWeight: 900, color: col, fontFamily: "monospace" }}>{pick.estimatedMove}</div>
+                          </div>
+                          {/* Urgency */}
+                          <div style={{ textAlign: "center", minWidth: 90 }}>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>URGENCY</div>
+                            <div style={{ fontSize: 10, fontWeight: 700, color: urgencyCol, fontFamily: "monospace", padding: "2px 6px", background: bg(urgencyCol, "11"), border: bc(urgencyCol, "44"), borderRadius: 2 }}>{pick.urgency}</div>
+                          </div>
+                          {/* Confidence */}
+                          <div style={{ textAlign: "center", minWidth: 80 }}>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>CONFIDENCE</div>
+                            <div style={{ fontSize: 10, fontWeight: 700, color: pick.confidence === "HIGH" ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>{pick.confidence}</div>
+                          </div>
+                          {/* Catalyst + source */}
+                          <div style={{ flex: 1, minWidth: 200 }}>
+                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>CATALYST</div>
+                            <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.5, marginBottom: 4 }}>{pick.catalyst}</div>
+                            <div style={{ fontSize: 10, color: "#b24fff", fontFamily: "monospace" }}>SOURCE: {pick.source}</div>
+                          </div>
+                        </div>
   );
 }
 
