@@ -311,8 +311,8 @@ export default function NexusDashboard({ user, onLogout }) {
     const today = new Date().toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
     // Ask Claude to fill in a strict template — no JSON parsing needed
-    const prompt = `You are an aggressive options trading AI. Today is ${today}.
-Current global events: ${evCtx}
+    const prompt = "You are an aggressive options trading AI. Today is " + today + ".
+Current global events: " + evCtx + "
 
 Fill in this EXACT template for 5 options picks. Replace every VALUE in caps. Do not add any other text before or after.
 
@@ -322,7 +322,7 @@ PICK1_EXCHANGE=VALUE
 PICK1_SECTOR=VALUE
 PICK1_TYPE=CALL or PUT
 PICK1_STRIKE=$VALUE
-PICK1_EXPIRY=${fridays.first}
+PICK1_EXPIRY=" + fridays.first + "
 PICK1_PREMIUM=$VALUE-$VALUE
 PICK1_RETURN=+VALUE%
 PICK1_CONFIDENCE=HIGH or MEDIUM or LOW
@@ -337,7 +337,7 @@ PICK2_EXCHANGE=VALUE
 PICK2_SECTOR=VALUE
 PICK2_TYPE=CALL or PUT
 PICK2_STRIKE=$VALUE
-PICK2_EXPIRY=${fridays.first}
+PICK2_EXPIRY=" + fridays.first + "
 PICK2_PREMIUM=$VALUE-$VALUE
 PICK2_RETURN=+VALUE%
 PICK2_CONFIDENCE=HIGH or MEDIUM or LOW
@@ -352,7 +352,7 @@ PICK3_EXCHANGE=VALUE
 PICK3_SECTOR=VALUE
 PICK3_TYPE=CALL or PUT
 PICK3_STRIKE=$VALUE
-PICK3_EXPIRY=${fridays.second}
+PICK3_EXPIRY=" + fridays.second + "
 PICK3_PREMIUM=$VALUE-$VALUE
 PICK3_RETURN=+VALUE%
 PICK3_CONFIDENCE=HIGH or MEDIUM or LOW
@@ -367,7 +367,7 @@ PICK4_EXCHANGE=VALUE
 PICK4_SECTOR=VALUE
 PICK4_TYPE=CALL or PUT
 PICK4_STRIKE=$VALUE
-PICK4_EXPIRY=${fridays.second}
+PICK4_EXPIRY=" + fridays.second + "
 PICK4_PREMIUM=$VALUE-$VALUE
 PICK4_RETURN=+VALUE%
 PICK4_CONFIDENCE=HIGH or MEDIUM or LOW
@@ -382,14 +382,14 @@ PICK5_EXCHANGE=VALUE
 PICK5_SECTOR=VALUE
 PICK5_TYPE=CALL or PUT
 PICK5_STRIKE=$VALUE
-PICK5_EXPIRY=${fridays.second}
+PICK5_EXPIRY=" + fridays.second + "
 PICK5_PREMIUM=$VALUE-$VALUE
 PICK5_RETURN=+VALUE%
 PICK5_CONFIDENCE=HIGH or MEDIUM or LOW
 PICK5_CATALYST=VALUE
 PICK5_THESIS=VALUE
 PICK5_TRIGGER=VALUE
-PICK5_RISK=VALUE`;
+PICK5_RISK=VALUE"
 
     try {
       const text = await callClaude(prompt, 1400);
@@ -461,15 +461,15 @@ PICK5_RISK=VALUE`;
           const f = new Date(now); f.setDate(now.getDate() + daysToFri + (i * 7));
           allFridays.push(f.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" }));
         }
-        const prompt = `You are NEXUS market intelligence AI. Today is ${today}.
+        const prompt = "You are NEXUS market intelligence AI. Today is " + today + ".
 
 Current global events driving markets:
-${evCtx}
+" + evCtx + "
 
 Monitor these key sources mentally: CNBC, WSJ, Bloomberg, Reddit WSB/investing/options, SEC 13F filings, earnings calendar.
 Track these whales: Michael Burry, Michael Saylor (MSTR/BTC), Cathie Wood (ARK), Warren Buffett, Ryan Cohen.
 
-Available expiries (choose best fit per pick): ${allFridays.join(", ")}
+Available expiries (choose best fit per pick): ${allFridays.join(\", \")}
 Use longer expiry when catalyst needs 2-4 weeks. Use shorter when move is imminent this week.
 
 Identify 5 stocks/commodities most likely to move +9% OR -9% (either direction) based on earnings, sentiment, whale activity, news catalysts, Reddit unusual activity, and macro events.
@@ -529,7 +529,7 @@ PICK5_MOVE=
 PICK5_CATALYST=
 PICK5_SOURCE=
 PICK5_CONFIDENCE=HIGH or MEDIUM
-PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
+PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS"
 
         const text = await callClaude(prompt, 1400);
         picks = [];
