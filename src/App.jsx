@@ -562,8 +562,16 @@ export default function NexusDashboard({ user, onLogout }) {
     if (sourcesLoaded && !force) return;
     if (sourcesData) return; setLoadingTab(true);
     try {
-      const text = await callClaude("Country sourcing intelligence. Return ONLY JSON:\n{\"hotspots\":[{\"country\":\"name\",\"risk\":\"critical|high|medium\",\"exports\":[\"item (share%)\"],\"activeEvent\":\"event\",\"priceImpact\":\"impact\",\"alternatives\":[\"country\"]}]}\nCover: Russia,Ukraine,China,Saudi Arabia,Brazil,DRC,Australia,Iran,India,Taiwan.", 700);
-      setSourcesData(parseJSON(text)); setSourcesLoaded(true); trackCall(300, 700);
+      // Always force on first load to avoid stale empty cache
+      const res = await fetch(nexusUrl + "/api/sources?force=true", {
+        headers: { "x-nexus-key": nexusKey }
+      });
+      const data = await res.json();
+      if (data.success && data.hotspots?.length > 0) {
+        setSourcesData({ hotspots: data.hotspots });
+        setSourcesLoaded(true);
+        trackCall(300, 700);
+      }
     } catch {}
     setLoadingTab(false);
   };
