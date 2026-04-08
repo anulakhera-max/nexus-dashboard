@@ -562,7 +562,7 @@ export default function NexusDashboard({ user, onLogout }) {
     if (sourcesLoaded && !force) return;
     if (sourcesData) return; setLoadingTab(true);
     try {
-      const text = await callClaude(`Country sourcing intelligence. Return ONLY JSON:\n{"hotspots":[{"country":"name","risk":"critical|high|medium","exports":["item (share%)"],"activeEvent":"event","priceImpact":"impact","alternatives":["country"]}]}\nCover: Russia,Ukraine,China,Saudi Arabia,Brazil,DRC,Australia,Iran,India,Taiwan.`, 700);
+      const text = await callClaude("Country sourcing intelligence. Return ONLY JSON:\n{\"hotspots\":[{\"country\":\"name\",\"risk\":\"critical|high|medium\",\"exports\":[\"item (share%)\"],\"activeEvent\":\"event\",\"priceImpact\":\"impact\",\"alternatives\":[\"country\"]}]}\nCover: Russia,Ukraine,China,Saudi Arabia,Brazil,DRC,Australia,Iran,India,Taiwan.", 700);
       setSourcesData(parseJSON(text)); setSourcesLoaded(true); trackCall(300, 700);
     } catch {}
     setLoadingTab(false);
