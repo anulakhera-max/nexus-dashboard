@@ -680,16 +680,21 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingPower(true); setPowerError(null);
     try {
       if (nexusUrl && nexusKey) {
-        const qs = force ? "?force=true" : "";
-        // Call both endpoints in parallel — each under 10s
+        const qs = (force ? "?force=true&" : "?") + "x-nexus-key=" + nexusKey;
+        // Call both endpoints in parallel with 30s timeout
+        const fetchWithTimeout = (url) => {
+          const ctrl = new AbortController();
+          setTimeout(() => ctrl.abort(), 30000);
+          return fetch(url, { signal: ctrl.signal });
+        };
         const [resA, resB] = await Promise.all([
-          fetch(`${nexusUrl}/api/power-intel-a${qs}`, { headers: { "x-nexus-key": nexusKey } }),
-          fetch(`${nexusUrl}/api/power-intel-b${qs}`, { headers: { "x-nexus-key": nexusKey } }),
+          fetchWithTimeout(nexusUrl + "/api/power-intel-a" + qs),
+          fetchWithTimeout(nexusUrl + "/api/power-intel-b" + qs),
         ]);
         const [textA, textB] = await Promise.all([resA.text(), resB.text()]);
         let dataA, dataB;
-        try { dataA = JSON.parse(textA); } catch { throw new Error("Power Intel A error — check Vercel logs"); }
-        try { dataB = JSON.parse(textB); } catch { throw new Error("Power Intel B error — check Vercel logs"); }
+        try { dataA = JSON.parse(textA); } catch { throw new Error("Power Intel A timed out — click Analyze Now again (cache warms on 2nd try)"); }
+        try { dataB = JSON.parse(textB); } catch { throw new Error("Power Intel B timed out — click Analyze Now again"); }
         if (!dataA.success) throw new Error(dataA.error || "Power Intel A failed");
         if (!dataB.success) throw new Error(dataB.error || "Power Intel B failed");
         // Merge both results
