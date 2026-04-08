@@ -156,91 +156,34 @@ export default async function handler(req, res) {
       weekday: "long", year: "numeric", month: "long", day: "numeric"
     });
 
-    const prompt = `You are NEXUS, an elite quantitative options intelligence AI. Today is ${today}.
+    const pickTemplate = [
+      "PICK1_TICKER=","PICK1_NAME=","PICK1_EXCHANGE=","PICK1_DIRECTION=CALL or PUT",
+      "PICK1_EXPIRY=","PICK1_MOVE=estimated % move e.g. +12% or -15%",
+      "PICK1_CATALYST=primary reason in one line",
+      "PICK1_SOURCE=where signal came from e.g. Reddit WSB / Earnings / Whale / News",
+      "PICK1_CONFIDENCE=HIGH or MEDIUM","PICK1_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS","",
+      "PICK2_TICKER=","PICK2_NAME=","PICK2_EXCHANGE=","PICK2_DIRECTION=CALL or PUT",
+      "PICK2_EXPIRY=","PICK2_MOVE=","PICK2_CATALYST=","PICK2_SOURCE=",
+      "PICK2_CONFIDENCE=HIGH or MEDIUM","PICK2_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS","",
+      "PICK3_TICKER=","PICK3_NAME=","PICK3_EXCHANGE=","PICK3_DIRECTION=CALL or PUT",
+      "PICK3_EXPIRY=","PICK3_MOVE=","PICK3_CATALYST=","PICK3_SOURCE=",
+      "PICK3_CONFIDENCE=HIGH or MEDIUM","PICK3_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS","",
+      "PICK4_TICKER=","PICK4_NAME=","PICK4_EXCHANGE=","PICK4_DIRECTION=CALL or PUT",
+      "PICK4_EXPIRY=","PICK4_MOVE=","PICK4_CATALYST=","PICK4_SOURCE=",
+      "PICK4_CONFIDENCE=HIGH or MEDIUM","PICK4_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS","",
+      "PICK5_TICKER=","PICK5_NAME=","PICK5_EXCHANGE=","PICK5_DIRECTION=CALL or PUT",
+      "PICK5_EXPIRY=","PICK5_MOVE=","PICK5_CATALYST=","PICK5_SOURCE=",
+      "PICK5_CONFIDENCE=HIGH or MEDIUM","PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS"
+    ].join("\n");
 
-You have access to the following live market intelligence gathered right now:
-
-${headlineText}
-
-KEY WHALE TARGETS TO MONITOR:
-- Michael Burry (Scion Asset Management) — known for massive contrarian bets, 13F filings
-- Michael Saylor (MicroStrategy/MSTR) — Bitcoin maximalist, major BTC holder
-- Cathie Wood (ARK Invest) — daily buy/sell disclosures, disruptive tech focus
-- Warren Buffett (Berkshire) — large position changes signal major moves
-- Ryan Cohen — activist investor, targets struggling retailers
-
-AVAILABLE EXPIRY DATES: ${fridays.join(", ")}
-Choose the best expiry for each pick — can be any of these 4 Fridays.
-Use a longer expiry (3-4 weeks) when the catalyst needs time to play out.
-Use a shorter expiry (1-2 weeks) when the move is imminent.
-
-TASK: Identify exactly 5 stocks OR commodities most likely to move +9% OR -9% (in either direction) based on:
-1. News catalysts from the headlines above
-2. Reddit retail sentiment and unusual activity
-3. Upcoming earnings that historically cause 9%+ moves
-4. Whale position changes or announcements
-5. Market anomalies, unusual options flow, or sentiment extremes
-6. Technical breakout or breakdown setups
-7. Macro events (Fed, CPI, geopolitical) impacting specific sectors
-
-UNIVERSE: NYSE, NASDAQ, TSX stocks + Gold (GLD/GC), Oil (USO/CL), Natural Gas (UNG)
-
-For each pick fill in this EXACT template. No other text before or after.
-
-PICK1_TICKER=
-PICK1_NAME=
-PICK1_EXCHANGE=
-PICK1_DIRECTION=CALL or PUT
-PICK1_EXPIRY=
-PICK1_MOVE=estimated % move e.g. +12% or -15%
-PICK1_CATALYST=primary reason in one line
-PICK1_SOURCE=where signal came from e.g. Reddit WSB / Earnings / Whale / News
-PICK1_CONFIDENCE=HIGH or MEDIUM
-PICK1_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS
-
-PICK2_TICKER=
-PICK2_NAME=
-PICK2_EXCHANGE=
-PICK2_DIRECTION=CALL or PUT
-PICK2_EXPIRY=
-PICK2_MOVE=
-PICK2_CATALYST=
-PICK2_SOURCE=
-PICK2_CONFIDENCE=HIGH or MEDIUM
-PICK2_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS
-
-PICK3_TICKER=
-PICK3_NAME=
-PICK3_EXCHANGE=
-PICK3_DIRECTION=CALL or PUT
-PICK3_EXPIRY=
-PICK3_MOVE=
-PICK3_CATALYST=
-PICK3_SOURCE=
-PICK3_CONFIDENCE=HIGH or MEDIUM
-PICK3_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS
-
-PICK4_TICKER=
-PICK4_NAME=
-PICK4_EXCHANGE=
-PICK4_DIRECTION=CALL or PUT
-PICK4_EXPIRY=
-PICK4_MOVE=
-PICK4_CATALYST=
-PICK4_SOURCE=
-PICK4_CONFIDENCE=HIGH or MEDIUM
-PICK4_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS
-
-PICK5_TICKER=
-PICK5_NAME=
-PICK5_EXCHANGE=
-PICK5_DIRECTION=CALL or PUT
-PICK5_EXPIRY=
-PICK5_MOVE=
-PICK5_CATALYST=
-PICK5_SOURCE=
-PICK5_CONFIDENCE=HIGH or MEDIUM
-PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
+    const prompt = "You are NEXUS, an elite quantitative options intelligence AI. Today is " + today + ".\n\n" +
+      "Live market intelligence:\n" + headlineText + "\n\n" +
+      "KEY WHALES: Burry (contrarian), Saylor (BTC), Cathie Wood (ARK), Buffett (Berkshire), Ryan Cohen (activist)\n\n" +
+      "AVAILABLE EXPIRY DATES: " + fridays.join(", ") + "\n" +
+      "Use shorter expiry (1-2 weeks) for imminent moves, longer (3-4 weeks) for catalysts needing time.\n\n" +
+      "TASK: Identify exactly 5 stocks/commodities most likely to move +9% or -9% based on: news catalysts, Reddit sentiment, earnings, whale moves, unusual options flow, macro events.\n\n" +
+      "UNIVERSE: NYSE, NASDAQ, TSX + Gold (GLD), Oil (USO), Natural Gas (UNG)\n\n" +
+      "Fill in this EXACT template. No other text before or after.\n\n" + pickTemplate;
 
     const text = await callClaude(prompt, 1400);
 
