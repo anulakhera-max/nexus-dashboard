@@ -51,16 +51,16 @@ async function callClaude(prompt, maxTokens = 900) {
 
 function parseJSON(text) {
   if (!text) return null;
-  // Strip markdown code fences
-  let clean = text.replace(/`{3}json[\s\S]*?`{3}/gi, '').replace(/`{3}/g, '').trim();
-  // Try direct parse
+  var clean = text.trim();
+  if (clean.indexOf("json") === 0) clean = clean.slice(4);
+  clean = clean.replace(/^[\s\S]*?\[/, "[").replace(/\}[\s\S]*$/, "}");
   try { return JSON.parse(clean); } catch {}
-  // Try finding JSON array anywhere in text
-  const arrMatch = clean.match(/\[[\s\S]*\]/);
-  if (arrMatch) { try { return JSON.parse(arrMatch[0]); } catch {} }
-  // Try finding JSON object
-  const objMatch = clean.match(/\{[\s\S]*\}/);
-  if (objMatch) { try { return JSON.parse(objMatch[0]); } catch {} }
+  var a = clean.indexOf("[");
+  var b = clean.lastIndexOf("]");
+  if (a >= 0 && b > a) { try { return JSON.parse(clean.slice(a, b+1)); } catch {} }
+  var c = clean.indexOf("{");
+  var d = clean.lastIndexOf("}");
+  if (c >= 0 && d > c) { try { return JSON.parse(clean.slice(c, d+1)); } catch {} }
   return null;
 }
 
