@@ -1259,25 +1259,6 @@ PICK5_URGENCY=THIS WEEK or NEXT WEEK or 2-4 WEEKS`;
                             <div style={{ fontSize: 10, color: "#b24fff", fontFamily: "monospace" }}>SOURCE: {pick.source}</div>
                           </div>
                         </div>
-                        {/* Real options chain from Questrade */}
-                        {qtChains[pick.ticker] && (
-                          <div style={{ marginTop: 10, padding: "10px 12px", background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 3 }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", marginBottom: 8, letterSpacing: 2 }}>
-                              ⛓ LIVE {qtChains[pick.ticker].direction?.toUpperCase()} CHAIN — {pick.ticker} @ ${qtChains[pick.ticker].currentPrice?.toFixed(2)} — Exp: {new Date(qtChains[pick.ticker].expiryDate).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
-                            </div>
-                            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                              {qtChains[pick.ticker].strikes?.slice(0, 6).map((s, si) => (
-                                <div key={si} style={{ padding: "6px 10px", background: "#080f1a", border: `1px solid ${Math.abs(s.strikePrice - qtChains[pick.ticker].currentPrice) < 5 ? "#00d4ff55" : "#1a3a5c"}`, borderRadius: 3, minWidth: 90, textAlign: "center" }}>
-                                  <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: Math.abs(s.strikePrice - qtChains[pick.ticker].currentPrice) < 5 ? "#00d4ff" : "#e8f4ff" }}>${s.strikePrice?.toFixed(2)}</div>
-                                  <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>bid ${s.bidPrice?.toFixed(2)}</div>
-                                  <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>ask ${s.askPrice?.toFixed(2)}</div>
-                                  <div style={{ fontSize: 9, color: "#8aabb8", fontFamily: "monospace", marginTop: 2 }}>Δ {s.delta?.toFixed(2)}</div>
-                                  <div style={{ fontSize: 9, color: s.impliedVolatility > 100 ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>IV {s.impliedVolatility?.toFixed(0)}%</div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     );
                   })}
