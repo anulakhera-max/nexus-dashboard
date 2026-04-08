@@ -684,7 +684,7 @@ export default function NexusDashboard({ user, onLogout }) {
         // Call both endpoints in parallel with 30s timeout
         const fetchWithTimeout = (url) => {
           const ctrl = new AbortController();
-          setTimeout(() => ctrl.abort(), 30000);
+          setTimeout(() => ctrl.abort(), 90000); // 90s — Render cold start can take 50s
           return fetch(url, { signal: ctrl.signal });
         };
         const [resA, resB] = await Promise.all([
@@ -1161,7 +1161,7 @@ export default function NexusDashboard({ user, onLogout }) {
                   </button>
                 </div>
 
-                {loadingPower && <div style={{ textAlign: "center", padding: 40, color: "#ff6b35", fontFamily: "monospace", fontSize: 12 }}>◈ Running psychographic analysis on world leaders...<br/>Building scenario engine...<br/>Mapping power network...<br/><br/>This takes 20-30 seconds.</div>}
+                {loadingPower && <div style={{ textAlign: "center", padding: 40, color: "#ff6b35", fontFamily: "monospace", fontSize: 12 }}>◈ Running psychographic analysis on world leaders...<br/>Building scenario engine...<br/>Mapping power network...<br/><br/>First load takes 30-60 seconds (server warming up).<br/>Subsequent loads are instant from cache.</div>}
 
                 {powerError && !loadingPower && (
                   <div style={{ padding: 14, background: "rgba(255,107,53,0.08)", border: "1px solid rgba(255,107,53,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#ff6b35" }}>⚠ {powerError}</div>
