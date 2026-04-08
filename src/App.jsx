@@ -362,12 +362,22 @@ export default function NexusDashboard({ user, onLogout }) {
       let picks, meta;
       if (nexusUrl && nexusKey) {
         // Use backend API with real data sources
-        const res = await fetch(`${nexusUrl}/api/intelligence${force ? "?force=true" : ""}`, {
-          headers: { "x-nexus-key": nexusKey }
-        });
-        const data = await res.json();
-        if (data.success) { picks = data.picks; meta = data; }
-        else throw new Error(data.error || "API error");
+        const controller = new AbortController();
+        const tmo = setTimeout(() => controller.abort(), 25000);
+        let res2;
+        try {
+          res2 = await fetch(nexusUrl + "/api/intelligence" + (force ? "?force=true" : ""), {
+            headers: { "x-nexus-key": nexusKey }, signal: controller.signal
+          });
+        } catch (fe) {
+          if (fe.name === "AbortError") throw new Error("Timed out — try again in a moment");
+          throw fe;
+        } finally { clearTimeout(tmo); }
+        const rawText = await res2.text();
+        if (!rawText || rawText.startsWith("<")) throw new Error("Server timed out — try again");
+        const data = JSON.parse(rawText);
+        if (data.success && data.picks?.length > 0) { picks = data.picks; meta = data; }
+        else throw new Error(data.error || "No picks returned — try again");
       } else {
         // Fallback: call Claude directly from browser
         const evCtx = events.filter(e => ["critical","high"].includes(e.severity)).slice(0, 5)
