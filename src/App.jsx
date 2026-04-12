@@ -2101,7 +2101,7 @@ export default function NexusDashboard({ user, onLogout }) {
               </div>
             )}
 
-        <div style={S.panel}>
+        {(tab !== "trades" && tab !== "watch") && <div style={S.panel}>
           <div style={S.panelHeader}>⬡ AI INTELLIGENCE BRIEF</div>
           <div style={S.panelBody}>
             {apiError && (
@@ -2119,7 +2119,7 @@ export default function NexusDashboard({ user, onLogout }) {
             {loading && <Spinner />}
             {analysisHtml && !loading && <div style={{ fontSize: 11, lineHeight: 1.7 }}>{renderAnalysis(analysisHtml)}</div>}
           </div>
-        </div>
+        </div>}
       </div>
 
       {/* TICKER */}
