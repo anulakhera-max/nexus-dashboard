@@ -234,6 +234,10 @@ export default function NexusDashboard({ user, onLogout }) {
   const [predictions, setPredictions] = useState(null);
   const [supplyData, setSupplyData] = useState(null);
   const [sourcesData, setSourcesData] = useState(null);
+  const [watchlist, setWatchlist] = useState({ individuals: [], stocks: [] });
+  const [watchResults, setWatchResults] = useState([]);
+  const [loadingWatch, setLoadingWatch] = useState(false);
+  const [watchInput, setWatchInput] = useState({ name: "", ticker: "", type: "individual" });
   const [loadingTab, setLoadingTab] = useState(false);
   const [clock, setClock] = useState("");
   const [tickerItems, setTickerItems] = useState([]);
@@ -502,6 +506,55 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingTab(false);
   };
 
+  // ── Watchlist functions ──────────────────────────────────────
+  const loadWatchlist = async () => {
+    try {
+      const res = await fetch(nexusUrl + "/api/watchlist", { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setWatchlist(data.watchlist);
+    } catch {}
+  };
+
+  const saveWatchlist = async (updated) => {
+    try {
+      await fetch(nexusUrl + "/api/watchlist", {
+        method: "POST",
+        headers: { "x-nexus-key": nexusKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ watchlist: updated })
+      });
+    } catch {}
+  };
+
+  const addToWatchlist = async () => {
+    const { name, ticker, type } = watchInput;
+    if (!name && !ticker) return;
+    const item = { id: Date.now(), name: name || ticker, ticker: ticker || null, type, addedAt: new Date().toISOString() };
+    const updated = type === "stock"
+      ? { ...watchlist, stocks: [...(watchlist.stocks || []), item] }
+      : { ...watchlist, individuals: [...(watchlist.individuals || []), item] };
+    setWatchlist(updated);
+    setWatchInput({ name: "", ticker: "", type: "individual" });
+    await saveWatchlist(updated);
+  };
+
+  const removeFromWatchlist = async (id, type) => {
+    const updated = type === "stock"
+      ? { ...watchlist, stocks: (watchlist.stocks || []).filter(s => s.id !== id) }
+      : { ...watchlist, individuals: (watchlist.individuals || []).filter(i => i.id !== id) };
+    setWatchlist(updated);
+    await saveWatchlist(updated);
+  };
+
+  const scanWatchlist = async () => {
+    setLoadingWatch(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/watchlist/scan", { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setWatchResults(data.results);
+    } catch {}
+    setLoadingWatch(false);
+  };
+
   // ── Questrade API helpers ──────────────────────────────────
   const nexusUrl = import.meta.env.VITE_NEXUS_URL || "https://nexus-dashboard-blue.vercel.app";
   const nexusKey = import.meta.env.VITE_NEXUS_API_KEY || "nexus-axl-agent-key";
@@ -607,7 +660,7 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   // Auto-connect Questrade on load
-  useEffect(() => { connectQuestrade(); }, []);
+  useEffect(() => { connectQuestrade(); loadWatchlist(); }, []);
 
   const generatePowerIntel = async (force = false) => {
     if (loadingPower) return;
@@ -1664,6 +1717,86 @@ export default function NexusDashboard({ user, onLogout }) {
         </div>
 
         {/* RIGHT PANEL */}
+            {/* WATCHLIST TAB */}
+            {tab === "watch" && (
+              <div>
+                {/* Header */}
+                <div style={{ background: "linear-gradient(135deg,rgba(0,212,255,0.1),rgba(0,212,255,0.03))", border: "1px solid rgba(0,212,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00d4ff", letterSpacing: 3, marginBottom: 4 }}>👁 INTELLIGENCE WATCHLIST</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Individuals and stocks — always monitored, injected into every scan</div>
+                  </div>
+                  <button onClick={scanWatchlist} disabled={loadingWatch} style={{ background: loadingWatch ? "#1a2d47" : "linear-gradient(135deg,#0a3d5c,#00d4ff)", color: loadingWatch ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 18px", fontSize: 12, fontWeight: 700, letterSpacing: 2, cursor: loadingWatch ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                    {loadingWatch ? "SCANNING..." : "👁 SCAN NOW"}
+                  </button>
+                </div>
+
+                {/* Add item form */}
+                <div style={{ background: "#080f1a", border: "1px solid #1a3a5c", borderRadius: 4, padding: 16, marginBottom: 16 }}>
+                  <div style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d8c", letterSpacing: 2, marginBottom: 12 }}>ADD TO WATCHLIST</div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                    <select value={watchInput.type} onChange={e => setWatchInput(p => ({...p, type: e.target.value}))} style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "6px 10px", fontSize: 11, fontFamily: "monospace", cursor: "pointer" }}>
+                      <option value="individual">Individual</option>
+                      <option value="stock">Stock</option>
+                    </select>
+                    <input value={watchInput.name} onChange={e => setWatchInput(p => ({...p, name: e.target.value}))} placeholder={watchInput.type === "stock" ? "Company name" : "Person name"} style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "6px 10px", fontSize: 11, fontFamily: "monospace", flex: 1, minWidth: 140, outline: "none" }} />
+                    {watchInput.type === "stock" && <input value={watchInput.ticker} onChange={e => setWatchInput(p => ({...p, ticker: e.target.value.toUpperCase()}))} placeholder="TICKER" style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "6px 10px", fontSize: 11, fontFamily: "monospace", width: 90, outline: "none" }} />}
+                    <button onClick={addToWatchlist} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.4)", color: "#00d4ff", borderRadius: 3, padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>+ ADD</button>
+                  </div>
+                </div>
+
+                {/* Watchlist display */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+                  {/* Individuals */}
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 3, marginBottom: 10 }}>👤 INDIVIDUALS ({(watchlist.individuals||[]).length})</div>
+                    {(watchlist.individuals || []).length === 0 && <div style={{ fontSize: 11, color: "#4a6d8c", fontStyle: "italic" }}>No individuals added yet</div>}
+                    {(watchlist.individuals || []).map(item => {
+                      const result = watchResults.find(r => r.id === item.id);
+                      return (
+                        <div key={item.id} style={{ background: "#080f1a", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 4, padding: 12, marginBottom: 8 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: result?.articles?.length ? 8 : 0 }}>
+                            <div>
+                              <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 500, color: "#e8f4ff" }}>{item.name}</span>
+                              {result && <span style={{ marginLeft: 8, fontSize: 9, fontFamily: "monospace", color: result.signal === "ACTIVE" ? "#ff2d55" : result.signal === "MENTION" ? "#ffb800" : "#4a6d8c", padding: "1px 6px", background: result.signal === "ACTIVE" ? "rgba(255,45,85,0.1)" : "transparent", borderRadius: 2 }}>{result.signal}</span>}
+                            </div>
+                            <button onClick={() => removeFromWatchlist(item.id, "individual")} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 14, padding: "0 4px" }}>×</button>
+                          </div>
+                          {result?.articles?.map((a, i) => <div key={i} style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.4, marginBottom: 3, paddingLeft: 8, borderLeft: "2px solid rgba(178,79,255,0.3)" }}>{a}</div>)}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Stocks */}
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 10 }}>📈 STOCKS ({(watchlist.stocks||[]).length})</div>
+                    {(watchlist.stocks || []).length === 0 && <div style={{ fontSize: 11, color: "#4a6d8c", fontStyle: "italic" }}>No stocks added yet</div>}
+                    {(watchlist.stocks || []).map(item => {
+                      const result = watchResults.find(r => r.id === item.id);
+                      return (
+                        <div key={item.id} style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 12, marginBottom: 8 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: result?.articles?.length ? 8 : 0 }}>
+                            <div>
+                              {item.ticker && <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#39ff14", marginRight: 8 }}>{item.ticker}</span>}
+                              <span style={{ fontSize: 12, color: "#8aabb8" }}>{item.name}</span>
+                              {result && <span style={{ marginLeft: 8, fontSize: 9, fontFamily: "monospace", color: result.signal === "ACTIVE" ? "#ff2d55" : result.signal === "MENTION" ? "#ffb800" : "#4a6d8c", padding: "1px 6px", background: result.signal === "ACTIVE" ? "rgba(255,45,85,0.1)" : "transparent", borderRadius: 2 }}>{result.signal}</span>}
+                            </div>
+                            <button onClick={() => removeFromWatchlist(item.id, "stock")} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 14, padding: "0 4px" }}>×</button>
+                          </div>
+                          {result?.articles?.map((a, i) => <div key={i} style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.4, marginBottom: 3, paddingLeft: 8, borderLeft: "2px solid rgba(57,255,20,0.3)" }}>{a}</div>)}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div style={{ padding: "10px 14px", background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 3, fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
+                  <span style={{ color: "#00d4ff" }}>👁 HOW IT WORKS:</span> Every item here is automatically injected into Power Intel and Intel Picks scans. Watched individuals trigger psychographic analysis. Watched stocks get priority signal detection. Click Scan Now for live news feed per item.
+                </div>
+              </div>
+            )}
+
         <div style={S.panel}>
           <div style={S.panelHeader}>⬡ AI INTELLIGENCE BRIEF</div>
           <div style={S.panelBody}>
