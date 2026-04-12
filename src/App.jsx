@@ -236,6 +236,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [sourcesData, setSourcesData] = useState(null);
   const [watchlist, setWatchlist] = useState({ individuals: [], stocks: [] });
   const [trades, setTrades] = useState(null);
+  const [trackedPicks, setTrackedPicks] = useState([]);
+  const [showTracker, setShowTracker] = useState(false);
+  const [trackerInput, setTrackerInput] = useState({});
   const [loadingTrades, setLoadingTrades] = useState(false);
   const [tradesError, setTradesError] = useState(null);
   const [pipelineStatus, setPipelineStatus] = useState(null);
@@ -555,6 +558,61 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingTrades(false);
   };
 
+  // ── Pick Tracker functions ───────────────────────────────────
+  const loadTrackedPicks = async () => {
+    try {
+      const res = await fetch(nexusUrl + "/api/watchlist", { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.watchlist?.picks) setTrackedPicks(data.watchlist.picks);
+    } catch {}
+    // Also check localStorage as fallback
+    try {
+      const local = localStorage.getItem("nexus_tracked_picks");
+      if (local) setTrackedPicks(JSON.parse(local));
+    } catch {}
+  };
+
+  const saveTrackedPicks = async (picks) => {
+    try { localStorage.setItem("nexus_tracked_picks", JSON.stringify(picks)); } catch {}
+  };
+
+  const logTrade = (trade) => {
+    const entry = {
+      id: Date.now(),
+      ticker: trade.ticker,
+      direction: trade.direction,
+      strike: trade.strike,
+      bid: trade.bid,
+      ask: trade.ask,
+      mid: trade.mid,
+      expiry: trade.expiry,
+      thesis: trade.thesis,
+      probability: trade.probability,
+      targetPct: trade.targetPct,
+      stopPct: trade.stopPct,
+      entryDate: new Date().toISOString(),
+      entryPrice: trade.mid || null,
+      exitPrice: null,
+      exitDate: null,
+      outcome: "OPEN",
+      pnlPct: null,
+      notes: "",
+    };
+    const updated = [entry, ...trackedPicks];
+    setTrackedPicks(updated);
+    saveTrackedPicks(updated);
+  };
+
+  const updatePickOutcome = (id, exitPrice, outcome, notes) => {
+    const updated = trackedPicks.map(p => {
+      if (p.id !== id) return p;
+      const pnlPct = p.entryPrice && exitPrice ? Math.round(((exitPrice - p.entryPrice) / p.entryPrice) * 100) : null;
+      return { ...p, exitPrice, exitDate: new Date().toISOString(), outcome, pnlPct, notes };
+    });
+    setTrackedPicks(updated);
+    saveTrackedPicks(updated);
+  };
+
   const loadPipelineStatus = async () => {
     try {
       const res = await fetch(nexusUrl + "/api/pipeline-status", { headers: { "x-nexus-key": nexusKey } });
@@ -717,7 +775,7 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   // Auto-connect Questrade on load
-  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); }, []);
+  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); loadTrackedPicks(); }, []);
 
   const generatePowerIntel = async (force = false) => {
     if (loadingPower) return;
@@ -1880,8 +1938,88 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontSize: 10, color: "#4a6d8c", textAlign: "center", padding: "8px", lineHeight: 1.6 }}>
                       {trades.disclaimer} | Generated: {new Date(trades.timestamp).toLocaleString()}
                     </div>
+
+                    {/* Log all trades button */}
+                    <div style={{ textAlign: "center", marginTop: 8 }}>
+                      <button onClick={() => { trades.trades.forEach(t => logTrade(t)); setShowTracker(true); }} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.4)", color: "#ffb800", borderRadius: 3, padding: "8px 20px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>
+                        📋 LOG ALL 3 TRADES TO TRACKER
+                      </button>
+                    </div>
                   </div>
                 )}
+
+                {/* PICK TRACKER */}
+                <div style={{ marginTop: 24 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, cursor: "pointer" }} onClick={() => setShowTracker(!showTracker)}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 3 }}>📋 PICK TRACKER ({trackedPicks.length} logged)</div>
+                    <div style={{ fontSize: 11, color: "#4a6d8c" }}>
+                      {trackedPicks.filter(p => p.outcome === "WIN").length}W / {trackedPicks.filter(p => p.outcome === "LOSS").length}L / {trackedPicks.filter(p => p.outcome === "OPEN").length} OPEN
+                      {trackedPicks.filter(p => p.outcome !== "OPEN").length > 0 && (
+                        <span style={{ marginLeft: 8, color: "#ffd700" }}>
+                          {Math.round(trackedPicks.filter(p => p.outcome === "WIN").length / trackedPicks.filter(p => p.outcome !== "OPEN").length * 100)}% win rate
+                        </span>
+                      )}
+                      <span style={{ marginLeft: 8 }}>{showTracker ? "▲" : "▼"}</span>
+                    </div>
+                  </div>
+
+                  {showTracker && (
+                    <div>
+                      {trackedPicks.length === 0 && (
+                        <div style={{ fontSize: 11, color: "#4a6d8c", fontStyle: "italic", padding: 12 }}>No picks logged yet. Run the pipeline and click LOG ALL 3 TRADES.</div>
+                      )}
+                      {trackedPicks.map((pick) => (
+                        <div key={pick.id} style={{ background: "#080f1a", border: `1px solid ${pick.outcome === "WIN" ? "rgba(57,255,20,0.3)" : pick.outcome === "LOSS" ? "rgba(255,45,85,0.3)" : "rgba(74,109,140,0.3)"}`, borderRadius: 4, padding: 12, marginBottom: 8 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 15, fontWeight: 700, color: pick.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{pick.ticker}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 10, color: pick.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{pick.direction}</span>
+                              {pick.strike && <span style={{ fontSize: 10, color: "#8aabb8", fontFamily: "monospace" }}>${pick.strike} strike</span>}
+                              <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>exp {pick.expiry}</span>
+                              <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 2, background: pick.outcome === "WIN" ? "rgba(57,255,20,0.1)" : pick.outcome === "LOSS" ? "rgba(255,45,85,0.1)" : "rgba(255,184,0,0.1)", color: pick.outcome === "WIN" ? "#39ff14" : pick.outcome === "LOSS" ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>{pick.outcome}</span>
+                              {pick.pnlPct !== null && <span style={{ fontSize: 11, fontWeight: 700, color: pick.pnlPct >= 0 ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{pick.pnlPct >= 0 ? "+" : ""}{pick.pnlPct}%</span>}
+                            </div>
+                            <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{new Date(pick.entryDate).toLocaleDateString()}</div>
+                          </div>
+                          {pick.thesis && <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 6, lineHeight: 1.5 }}>{pick.thesis.slice(0, 120)}{pick.thesis.length > 120 ? "..." : ""}</div>}
+                          {pick.entryPrice && <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 4, fontFamily: "monospace" }}>Entry: ${pick.entryPrice} · Target: {pick.targetPct} · Stop: {pick.stopPct}</div>}
+                          {pick.outcome === "OPEN" && (
+                            <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                              <input placeholder="Exit price" style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "4px 8px", fontSize: 11, fontFamily: "monospace", width: 90, outline: "none" }}
+                                onChange={e => setTrackerInput(p => ({...p, [pick.id]: {...p[pick.id], exitPrice: parseFloat(e.target.value)}}))} />
+                              <input placeholder="Notes" style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "4px 8px", fontSize: 11, fontFamily: "monospace", flex: 1, minWidth: 100, outline: "none" }}
+                                onChange={e => setTrackerInput(p => ({...p, [pick.id]: {...p[pick.id], notes: e.target.value}}))} />
+                              <button onClick={() => updatePickOutcome(pick.id, trackerInput[pick.id]?.exitPrice, "WIN", trackerInput[pick.id]?.notes || "")} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "4px 12px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>WIN</button>
+                              <button onClick={() => updatePickOutcome(pick.id, trackerInput[pick.id]?.exitPrice, "LOSS", trackerInput[pick.id]?.notes || "")} style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", color: "#ff2d55", borderRadius: 3, padding: "4px 12px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>LOSS</button>
+                              <button onClick={() => updatePickOutcome(pick.id, trackerInput[pick.id]?.exitPrice, "SCRATCH", trackerInput[pick.id]?.notes || "")} style={{ background: "rgba(74,109,140,0.1)", border: "1px solid rgba(74,109,140,0.3)", color: "#8aabb8", borderRadius: 3, padding: "4px 12px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>SCRATCH</button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {trackedPicks.length > 0 && (
+                        <div style={{ marginTop: 12, padding: "10px 14px", background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 4 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 2, marginBottom: 8 }}>PERFORMANCE SUMMARY</div>
+                          <div style={{ display: "flex", gap: 20, flexWrap: "wrap", fontSize: 12, fontFamily: "monospace" }}>
+                            <span>Total: <span style={{ color: "#e8f4ff" }}>{trackedPicks.length}</span></span>
+                            <span style={{ color: "#39ff14" }}>Wins: {trackedPicks.filter(p => p.outcome === "WIN").length}</span>
+                            <span style={{ color: "#ff2d55" }}>Losses: {trackedPicks.filter(p => p.outcome === "LOSS").length}</span>
+                            <span style={{ color: "#ffb800" }}>Open: {trackedPicks.filter(p => p.outcome === "OPEN").length}</span>
+                            {trackedPicks.filter(p => p.outcome !== "OPEN").length > 0 && (
+                              <span style={{ color: "#ffd700", fontWeight: 700 }}>
+                                Win Rate: {Math.round(trackedPicks.filter(p => p.outcome === "WIN").length / trackedPicks.filter(p => p.outcome !== "OPEN").length * 100)}%
+                              </span>
+                            )}
+                            {trackedPicks.filter(p => p.pnlPct !== null).length > 0 && (
+                              <span style={{ color: "#ffd700" }}>
+                                Avg P&L: {Math.round(trackedPicks.filter(p => p.pnlPct !== null).reduce((s, p) => s + p.pnlPct, 0) / trackedPicks.filter(p => p.pnlPct !== null).length)}%
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
