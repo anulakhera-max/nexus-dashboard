@@ -1,6 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-function bc(col, alpha) { return "1px solid " + col + (alpha || ""); }
-function bg(col, alpha) { return col + (alpha || ""); }
 
 const API_URL = "https://api.anthropic.com/v1/messages";
 const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
@@ -24,7 +22,7 @@ const catColors = { weather: "#00d4ff", conflict: "#ff2d55", diplomatic: "#ffb80
 const catLabels = { weather: "🌊 WEATHER", conflict: "⚔ CONFLICT", diplomatic: "🏛 DIPLOMATIC", economic: "💹 ECONOMIC", tech: "⚡ TECH", health: "🧬 HEALTH" };
 const sevColors = { critical: "#ff2d55", high: "#ffb800", medium: "#00d4ff", low: "#39ff14" };
 
-// v2 // Estimate cost: ~$3 per 1M input tokens, ~$15 per 1M output tokens (Sonnet)
+// Estimate cost: ~$3 per 1M input tokens, ~$15 per 1M output tokens (Sonnet)
 function estimateCost(promptLen, maxTokens) {
   const inputTokens = Math.ceil(promptLen / 4);
   const outputTokens = maxTokens;
@@ -224,74 +222,6 @@ function OptionsPickCard({ pick, rank }) {
   );
 }
 
-function IntelPickCard({ pick, i, qtConnected, qtQuotes, qtChains, loadingChain, fetchChain }) {
-  const isCall = pick.direction === "CALL";
-  const col = isCall ? "#39ff14" : "#ff2d55";
-  const urgencyCol = pick.urgency === "THIS WEEK" ? "#ff2d55" : pick.urgency === "NEXT WEEK" ? "#ffb800" : "#00d4ff";
-  return (
-                        <div key={i} style={{ background: "#080f1a", border: bc(col, "33"), borderLeft: "4px solid " + col, borderRadius: 4, padding: 16, marginBottom: 12, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                          {/* Rank */}
-                          <div style={{ width: 32, height: 32, borderRadius: "50%", background: bg(col, "22"), border: bc(col, "55"), display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: col, flexShrink: 0 }}>
-                            {pick.rank}
-                          </div>
-                          {/* Ticker + name */}
-                          <div style={{ minWidth: 120 }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 900, color: "#e8f4ff", lineHeight: 1 }}>{pick.ticker}</div>
-                            <div style={{ fontSize: 11, color: "#4a6d8c", marginTop: 2 }}>{pick.name}</div>
-                            <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{pick.exchange}</div>
-                          </div>
-                          {/* Live price from Questrade */}
-                          {qtQuotes[pick.ticker] && (
-                            <div style={{ textAlign: "center", minWidth: 80 }}>
-                              <div style={{ fontSize: 9, color: "#39ff14", fontFamily: "monospace", marginBottom: 3 }}>LIVE PRICE</div>
-                              <div style={{ fontSize: 16, fontWeight: 900, color: "#39ff14", fontFamily: "monospace" }}>${qtQuotes[pick.ticker].lastPrice?.toFixed(2)}</div>
-                              <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>bid ${qtQuotes[pick.ticker].bidPrice?.toFixed(2)} · ask ${qtQuotes[pick.ticker].askPrice?.toFixed(2)}</div>
-                            </div>
-                          )}
-                          {/* Load chain button if not loaded */}
-                          {qtConnected && !qtChains[pick.ticker] && !loadingChain[pick.ticker] && (
-                            <button onClick={() => fetchChain(pick.ticker, pick.direction)} style={{ fontSize: 9, fontFamily: "monospace", color: "#00d4ff", background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.3)", borderRadius: 3, padding: "4px 8px", cursor: "pointer" }}>
-                              ⛓ CHAIN
-                            </button>
-                          )}
-                          {loadingChain[pick.ticker] && (
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>loading...</div>
-                          )}
-                          {/* Direction */}
-                          <div style={{ textAlign: "center", minWidth: 70 }}>
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>DIRECTION</div>
-                            <div style={{ fontSize: 18, fontWeight: 900, color: col, fontFamily: "monospace" }}>{pick.direction}</div>
-                          </div>
-                          {/* Expiry */}
-                          <div style={{ textAlign: "center", minWidth: 100 }}>
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>EXPIRY</div>
-                            <div style={{ fontSize: 13, fontWeight: 700, color: "#ffb800", fontFamily: "monospace" }}>{pick.expiry}</div>
-                          </div>
-                          {/* Move */}
-                          <div style={{ textAlign: "center", minWidth: 70 }}>
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>EST. MOVE</div>
-                            <div style={{ fontSize: 18, fontWeight: 900, color: col, fontFamily: "monospace" }}>{pick.estimatedMove}</div>
-                          </div>
-                          {/* Urgency */}
-                          <div style={{ textAlign: "center", minWidth: 90 }}>
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>URGENCY</div>
-                            <div style={{ fontSize: 10, fontWeight: 700, color: urgencyCol, fontFamily: "monospace", padding: "2px 6px", background: bg(urgencyCol, "11"), border: bc(urgencyCol, "44"), borderRadius: 2 }}>{pick.urgency}</div>
-                          </div>
-                          {/* Confidence */}
-                          <div style={{ textAlign: "center", minWidth: 80 }}>
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>CONFIDENCE</div>
-                            <div style={{ fontSize: 10, fontWeight: 700, color: pick.confidence === "HIGH" ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>{pick.confidence}</div>
-                          </div>
-                          {/* Catalyst + source */}
-                          <div style={{ flex: 1, minWidth: 200 }}>
-                            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>CATALYST</div>
-                            <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.5, marginBottom: 4 }}>{pick.catalyst}</div>
-                            <div style={{ fontSize: 10, color: "#b24fff", fontFamily: "monospace" }}>SOURCE: {pick.source}</div>
-                          </div>
-                        </div>
-  );
-}
-
 export default function NexusDashboard({ user, onLogout }) {
   const [events, setEvents] = useState(seedEvents);
   const [filter, setFilter] = useState("all");
@@ -360,10 +290,7 @@ export default function NexusDashboard({ user, onLogout }) {
   useEffect(() => {
     const check = () => {
       const now = new Date();
-      const savedTime = loadOptionsTime();
-      if (now.getHours() >= 8 && (!savedTime || savedTime.toDateString() !== now.toDateString())) {
-        if (tab === "options") generateOptionsPicks();
-      }
+
     };
     check();
     const iv = setInterval(check, 60000);
@@ -562,7 +489,6 @@ export default function NexusDashboard({ user, onLogout }) {
     if (sourcesLoaded && !force) return;
     if (sourcesData) return; setLoadingTab(true);
     try {
-      // Always force on first load to avoid stale empty cache
       const res = await fetch(nexusUrl + "/api/sources?force=true", {
         headers: { "x-nexus-key": nexusKey }
       });
@@ -688,21 +614,16 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingPower(true); setPowerError(null);
     try {
       if (nexusUrl && nexusKey) {
-        const qs = (force ? "?force=true&" : "?") + "x-nexus-key=" + nexusKey;
-        // Call both endpoints in parallel with 30s timeout
-        const fetchWithTimeout = (url) => {
-          const ctrl = new AbortController();
-          setTimeout(() => ctrl.abort(), 90000); // 90s — Render cold start can take 50s
-          return fetch(url, { signal: ctrl.signal });
-        };
+        const qs = force ? "?force=true" : "";
+        // Call both endpoints in parallel — each under 10s
         const [resA, resB] = await Promise.all([
-          fetchWithTimeout(nexusUrl + "/api/power-intel-a" + qs),
-          fetchWithTimeout(nexusUrl + "/api/power-intel-b" + qs),
+          fetch(`${nexusUrl}/api/power-intel-a${qs}`, { headers: { "x-nexus-key": nexusKey } }),
+          fetch(`${nexusUrl}/api/power-intel-b${qs}`, { headers: { "x-nexus-key": nexusKey } }),
         ]);
         const [textA, textB] = await Promise.all([resA.text(), resB.text()]);
         let dataA, dataB;
-        try { dataA = JSON.parse(textA); } catch { throw new Error("Power Intel A timed out — click Analyze Now again (cache warms on 2nd try)"); }
-        try { dataB = JSON.parse(textB); } catch { throw new Error("Power Intel B timed out — click Analyze Now again"); }
+        try { dataA = JSON.parse(textA); } catch { throw new Error("Power Intel A error — check Vercel logs"); }
+        try { dataB = JSON.parse(textB); } catch { throw new Error("Power Intel B error — check Vercel logs"); }
         if (!dataA.success) throw new Error(dataA.error || "Power Intel A failed");
         if (!dataB.success) throw new Error(dataB.error || "Power Intel B failed");
         // Merge both results
@@ -915,9 +836,7 @@ export default function NexusDashboard({ user, onLogout }) {
             {[["events","EVENTS FEED"],["predictions","PRICE PREDICTIONS"],["supply","SUPPLY CHAIN"],["sources","SOURCE MAP"]].map(([t,l]) => (
               <button key={t} style={S.tab(tab === t, false)} onClick={() => handleTab(t)}>{l}</button>
             ))}
-            <button style={{ ...S.tab(tab === "options", true), animation: tab !== "options" ? "goldGlow 3s infinite" : "none" }} onClick={() => handleTab("options")}>
-              ★ OPTIONS PICKS
-            </button>
+
             <button style={{ ...S.tab(tab === "intel", true), color: tab === "intel" ? "#b24fff" : "#4a6d8c", borderBottom: tab === "intel" ? "2px solid #b24fff" : "2px solid transparent", animation: tab !== "intel" ? "none" : "none" }} onClick={() => handleTab("intel")}>
               ⬡ INTEL PICKS
             </button>
@@ -1038,69 +957,7 @@ export default function NexusDashboard({ user, onLogout }) {
               </>
             )}
 
-            {/* OPTIONS PICKS */}
-            {tab === "options" && (
-              <div>
-                {/* Header */}
-                <div style={{ background: "linear-gradient(135deg,rgba(184,134,11,0.15),rgba(255,215,0,0.04))", border: "1px solid rgba(255,215,0,0.25)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-                  <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffd700", letterSpacing: 3, marginBottom: 4 }}>★ DAILY OPTIONS INTELLIGENCE — QUESTRADE</div>
-                    <div style={{ fontSize: 11, color: "#8aabb8" }}>
-                      Aggressive event-driven picks · <span style={{ color: "#ffb800" }}>NYSE · NASDAQ · TSX</span> · Expires <span style={{ color: "#ffd700" }}>{fridays.first}</span> or <span style={{ color: "#ff6b35" }}>{fridays.second}</span> at 3:30 PM ET
-                    </div>
-                    {lastGenerated && <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginTop: 4 }}>Generated: {lastGenerated.toLocaleString()} · Auto-refreshes 8:00 AM daily</div>}
-                  </div>
-                  <button style={S.btnGold(loadingOptions)} onClick={generateOptionsPicks} disabled={loadingOptions}>
-                    {loadingOptions ? "GENERATING..." : optionsPicks ? "⟳ REFRESH PICKS" : "★ GENERATE PICKS"}
-                  </button>
-                </div>
-
-                {/* Expiry filter */}
-                {optionsPicks && !loadingOptions && (
-                  <div style={{ display: "flex", gap: 8, marginBottom: 14, alignItems: "center" }}>
-                    {[["both","Both Fridays"],["this",`This Fri (${fridays.first})`],["next",`Next Fri (${fridays.second})`]].map(([val, label]) => (
-                      <button key={val} onClick={() => setSelectedExpiry(val)} style={{ fontSize: 10, padding: "5px 12px", background: selectedExpiry === val ? "rgba(255,215,0,0.1)" : "#0d1829", border: `1px solid ${selectedExpiry === val ? "#ffd700" : "#1a2d47"}`, borderRadius: 2, color: selectedExpiry === val ? "#ffd700" : "#4a6d8c", cursor: "pointer", fontFamily: "monospace" }}>
-                        {label}
-                      </button>
-                    ))}
-                    <div style={{ marginLeft: "auto", fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{filteredPicks?.length || 0} picks</div>
-                  </div>
-                )}
-
-                {loadingOptions && <Spinner label="GENERATING OPTIONS INTELLIGENCE..." />}
-
-                {optionsError && !loadingOptions && (
-                  <div style={{ padding: 14, background: "rgba(255,45,85,0.08)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#ff2d55", marginBottom: 12 }}>⚠ {optionsError}</div>
-                )}
-
-                {!optionsPicks && !loadingOptions && !optionsError && (
-                  <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16, animation: "goldGlow 2s infinite" }}>★</div>
-                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ffd700", marginBottom: 8, letterSpacing: 3 }}>DAILY OPTIONS PICKS</div>
-                    <div style={{ fontSize: 12, color: "#4a6d8c", lineHeight: 1.8, maxWidth: 420, margin: "0 auto 24px" }}>
-                      5 aggressive, event-driven options recommendations for Questrade — tied to active global events tracked by NEXUS. Picks auto-generate every morning at 8:00 AM.
-                    </div>
-                    <button style={{ ...S.btnGold(false), fontSize: 14, padding: "12px 32px" }} onClick={generateOptionsPicks}>
-                      ★ GENERATE TODAY'S PICKS
-                    </button>
-                  </div>
-                )}
-
-                {filteredPicks && !loadingOptions && filteredPicks.map((pick, i) => (
-                  <OptionsPickCard key={i} pick={pick} rank={pick.rank || i + 1} />
-                ))}
-
-                {optionsPicks && !loadingOptions && (
-                  <div style={{ padding: "12px 16px", background: "rgba(255,184,0,0.04)", border: "1px solid rgba(255,184,0,0.15)", borderRadius: 3, marginTop: 6 }}>
-                    <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
-                      <span style={{ color: "#ffb800" }}>⚠ IMPORTANT:</span> These AI-generated picks are for educational and informational purposes only and do not constitute financial advice. Options trading involves substantial risk including total loss of premium paid. Always verify strikes, premiums and liquidity directly on Questrade before placing any trade. Consult a licensed financial advisor before investing.
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* INTEL PICKS TAB */}
+            
             {tab === "intel" && (
               <div>
                 {/* Header */}
@@ -1169,7 +1026,7 @@ export default function NexusDashboard({ user, onLogout }) {
                   </button>
                 </div>
 
-                {loadingPower && <div style={{ textAlign: "center", padding: 40, color: "#ff6b35", fontFamily: "monospace", fontSize: 12 }}>◈ Running psychographic analysis on world leaders...<br/>Building scenario engine...<br/>Mapping power network...<br/><br/>First load takes 30-60 seconds (server warming up).<br/>Subsequent loads are instant from cache.</div>}
+                {loadingPower && <div style={{ textAlign: "center", padding: 40, color: "#ff6b35", fontFamily: "monospace", fontSize: 12 }}>◈ Running psychographic analysis on world leaders...<br/>Building scenario engine...<br/>Mapping power network...<br/><br/>This takes 20-30 seconds.</div>}
 
                 {powerError && !loadingPower && (
                   <div style={{ padding: 14, background: "rgba(255,107,53,0.08)", border: "1px solid rgba(255,107,53,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#ff6b35" }}>⚠ {powerError}</div>
