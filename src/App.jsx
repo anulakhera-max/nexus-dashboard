@@ -245,6 +245,7 @@ export default function NexusDashboard({ user, onLogout }) {
   const [pipelineStatus, setPipelineStatus] = useState(null);
   const [earnings, setEarnings] = useState([]);
   const [unusualFlow, setUnusualFlow] = useState(null);
+  const [movers, setMovers] = useState(null);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -623,6 +624,14 @@ export default function NexusDashboard({ user, onLogout }) {
     saveTrackedPicks(updated);
   };
 
+  const loadMovers = async () => {
+    try {
+      const res = await fetch(nexusUrl + "/api/movers", { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setMovers(data);
+    } catch {}
+  };
+
   const loadUnusualFlow = async (force = false) => {
     setLoadingFlow(true); setFlowError(null);
     try {
@@ -805,7 +814,7 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   // Auto-connect Questrade on load
-  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); loadTrackerData(); loadEarnings(); }, []);
+  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); loadTrackerData(); loadEarnings(); loadMovers(); }, []);
 
   const generatePowerIntel = async (force = false) => {
     if (loadingPower) return;
@@ -1052,6 +1061,23 @@ export default function NexusDashboard({ user, onLogout }) {
             </button>
           </div>
 
+          {/* Daily movers strip */}
+          {movers && (movers.gainers?.length > 0 || movers.losers?.length > 0) && (
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap", padding: "4px 0 4px", alignItems: "center", borderBottom: "1px solid rgba(26,45,71,0.6)", marginBottom: 4 }}>
+              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", letterSpacing: 2, flexShrink: 0 }}>TOP GAIN:</span>
+              {(movers.gainers || []).slice(0, 5).map(g => (
+                <span key={g.ticker} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: "rgba(57,255,20,0.1)", color: "#39ff14", border: "1px solid rgba(57,255,20,0.25)" }}>
+                  {g.ticker} +{g.changePct?.toFixed(1)}% {g.volRatio > 2 ? g.volRatio + "x vol" : ""}
+                </span>
+              ))}
+              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", letterSpacing: 2, flexShrink: 0, marginLeft: 8 }}>TOP LOSS:</span>
+              {(movers.losers || []).slice(0, 5).map(l => (
+                <span key={l.ticker} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55", border: "1px solid rgba(255,45,85,0.25)" }}>
+                  {l.ticker} {l.changePct?.toFixed(1)}%
+                </span>
+              ))}
+            </div>
+          )}
           {/* Earnings strip */}
           {earnings.filter(e => e.daysOut >= 0 && e.daysOut <= 30).length > 0 && (
             <div style={{ display: "flex", gap: 5, flexWrap: "wrap", padding: "4px 0 6px", alignItems: "center" }}>
@@ -1069,6 +1095,48 @@ export default function NexusDashboard({ user, onLogout }) {
             {/* EVENTS */}
             {tab === "events" && (
               <>
+                {/* Daily Movers Analysis */}
+                {movers && (movers.gainers?.length > 0 || movers.losers?.length > 0) && (
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d8c", letterSpacing: 3, marginBottom: 10 }}>TODAY'S MARKET MOVERS — VOLUME ANALYSIS</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                      {/* Gainers */}
+                      <div>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", letterSpacing: 2, marginBottom: 6 }}>TOP GAINERS</div>
+                        {(movers.gainers || []).map((g, i) => (
+                          <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.15)", borderRadius: 3, padding: "8px 10px", marginBottom: 6 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14" }}>{g.ticker}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 12, color: "#39ff14" }}>+{g.changePct?.toFixed(1)}%</span>
+                            </div>
+                            <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 2 }}>{g.name}</div>
+                            <div style={{ display: "flex", gap: 10, marginTop: 4, fontSize: 9, fontFamily: "monospace" }}>
+                              <span style={{ color: g.volRatio > 3 ? "#ffd700" : "#4a6d8c" }}>Vol: {g.volRatio}x avg {g.volRatio > 3 ? "⚡" : ""}</span>
+                              {g.sector && <span style={{ color: "#4a6d8c" }}>{g.sector}</span>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Losers */}
+                      <div>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", letterSpacing: 2, marginBottom: 6 }}>TOP LOSERS</div>
+                        {(movers.losers || []).map((l, i) => (
+                          <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.15)", borderRadius: 3, padding: "8px 10px", marginBottom: 6 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55" }}>{l.ticker}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 12, color: "#ff2d55" }}>{l.changePct?.toFixed(1)}%</span>
+                            </div>
+                            <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 2 }}>{l.name}</div>
+                            <div style={{ display: "flex", gap: 10, marginTop: 4, fontSize: 9, fontFamily: "monospace" }}>
+                              <span style={{ color: l.volRatio > 3 ? "#ffd700" : "#4a6d8c" }}>Vol: {l.volRatio}x avg {l.volRatio > 3 ? "⚡" : ""}</span>
+                              {l.sector && <span style={{ color: "#4a6d8c" }}>{l.sector}</span>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {criticals > 0 && (
                   <div style={{ padding: "7px 12px", background: "rgba(255,45,85,0.08)", border: "1px solid rgba(255,45,85,0.25)", borderRadius: 3, fontFamily: "monospace", fontSize: 10, color: "#ff2d55", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#ff2d55", display: "inline-block", animation: "pulseDot 1s infinite", flexShrink: 0 }} />
