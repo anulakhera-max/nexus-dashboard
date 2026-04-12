@@ -242,6 +242,7 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingTrades, setLoadingTrades] = useState(false);
   const [tradesError, setTradesError] = useState(null);
   const [pipelineStatus, setPipelineStatus] = useState(null);
+  const [earnings, setEarnings] = useState([]);
   const [pipelineRunning, setPipelineRunning] = useState(false);
   const [pipelineStage, setPipelineStage] = useState("");
   const [watchResults, setWatchResults] = useState([]);
@@ -639,6 +640,14 @@ export default function NexusDashboard({ user, onLogout }) {
     saveTrackedPicks(updated);
   };
 
+  const loadEarnings = async () => {
+    try {
+      const res = await fetch(nexusUrl + "/api/earnings", { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setEarnings(data.earnings || []);
+    } catch {}
+  };
+
   const loadPipelineStatus = async () => {
     try {
       const res = await fetch(nexusUrl + "/api/pipeline-status", { headers: { "x-nexus-key": nexusKey } });
@@ -801,7 +810,7 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   // Auto-connect Questrade on load
-  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); loadTrackedPicks(); }, []);
+  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); loadTrackedPicks(); loadEarnings(); }, []);
 
   const generatePowerIntel = async (force = false) => {
     if (loadingPower) return;
