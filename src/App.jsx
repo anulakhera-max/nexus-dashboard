@@ -648,6 +648,7 @@ export default function NexusDashboard({ user, onLogout }) {
     } catch {}
   };
 
+  
   const loadPipelineStatus = async () => {
     try {
       const res = await fetch(nexusUrl + "/api/pipeline-status", { headers: { "x-nexus-key": nexusKey } });
@@ -1053,6 +1054,18 @@ export default function NexusDashboard({ user, onLogout }) {
               TRADES
             </button>
           </div>
+
+          {/* Earnings strip */}
+          {earnings.filter(e => e.daysOut >= 0 && e.daysOut <= 30).length > 0 && (
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap", padding: "4px 0 6px", alignItems: "center" }}>
+              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800", letterSpacing: 2, flexShrink: 0 }}>EARNINGS:</span>
+              {earnings.filter(e => e.daysOut >= 0 && e.daysOut <= 30).slice(0, 10).map(e => (
+                <span key={e.ticker} style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 6px", borderRadius: 2, background: e.daysOut <= 5 ? "rgba(255,45,85,0.15)" : "rgba(255,184,0,0.1)", color: e.daysOut <= 5 ? "#ff2d55" : "#ffb800", border: `1px solid ${e.daysOut <= 5 ? "rgba(255,45,85,0.4)" : "rgba(255,184,0,0.3)"}` }}>
+                  {e.ticker} +{e.daysOut}d
+                </span>
+              ))}
+            </div>
+          )}
 
           <div style={S.contentArea}>
 
