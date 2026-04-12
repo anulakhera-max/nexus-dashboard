@@ -243,6 +243,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [tradesError, setTradesError] = useState(null);
   const [pipelineStatus, setPipelineStatus] = useState(null);
   const [earnings, setEarnings] = useState([]);
+  const [unusualFlow, setUnusualFlow] = useState(null);
+  const [loadingFlow, setLoadingFlow] = useState(false);
+  const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
   const [pipelineStage, setPipelineStage] = useState("");
   const [watchResults, setWatchResults] = useState([]);
@@ -638,6 +641,17 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadUnusualFlow = async (force = false) => {
+    setLoadingFlow(true); setFlowError(null);
+    try {
+      const res = await fetch(nexusUrl + "/api/unusual-flow" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setUnusualFlow(data);
+      else setFlowError(data.error || "Failed");
+    } catch (err) { setFlowError(err.message); }
+    setLoadingFlow(false);
   };
 
   const loadEarnings = async () => {
@@ -1052,6 +1066,9 @@ export default function NexusDashboard({ user, onLogout }) {
             </button>
             <button style={{ background: tab === "trades" ? "rgba(255,45,85,0.15)" : "transparent", color: tab === "trades" ? "#ff2d55" : "#4a6d8c", border: tab === "trades" ? "1px solid rgba(255,45,85,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => handleTab("trades")}>
               TRADES
+            </button>
+            <button style={{ background: tab === "flow" ? "rgba(178,79,255,0.15)" : "transparent", color: tab === "flow" ? "#b24fff" : "#4a6d8c", border: tab === "flow" ? "1px solid rgba(178,79,255,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("flow"); if (!unusualFlow) loadUnusualFlow(); }}>
+              ⚡ FLOW
             </button>
           </div>
 
@@ -2066,6 +2083,95 @@ export default function NexusDashboard({ user, onLogout }) {
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* UNUSUAL FLOW TAB */}
+            {tab === "flow" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                <div style={{ background: "linear-gradient(135deg,rgba(178,79,255,0.1),rgba(178,79,255,0.03))", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#b24fff", letterSpacing: 3, marginBottom: 4 }}>⚡ UNUSUAL OPTIONS FLOW</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Smart money detector — Vol/OI ratio spikes signal institutional positioning</div>
+                  </div>
+                  <button onClick={() => loadUnusualFlow(true)} disabled={loadingFlow} style={{ background: loadingFlow ? "#1a2d47" : "rgba(178,79,255,0.15)", border: "1px solid rgba(178,79,255,0.4)", color: loadingFlow ? "#4a6d8c" : "#b24fff", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingFlow ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                    {loadingFlow ? "SCANNING..." : "⚡ SCAN FLOW"}
+                  </button>
+                </div>
+
+                {flowError && <div style={{ padding: 12, background: "rgba(178,79,255,0.1)", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 4, color: "#b24fff", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>⚠ {flowError}</div>}
+
+                {!unusualFlow && !loadingFlow && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>⚡</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#b24fff", letterSpacing: 3, marginBottom: 8 }}>NO FLOW DATA</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Scan for unusual options activity across your watchlist and core tickers</div>
+                    <button onClick={() => loadUnusualFlow(true)} style={{ background: "rgba(178,79,255,0.15)", border: "1px solid rgba(178,79,255,0.4)", color: "#b24fff", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>⚡ SCAN NOW</button>
+                  </div>
+                )}
+
+                {unusualFlow && (
+                  <div>
+                    {/* Summary banner */}
+                    <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+                      {[["TICKERS SCANNED", unusualFlow.tickersScanned], ["SIGNALS FOUND", unusualFlow.signals?.length || 0], ["QT POWERED", unusualFlow.qtPowered ? "YES" : "GDELT"]].map(([label, val]) => (
+                        <div key={label} style={{ flex: 1, minWidth: 100, background: "#080f1a", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 4, padding: "8px 12px", textAlign: "center" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 4 }}>{label}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#b24fff" }}>{val}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Claude interpretation */}
+                    {unusualFlow.interpretation && (
+                      <div style={{ background: "#080f1a", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 6, padding: 16, marginBottom: 16 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 3, marginBottom: 12 }}>SMART MONEY INTERPRETATION</div>
+                        <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap" }}>
+                          <div style={{ flex: 1, background: unusualFlow.interpretation.marketBias === "BULLISH" ? "rgba(57,255,20,0.05)" : unusualFlow.interpretation.marketBias === "BEARISH" ? "rgba(255,45,85,0.05)" : "rgba(74,109,140,0.05)", border: `1px solid ${unusualFlow.interpretation.marketBias === "BULLISH" ? "rgba(57,255,20,0.2)" : unusualFlow.interpretation.marketBias === "BEARISH" ? "rgba(255,45,85,0.2)" : "rgba(74,109,140,0.2)"}`, borderRadius: 4, padding: "8px 12px" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 4 }}>MARKET BIAS</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: unusualFlow.interpretation.marketBias === "BULLISH" ? "#39ff14" : unusualFlow.interpretation.marketBias === "BEARISH" ? "#ff2d55" : "#ffb800" }}>{unusualFlow.interpretation.marketBias}</div>
+                          </div>
+                        </div>
+                        {unusualFlow.interpretation.smartMoneySummary && (
+                          <div style={{ fontSize: 12, color: "#c8dce8", lineHeight: 1.6, marginBottom: 10, paddingLeft: 10, borderLeft: "2px solid rgba(178,79,255,0.4)" }}>{unusualFlow.interpretation.smartMoneySummary}</div>
+                        )}
+                        {unusualFlow.interpretation.topSignal?.ticker && (
+                          <div style={{ background: "rgba(178,79,255,0.05)", borderRadius: 4, padding: "10px 12px", marginBottom: 8 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", marginBottom: 6 }}>TOP SIGNAL</div>
+                            <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 4 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: unusualFlow.interpretation.topSignal.direction === "BULLISH" ? "#39ff14" : "#ff2d55" }}>{unusualFlow.interpretation.topSignal.ticker}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 2, background: unusualFlow.interpretation.topSignal.direction === "BULLISH" ? "rgba(57,255,20,0.1)" : "rgba(255,45,85,0.1)", color: unusualFlow.interpretation.topSignal.direction === "BULLISH" ? "#39ff14" : "#ff2d55" }}>{unusualFlow.interpretation.topSignal.direction}</span>
+                              <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>{unusualFlow.interpretation.topSignal.urgency}</span>
+                            </div>
+                            <div style={{ fontSize: 11, color: "#8aabb8" }}>{unusualFlow.interpretation.topSignal.thesis}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Raw signals */}
+                    {unusualFlow.signals?.length > 0 && (
+                      <div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d8c", letterSpacing: 3, marginBottom: 10 }}>RAW SIGNALS ({unusualFlow.signals.length})</div>
+                        {unusualFlow.signals.map((s, i) => (
+                          <div key={i} style={{ background: "#080f1a", border: `1px solid ${s.sentiment === "BULLISH" ? "rgba(57,255,20,0.2)" : s.sentiment === "BEARISH" ? "rgba(255,45,85,0.2)" : "rgba(74,109,140,0.2)"}`, borderRadius: 4, padding: 12, marginBottom: 8, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: s.optionType === "CALL" ? "#39ff14" : "#ff2d55", minWidth: 60 }}>{s.ticker}</div>
+                            <span style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 2, background: s.optionType === "CALL" ? "rgba(57,255,20,0.1)" : "rgba(255,45,85,0.1)", color: s.optionType === "CALL" ? "#39ff14" : "#ff2d55" }}>{s.optionType}</span>
+                            {s.volOiRatio && <span style={{ fontFamily: "monospace", fontSize: 11, color: "#ffd700" }}>Vol/OI: {s.volOiRatio}x</span>}
+                            {s.strikePrice && <span style={{ fontFamily: "monospace", fontSize: 11, color: "#8aabb8" }}>${s.strikePrice} strike</span>}
+                            {s.expiry && <span style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d8c" }}>exp {s.expiry}</span>}
+                            {s.premium && <span style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800" }}>${Math.round(s.premium/1000)}K premium</span>}
+                            <span style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 6px", borderRadius: 2, background: s.sentiment === "BULLISH" ? "rgba(57,255,20,0.1)" : s.sentiment === "BEARISH" ? "rgba(255,45,85,0.1)" : "rgba(74,109,140,0.1)", color: s.sentiment === "BULLISH" ? "#39ff14" : s.sentiment === "BEARISH" ? "#ff2d55" : "#8aabb8", marginLeft: "auto" }}>{s.sentiment}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 12, fontFamily: "monospace" }}>
+                      Scanned: {new Date(unusualFlow.timestamp).toLocaleString()} · Vol/OI threshold: 3x+ · Min premium: $10K · {unusualFlow.qtPowered ? "Powered by Questrade live data" : "Powered by GDELT signals (connect Questrade for live data)"}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
