@@ -1846,13 +1846,16 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55", letterSpacing: 3, marginBottom: 4 }}>◎ TOP 3 TRADE EXECUTION</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>Final output of the pipeline — 27 candidates → 9 scored → 3 validated with live Questrade data</div>
                   </div>
-                  <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button onClick={runFullPipeline} disabled={pipelineRunning} style={{ background: pipelineRunning ? "#1a2d47" : "linear-gradient(135deg,#7b0000,#ff2d55)", color: pipelineRunning ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: pipelineRunning ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
                       {pipelineRunning ? pipelineStage : "◎ RUN PIPELINE"}
                     </button>
                     <button onClick={() => loadTrades(true)} disabled={loadingTrades} style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.4)", color: "#ff2d55", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>
                       ⟳ REFRESH
                     </button>
+                    {trades?.trades && <button onClick={() => { trades.trades.forEach(t => logTrade(t)); setShowTracker(true); }} style={{ background: "rgba(255,184,0,0.15)", border: "1px solid rgba(255,184,0,0.5)", color: "#ffb800", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>
+                      📋 LOG TRADES
+                    </button>}
                   </div>
                 </div>
 
@@ -1939,12 +1942,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {trades.disclaimer} | Generated: {new Date(trades.timestamp).toLocaleString()}
                     </div>
 
-                    {/* Log all trades button */}
-                    <div style={{ textAlign: "center", marginTop: 12 }}>
-                      <button onClick={() => { trades.trades.forEach(t => logTrade(t)); setShowTracker(true); }} style={{ background: "rgba(255,184,0,0.15)", border: "2px solid rgba(255,184,0,0.6)", color: "#ffb800", borderRadius: 4, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2, width: "100%" }}>
-                        📋 LOG ALL 3 TRADES TO TRACKER
-                      </button>
-                    </div>
+
                   </div>
                 )}
 
