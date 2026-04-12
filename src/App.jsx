@@ -953,6 +953,12 @@ export default function NexusDashboard({ user, onLogout }) {
             <button style={{ ...S.tab(tab === "power", true), color: tab === "power" ? "#ff6b35" : "#4a6d8c", borderBottom: tab === "power" ? "2px solid #ff6b35" : "2px solid transparent" }} onClick={() => handleTab("power")}>
               ◈ POWER INTEL
             </button>
+            <button style={{ background: tab === "watch" ? "rgba(0,212,255,0.15)" : "transparent", color: tab === "watch" ? "#00d4ff" : "#4a6d8c", border: tab === "watch" ? "1px solid rgba(0,212,255,0.4)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => handleTab("watch")}>
+              WATCHLIST
+            </button>
+            <button style={{ background: tab === "trades" ? "rgba(255,45,85,0.15)" : "transparent", color: tab === "trades" ? "#ff2d55" : "#4a6d8c", border: tab === "trades" ? "1px solid rgba(255,45,85,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => handleTab("trades")}>
+              TRADES
+            </button>
           </div>
 
           <div style={S.contentArea}>
