@@ -1840,7 +1840,7 @@ export default function NexusDashboard({ user, onLogout }) {
         {/* RIGHT PANEL */}
             {/* TRADES TAB */}
             {tab === "trades" && (
-              <div>
+              <div style={{ paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(255,45,85,0.1),rgba(255,45,85,0.03))", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55", letterSpacing: 3, marginBottom: 4 }}>◎ TOP 3 TRADE EXECUTION</div>
@@ -1940,8 +1940,8 @@ export default function NexusDashboard({ user, onLogout }) {
                     </div>
 
                     {/* Log all trades button */}
-                    <div style={{ textAlign: "center", marginTop: 8 }}>
-                      <button onClick={() => { trades.trades.forEach(t => logTrade(t)); setShowTracker(true); }} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.4)", color: "#ffb800", borderRadius: 3, padding: "8px 20px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>
+                    <div style={{ textAlign: "center", marginTop: 12 }}>
+                      <button onClick={() => { trades.trades.forEach(t => logTrade(t)); setShowTracker(true); }} style={{ background: "rgba(255,184,0,0.15)", border: "2px solid rgba(255,184,0,0.6)", color: "#ffb800", borderRadius: 4, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2, width: "100%" }}>
                         📋 LOG ALL 3 TRADES TO TRACKER
                       </button>
                     </div>
