@@ -1840,7 +1840,7 @@ export default function NexusDashboard({ user, onLogout }) {
         {/* RIGHT PANEL */}
             {/* TRADES TAB */}
             {tab === "trades" && (
-              <div style={{ paddingBottom: 40 }}>
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(255,45,85,0.1),rgba(255,45,85,0.03))", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55", letterSpacing: 3, marginBottom: 4 }}>◎ TOP 3 TRADE EXECUTION</div>
@@ -2023,7 +2023,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
             {/* WATCHLIST TAB */}
             {tab === "watch" && (
-              <div>
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 {/* Header */}
                 <div style={{ background: "linear-gradient(135deg,rgba(0,212,255,0.1),rgba(0,212,255,0.03))", border: "1px solid rgba(0,212,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
@@ -2101,7 +2101,7 @@ export default function NexusDashboard({ user, onLogout }) {
               </div>
             )}
 
-        {(tab !== "trades" && tab !== "watch") && <div style={S.panel}>
+        <div style={S.panel}>
           <div style={S.panelHeader}>⬡ AI INTELLIGENCE BRIEF</div>
           <div style={S.panelBody}>
             {apiError && (
@@ -2119,7 +2119,7 @@ export default function NexusDashboard({ user, onLogout }) {
             {loading && <Spinner />}
             {analysisHtml && !loading && <div style={{ fontSize: 11, lineHeight: 1.7 }}>{renderAnalysis(analysisHtml)}</div>}
           </div>
-        </div>}
+        </div>
       </div>
 
       {/* TICKER */}
