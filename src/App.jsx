@@ -22,7 +22,7 @@ const catColors = { weather: "#00d4ff", conflict: "#ff2d55", diplomatic: "#ffb80
 const catLabels = { weather: "🌊 WEATHER", conflict: "⚔ CONFLICT", diplomatic: "🏛 DIPLOMATIC", economic: "💹 ECONOMIC", tech: "⚡ TECH", health: "🧬 HEALTH" };
 const sevColors = { critical: "#ff2d55", high: "#ffb800", medium: "#00d4ff", low: "#39ff14" };
 
-// NEXUS v3.0 — Pipeline Architecture // Estimate cost: ~$3 per 1M input tokens, ~$15 per 1M output tokens (Sonnet)
+// NEXUS v3.1 — Earnings Calendar // Estimate cost: ~$3 per 1M input tokens, ~$15 per 1M output tokens (Sonnet)
 function estimateCost(promptLen, maxTokens) {
   const inputTokens = Math.ceil(promptLen / 4);
   const outputTokens = maxTokens;
