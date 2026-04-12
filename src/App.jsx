@@ -577,30 +577,56 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   const logTrade = (trade) => {
-    const entry = {
-      id: Date.now(),
-      ticker: trade.ticker,
-      direction: trade.direction,
-      strike: trade.strike,
-      bid: trade.bid,
-      ask: trade.ask,
-      mid: trade.mid,
-      expiry: trade.expiry,
-      thesis: trade.thesis,
-      probability: trade.probability,
-      targetPct: trade.targetPct,
-      stopPct: trade.stopPct,
+    const makeEntry = (t, offset = 0) => ({
+      id: Date.now() + offset,
+      ticker: t.ticker,
+      direction: t.direction,
+      strike: t.strike,
+      bid: t.bid,
+      ask: t.ask,
+      mid: t.mid,
+      expiry: t.expiry,
+      thesis: t.thesis,
+      probability: t.probability,
+      targetPct: t.targetPct,
+      stopPct: t.stopPct,
       entryDate: new Date().toISOString(),
-      entryPrice: trade.mid || null,
+      entryPrice: t.mid || null,
       exitPrice: null,
       exitDate: null,
       outcome: "OPEN",
       pnlPct: null,
       notes: "",
-    };
-    const updated = [entry, ...trackedPicks];
-    setTrackedPicks(updated);
-    saveTrackedPicks(updated);
+    });
+    // Single trade
+    const entry = makeEntry(trade);
+    setTrackedPicks(prev => { const updated = [entry, ...prev]; saveTrackedPicks(updated); return updated; });
+  };
+
+  const logAllTrades = (tradeList) => {
+    // Log all trades in one state update to avoid stale closure issue
+    const entries = tradeList.map((t, i) => ({
+      id: Date.now() + i,
+      ticker: t.ticker,
+      direction: t.direction,
+      strike: t.strike,
+      bid: t.bid,
+      ask: t.ask,
+      mid: t.mid,
+      expiry: t.expiry,
+      thesis: t.thesis,
+      probability: t.probability,
+      targetPct: t.targetPct,
+      stopPct: t.stopPct,
+      entryDate: new Date().toISOString(),
+      entryPrice: t.mid || null,
+      exitPrice: null,
+      exitDate: null,
+      outcome: "OPEN",
+      pnlPct: null,
+      notes: "",
+    }));
+    setTrackedPicks(prev => { const updated = [...entries, ...prev]; saveTrackedPicks(updated); return updated; });
   };
 
   const updatePickOutcome = (id, exitPrice, outcome, notes) => {
@@ -1853,7 +1879,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     <button onClick={() => loadTrades(true)} disabled={loadingTrades} style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.4)", color: "#ff2d55", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>
                       ⟳ REFRESH
                     </button>
-                    {trades?.trades && <button onClick={() => { trades.trades.forEach(t => logTrade(t)); setShowTracker(true); }} style={{ background: "rgba(255,184,0,0.15)", border: "1px solid rgba(255,184,0,0.5)", color: "#ffb800", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>
+                    {trades?.trades && <button onClick={() => { logAllTrades(trades.trades); setShowTracker(true); }} style={{ background: "rgba(255,184,0,0.15)", border: "1px solid rgba(255,184,0,0.5)", color: "#ffb800", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>
                       📋 LOG TRADES
                     </button>}
                   </div>
