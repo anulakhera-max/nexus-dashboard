@@ -235,6 +235,12 @@ export default function NexusDashboard({ user, onLogout }) {
   const [supplyData, setSupplyData] = useState(null);
   const [sourcesData, setSourcesData] = useState(null);
   const [watchlist, setWatchlist] = useState({ individuals: [], stocks: [] });
+  const [trades, setTrades] = useState(null);
+  const [loadingTrades, setLoadingTrades] = useState(false);
+  const [tradesError, setTradesError] = useState(null);
+  const [pipelineStatus, setPipelineStatus] = useState(null);
+  const [pipelineRunning, setPipelineRunning] = useState(false);
+  const [pipelineStage, setPipelineStage] = useState("");
   const [watchResults, setWatchResults] = useState([]);
   const [loadingWatch, setLoadingWatch] = useState(false);
   const [watchInput, setWatchInput] = useState({ name: "", ticker: "", type: "individual" });
@@ -506,6 +512,57 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingTab(false);
   };
 
+  // ── Pipeline functions ───────────────────────────────────────
+  const runFullPipeline = async () => {
+    if (pipelineRunning) return;
+    setPipelineRunning(true); setPipelineStage("Gathering data..."); setTradesError(null);
+    try {
+      // Stage 1: Data gather
+      setPipelineStage("Stage 1/4 — Gathering all data sources...");
+      await fetch(nexusUrl + "/api/data-gather?force=true", { headers: { "x-nexus-key": nexusKey } });
+
+      // Stage 2: Power Intel A + B in parallel
+      setPipelineStage("Stage 2/4 — Running Power Intel analysis...");
+      await Promise.all([
+        fetch(nexusUrl + "/api/power-intel-a?force=true", { headers: { "x-nexus-key": nexusKey } }),
+        fetch(nexusUrl + "/api/power-intel-b?force=true", { headers: { "x-nexus-key": nexusKey } }),
+      ]);
+
+      // Stage 3: Intel Picks (27→9→3)
+      setPipelineStage("Stage 3/4 — Scoring 27 candidates → narrowing to 9...");
+      const intelRes = await fetch(nexusUrl + "/api/intelligence?force=true", { headers: { "x-nexus-key": nexusKey } });
+      const intelData = await intelRes.json();
+      if (intelData.success) setIntelPicks(intelData.picks || []);
+
+      // Stage 4: Final 3 trades with live QT validation
+      setPipelineStage("Stage 4/4 — Generating top 3 trades with live Questrade data...");
+      const tradesRes = await fetch(nexusUrl + "/api/trades?force=true", { headers: { "x-nexus-key": nexusKey } });
+      const tradesData = await tradesRes.json();
+      if (tradesData.success) { setTrades(tradesData); handleTab("trades"); }
+      else setTradesError(tradesData.error || "Trades failed");
+    } catch (err) { setTradesError(err.message); }
+    setPipelineRunning(false); setPipelineStage("");
+  };
+
+  const loadTrades = async (force = false) => {
+    setLoadingTrades(true); setTradesError(null);
+    try {
+      const res = await fetch(nexusUrl + "/api/trades" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setTrades(data);
+      else setTradesError(data.error || "Failed to load trades");
+    } catch (err) { setTradesError(err.message); }
+    setLoadingTrades(false);
+  };
+
+  const loadPipelineStatus = async () => {
+    try {
+      const res = await fetch(nexusUrl + "/api/pipeline-status", { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setPipelineStatus(data.stages);
+    } catch {}
+  };
+
   // ── Watchlist functions ──────────────────────────────────────
   const loadWatchlist = async () => {
     try {
@@ -660,7 +717,7 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   // Auto-connect Questrade on load
-  useEffect(() => { connectQuestrade(); loadWatchlist(); }, []);
+  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); }, []);
 
   const generatePowerIntel = async (force = false) => {
     if (loadingPower) return;
@@ -1717,6 +1774,111 @@ export default function NexusDashboard({ user, onLogout }) {
         </div>
 
         {/* RIGHT PANEL */}
+            {/* TRADES TAB */}
+            {tab === "trades" && (
+              <div>
+                <div style={{ background: "linear-gradient(135deg,rgba(255,45,85,0.1),rgba(255,45,85,0.03))", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55", letterSpacing: 3, marginBottom: 4 }}>◎ TOP 3 TRADE EXECUTION</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Final output of the pipeline — 27 candidates → 9 scored → 3 validated with live Questrade data</div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={runFullPipeline} disabled={pipelineRunning} style={{ background: pipelineRunning ? "#1a2d47" : "linear-gradient(135deg,#7b0000,#ff2d55)", color: pipelineRunning ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: pipelineRunning ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                      {pipelineRunning ? pipelineStage : "◎ RUN PIPELINE"}
+                    </button>
+                    <button onClick={() => loadTrades(true)} disabled={loadingTrades} style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.4)", color: "#ff2d55", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>
+                      ⟳ REFRESH
+                    </button>
+                  </div>
+                </div>
+
+                {tradesError && <div style={{ padding: 12, background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, color: "#ff6b8a", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>⚠ {tradesError}</div>}
+
+                {!trades && !loadingTrades && !tradesError && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>◎</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ff2d55", letterSpacing: 3, marginBottom: 8 }}>NO TRADES GENERATED</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Run the full pipeline to generate your top 3 validated trades</div>
+                    <button onClick={runFullPipeline} style={{ background: "linear-gradient(135deg,#7b0000,#ff2d55)", color: "#fff", border: "none", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>◎ RUN FULL PIPELINE</button>
+                  </div>
+                )}
+
+                {trades?.trades && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    {trades.trades.map((trade, i) => (
+                      <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 6, padding: 20 }}>
+                        {/* Trade header */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 24, fontWeight: 700, color: trade.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{trade.ticker}</div>
+                            <div>
+                              <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 700, color: trade.direction === "CALL" ? "#39ff14" : "#ff2d55", background: trade.direction === "CALL" ? "rgba(57,255,20,0.1)" : "rgba(255,45,85,0.1)", padding: "3px 10px", borderRadius: 3, marginRight: 6 }}>{trade.direction}</span>
+                              <span style={{ fontSize: 11, fontFamily: "monospace", color: "#8aabb8" }}>Score: {trade.score}/100</span>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: "right" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffd700", marginBottom: 2 }}>PROBABILITY</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 700, color: "#ffd700" }}>{trade.probability}</div>
+                          </div>
+                        </div>
+
+                        {/* Live QT data */}
+                        {trade.qtValidated ? (
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: 14, background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 4, padding: 12 }}>
+                            {[["CURRENT", "$" + (trade.currentPrice?.toFixed(2) || "—")], ["STRIKE", "$" + (trade.strike?.toFixed(0) || "—")], ["BID", "$" + (trade.bid?.toFixed(2) || "—")], ["ASK", "$" + (trade.ask?.toFixed(2) || "—")], ["MID", "$" + (trade.mid?.toFixed(2) || "—")]].map(([label, val]) => (
+                              <div key={label} style={{ textAlign: "center" }}>
+                                <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
+                                <div style={{ fontSize: 13, fontFamily: "monospace", color: "#00d4ff", fontWeight: 700 }}>{val}</div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 14 }}>⚠ Live QT data unavailable — connect Questrade to see real strikes</div>
+                        )}
+
+                        {/* Expiry + timing */}
+                        <div style={{ display: "flex", gap: 16, marginBottom: 12, fontSize: 11, fontFamily: "monospace" }}>
+                          <span style={{ color: "#8aabb8" }}>EXPIRY: <span style={{ color: "#e8f4ff" }}>{trade.expiry || "—"}</span></span>
+                          <span style={{ color: "#8aabb8" }}>TIMING: <span style={{ color: "#e8f4ff" }}>{trade.timing || trade.urgency}</span></span>
+                          {trade.iv ? <span style={{ color: "#8aabb8" }}>IV: <span style={{ color: "#ffb800" }}>{(trade.iv * 100).toFixed(0)}%</span></span> : null}
+                          {trade.delta ? <span style={{ color: "#8aabb8" }}>DELTA: <span style={{ color: "#e8f4ff" }}>{trade.delta?.toFixed(2)}</span></span> : null}
+                        </div>
+
+                        {/* Thesis */}
+                        <div style={{ fontSize: 12, color: "#c8dce8", lineHeight: 1.6, marginBottom: 12, paddingLeft: 10, borderLeft: "2px solid rgba(255,45,85,0.4)" }}>{trade.thesis || trade.catalyst}</div>
+
+                        {/* Target / Stop */}
+                        <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+                          <div style={{ flex: 1, background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 3, padding: "8px 12px" }}>
+                            <div style={{ fontSize: 9, fontFamily: "monospace", color: "#39ff14", marginBottom: 3 }}>TARGET</div>
+                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#39ff14", fontWeight: 700 }}>{trade.targetPct || "+65%"}</div>
+                          </div>
+                          <div style={{ flex: 1, background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 3, padding: "8px 12px" }}>
+                            <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ff2d55", marginBottom: 3 }}>STOP</div>
+                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#ff2d55", fontWeight: 700 }}>{trade.stopPct || "-35%"}</div>
+                          </div>
+                          {trade.hedge?.ticker && (
+                            <div style={{ flex: 2, background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 3, padding: "8px 12px" }}>
+                              <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ffb800", marginBottom: 3 }}>HEDGE</div>
+                              <div style={{ fontSize: 13, fontFamily: "monospace", color: "#ffb800", fontWeight: 700 }}>{trade.hedge.ticker} {trade.hedge.direction}</div>
+                              <div style={{ fontSize: 10, color: "#8aabb8" }}>{trade.hedge.reason}</div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Risk factors */}
+                        {trade.riskFactors && <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", padding: "6px 10px", background: "rgba(255,45,85,0.04)", borderRadius: 3 }}>⚠ RISKS: {trade.riskFactors}</div>}
+                      </div>
+                    ))}
+
+                    <div style={{ fontSize: 10, color: "#4a6d8c", textAlign: "center", padding: "8px", lineHeight: 1.6 }}>
+                      {trades.disclaimer} | Generated: {new Date(trades.timestamp).toLocaleString()}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* WATCHLIST TAB */}
             {tab === "watch" && (
               <div>
