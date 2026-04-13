@@ -249,6 +249,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [warRipple, setWarRipple] = useState(null);
   const [loadingWar, setLoadingWar] = useState(false);
   const [warError, setWarError] = useState(null);
+  const [newsBias, setNewsBias] = useState(null);
+  const [loadingBias, setLoadingBias] = useState(false);
+  const [biasError, setBiasError] = useState(null);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -625,6 +628,17 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadNewsBias = async (force = false) => {
+    setLoadingBias(true); setBiasError(null);
+    try {
+      const res = await fetch(nexusUrl + "/api/news-bias" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setNewsBias(data);
+      else setBiasError(data.error || "Failed");
+    } catch (err) { setBiasError(err.message); }
+    setLoadingBias(false);
   };
 
   const loadWarRipple = async (force = false) => {
@@ -1075,6 +1089,9 @@ export default function NexusDashboard({ user, onLogout }) {
             </button>
             <button style={{ background: tab === "war" ? "rgba(255,60,0,0.15)" : "transparent", color: tab === "war" ? "#ff3c00" : "#4a6d8c", border: tab === "war" ? "1px solid rgba(255,60,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("war"); if (!warRipple) loadWarRipple(); }}>
               ☢ WAR
+            </button>
+            <button style={{ background: tab === "bias" ? "rgba(255,184,0,0.15)" : "transparent", color: tab === "bias" ? "#ffb800" : "#4a6d8c", border: tab === "bias" ? "1px solid rgba(255,184,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("bias"); if (!newsBias) loadNewsBias(); }}>
+              🔍 BIAS
             </button>
           </div>
 
@@ -2254,6 +2271,127 @@ export default function NexusDashboard({ user, onLogout }) {
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 12, fontFamily: "monospace" }}>
                       Scanned: {new Date(unusualFlow.timestamp).toLocaleString()} · Vol/OI threshold: 3x+ · Min premium: $10K · {unusualFlow.qtPowered ? "Powered by Questrade live data" : "Powered by GDELT signals (connect Questrade for live data)"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* NEWS BIAS TAB */}
+            {tab === "bias" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                <div style={{ background: "linear-gradient(135deg,rgba(255,184,0,0.1),rgba(255,184,0,0.03))", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffb800", letterSpacing: 3, marginBottom: 4 }}>🔍 NEWS BIAS FILTER</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Detects pumping, coordinated narratives, arms-length relationships, staged alliances</div>
+                  </div>
+                  <button onClick={() => loadNewsBias(true)} disabled={loadingBias} style={{ background: loadingBias ? "#1a2d47" : "rgba(255,184,0,0.15)", border: "1px solid rgba(255,184,0,0.4)", color: loadingBias ? "#4a6d8c" : "#ffb800", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingBias ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                    {loadingBias ? "SCANNING..." : "🔍 SCAN BIAS"}
+                  </button>
+                </div>
+
+                {biasError && <div style={{ padding: 12, background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 4, color: "#ffb800", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>⚠ {biasError}</div>}
+
+                {!newsBias && !loadingBias && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ffb800", letterSpacing: 3, marginBottom: 8 }}>NEWS BIAS DETECTOR</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Analyzes headlines from CNN, BBC, CNBC, Bloomberg, Reddit to detect manipulation, pumping, coordinated narratives, and staged alliances</div>
+                    <button onClick={() => loadNewsBias(true)} style={{ background: "rgba(255,184,0,0.15)", border: "1px solid rgba(255,184,0,0.4)", color: "#ffb800", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>🔍 SCAN NOW</button>
+                  </div>
+                )}
+
+                {newsBias && (
+                  <div>
+                    {/* Manipulation risk banner */}
+                    <div style={{ background: newsBias.manipulationRisk === "CRITICAL" ? "rgba(255,45,85,0.1)" : newsBias.manipulationRisk === "HIGH" ? "rgba(255,60,0,0.1)" : newsBias.manipulationRisk === "MEDIUM" ? "rgba(255,184,0,0.1)" : "rgba(57,255,20,0.05)", border: `1px solid ${newsBias.manipulationRisk === "CRITICAL" ? "rgba(255,45,85,0.4)" : newsBias.manipulationRisk === "HIGH" ? "rgba(255,60,0,0.4)" : newsBias.manipulationRisk === "MEDIUM" ? "rgba(255,184,0,0.4)" : "rgba(57,255,20,0.2)"}`, borderRadius: 4, padding: "10px 14px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontFamily: "monospace", fontSize: 11, color: "#8aabb8" }}>MANIPULATION RISK — {newsBias.headlinesAnalyzed} headlines scanned</span>
+                      <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: newsBias.manipulationRisk === "CRITICAL" ? "#ff2d55" : newsBias.manipulationRisk === "HIGH" ? "#ff3c00" : newsBias.manipulationRisk === "MEDIUM" ? "#ffb800" : "#39ff14" }}>{newsBias.manipulationRisk}</span>
+                    </div>
+
+                    {/* Alert cards */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+                      {[
+                        { label: "PUMP DETECTED", value: newsBias.pumpDetected, tickers: newsBias.pumpTickers, evidence: newsBias.pumpEvidence, color: "#ff2d55" },
+                        { label: "DUMP DETECTED", value: newsBias.dumpDetected, tickers: newsBias.dumpTickers, evidence: newsBias.dumpEvidence, color: "#ff3c00" },
+                        { label: "COORDINATED NARRATIVE", value: newsBias.coordinatedNarrative, detail: newsBias.narrativeTheme, evidence: newsBias.narrativeEvidence, color: "#ffb800" },
+                        { label: "ALLIANCE DETECTED", value: newsBias.allianceDetected, detail: newsBias.allianceParties, evidence: newsBias.allianceEvidence, color: "#b24fff" },
+                      ].map(({ label, value, tickers, detail, evidence, color }) => (
+                        <div key={label} style={{ background: "#080f1a", border: `1px solid ${value ? color + "40" : "rgba(74,109,140,0.2)"}`, borderRadius: 4, padding: 10 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                            <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{label}</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: value ? color : "#39ff14" }}>{value ? "YES ⚠" : "NO ✓"}</span>
+                          </div>
+                          {tickers?.length > 0 && <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 4 }}>{tickers.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: color + "15", color }}>{t}</span>)}</div>}
+                          {(detail || evidence) && <div style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.5 }}>{detail || evidence}</div>}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Bias direction */}
+                    <div style={{ background: "#080f1a", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 4, padding: 12, marginBottom: 12 }}>
+                      <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 2, marginBottom: 8 }}>MARKET BIAS ANALYSIS</div>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                        <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: newsBias.mostBiasedDirection === "bullish" ? "#39ff14" : newsBias.mostBiasedDirection === "bearish" ? "#ff2d55" : "#ffb800" }}>{newsBias.mostBiasedDirection?.toUpperCase()}</span>
+                        <span style={{ fontSize: 11, color: "#8aabb8" }}>{newsBias.biasReasoning}</span>
+                      </div>
+                      {newsBias.contrarianPlay && (
+                        <div style={{ padding: "8px 10px", background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 3 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 4 }}>CONTRARIAN PLAY</div>
+                          <div style={{ fontSize: 11, color: "#c8dce8" }}>{newsBias.contrarianPlay}</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Real vs fake signals */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+                      {newsBias.realSignal?.ticker && (
+                        <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 6 }}>✓ GENUINE SIGNAL</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#39ff14", marginBottom: 4 }}>{newsBias.realSignal.ticker}</div>
+                          <div style={{ fontSize: 10, color: "#8aabb8" }}>{newsBias.realSignal.reason}</div>
+                        </div>
+                      )}
+                      {newsBias.fakeSignal?.ticker && (
+                        <div style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 6 }}>⚠ MANUFACTURED SIGNAL</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ff2d55", marginBottom: 4 }}>{newsBias.fakeSignal.ticker}</div>
+                          <div style={{ fontSize: 10, color: "#8aabb8" }}>{newsBias.fakeSignal.reason}</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Analyst/social manipulation */}
+                    {(newsBias.analystConflict || newsBias.brokerPump || newsBias.socialManipulation) && (
+                      <div style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.2)", borderRadius: 4, padding: 12, marginBottom: 12 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", letterSpacing: 2, marginBottom: 8 }}>CONFLICT OF INTEREST FLAGS</div>
+                        {newsBias.analystConflict && <div style={{ fontSize: 11, color: "#ffb800", marginBottom: 4 }}>⚠ ANALYST CONFLICT: {newsBias.analystConflictDetail}</div>}
+                        {newsBias.brokerPump && <div style={{ fontSize: 11, color: "#ffb800", marginBottom: 4 }}>⚠ BROKER PUMP: {newsBias.brokerPumpDetail}</div>}
+                        {newsBias.socialManipulation && <div style={{ fontSize: 11, color: "#ffb800", marginBottom: 4 }}>⚠ SOCIAL MANIPULATION: {newsBias.socialManipulationDetail}</div>}
+                        {newsBias.hedgeFundSignal && <div style={{ fontSize: 11, color: "#8aabb8" }}>HF SIGNAL: {newsBias.hedgeFundSignal}</div>}
+                      </div>
+                    )}
+
+                    {/* Trusted vs avoid */}
+                    {(newsBias.trustedSignals || newsBias.avoidSignals) && (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+                        {newsBias.trustedSignals && (
+                          <div style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.15)", borderRadius: 4, padding: 10 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 6 }}>TRUST THESE</div>
+                            <div style={{ fontSize: 10, color: "#c8dce8", lineHeight: 1.6 }}>{newsBias.trustedSignals}</div>
+                          </div>
+                        )}
+                        {newsBias.avoidSignals && (
+                          <div style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.15)", borderRadius: 4, padding: 10 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 6 }}>AVOID THESE</div>
+                            <div style={{ fontSize: 10, color: "#c8dce8", lineHeight: 1.6 }}>{newsBias.avoidSignals}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>
+                      Scanned: {new Date(newsBias.timestamp).toLocaleString()} · Bias signals injected into pipeline (pumped tickers -50% score, genuine signals +boost)
                     </div>
                   </div>
                 )}
