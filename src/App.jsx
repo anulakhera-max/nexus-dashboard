@@ -260,6 +260,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [rippleInput, setRippleInput] = useState("");
   const [patternMemory, setPatternMemory] = useState(null);
   const [loadingPattern, setLoadingPattern] = useState(false);
+  const [allianceData, setAllianceData] = useState(null);
+  const [loadingAlliance, setLoadingAlliance] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -636,6 +638,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadAlliance = async (force = false) => {
+    setLoadingAlliance(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/alliance-detect" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setAllianceData(data);
+    } catch {}
+    setLoadingAlliance(false);
   };
 
   const loadPatternMemory = async (force = false) => {
@@ -1141,6 +1153,9 @@ export default function NexusDashboard({ user, onLogout }) {
             </button>
             <button style={{ background: tab === "pattern" ? "rgba(255,215,0,0.15)" : "transparent", color: tab === "pattern" ? "#ffd700" : "#4a6d8c", border: tab === "pattern" ? "1px solid rgba(255,215,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("pattern"); if (!patternMemory) loadPatternMemory(); }}>
               🧠 PATTERN
+            </button>
+            <button style={{ background: tab === "alliance" ? "rgba(255,100,0,0.15)" : "transparent", color: tab === "alliance" ? "#ff6400" : "#4a6d8c", border: tab === "alliance" ? "1px solid rgba(255,100,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("alliance"); if (!allianceData) loadAlliance(); }}>
+              🕵 ALLIANCE
             </button>
           </div>
 
@@ -2320,6 +2335,187 @@ export default function NexusDashboard({ user, onLogout }) {
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 12, fontFamily: "monospace" }}>
                       Scanned: {new Date(unusualFlow.timestamp).toLocaleString()} · Vol/OI threshold: 3x+ · Min premium: $10K · {unusualFlow.qtPowered ? "Powered by Questrade live data" : "Powered by GDELT signals (connect Questrade for live data)"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ALLIANCE DETECTION TAB */}
+            {tab === "alliance" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                <div style={{ background: "linear-gradient(135deg,rgba(255,100,0,0.08),rgba(255,100,0,0.02))", border: "1px solid rgba(255,100,0,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff6400", letterSpacing: 3, marginBottom: 4 }}>🕵 ALLIANCE DETECTION</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Identifies coordinated moves between hedge funds, brokers, analysts — detects manufactured consensus and real institutional conviction</div>
+                  </div>
+                  <button onClick={() => loadAlliance(true)} disabled={loadingAlliance} style={{ background: loadingAlliance ? "#1a2d47" : "rgba(255,100,0,0.15)", border: "1px solid rgba(255,100,0,0.4)", color: loadingAlliance ? "#4a6d8c" : "#ff6400", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingAlliance ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                    {loadingAlliance ? "SCANNING..." : "🕵 DETECT ALLIANCES"}
+                  </button>
+                </div>
+
+                {!allianceData && !loadingAlliance && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>🕵</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ff6400", letterSpacing: 3, marginBottom: 8 }}>ALLIANCE DETECTOR</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Scans for coordinated institutional moves, manufactured consensus, short squeezes, and frontrun opportunities</div>
+                    <button onClick={() => loadAlliance(true)} style={{ background: "rgba(255,100,0,0.15)", border: "1px solid rgba(255,100,0,0.4)", color: "#ff6400", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>🕵 SCAN NOW</button>
+                  </div>
+                )}
+
+                {allianceData && (
+                  <div>
+                    {/* Risk banner */}
+                    <div style={{ background: allianceData.allianceRiskLevel === "CRITICAL" ? "rgba(255,45,85,0.1)" : allianceData.allianceRiskLevel === "HIGH" ? "rgba(255,100,0,0.1)" : "rgba(255,184,0,0.05)", border: `1px solid ${allianceData.allianceRiskLevel === "CRITICAL" ? "rgba(255,45,85,0.4)" : allianceData.allianceRiskLevel === "HIGH" ? "rgba(255,100,0,0.4)" : "rgba(255,184,0,0.2)"}`, borderRadius: 4, padding: "10px 14px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontFamily: "monospace", fontSize: 11, color: "#8aabb8" }}>ALLIANCE RISK LEVEL — {allianceData.headlinesAnalyzed} headlines scanned</span>
+                      <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: allianceData.allianceRiskLevel === "CRITICAL" ? "#ff2d55" : allianceData.allianceRiskLevel === "HIGH" ? "#ff6400" : "#ffb800" }}>{allianceData.allianceRiskLevel}</span>
+                    </div>
+
+                    {/* Cluster detection */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+                      {[
+                        { label: "UPGRADE CLUSTER", data: allianceData.upgradeCluster, color: "#39ff14" },
+                        { label: "DOWNGRADE CLUSTER", data: allianceData.downgradeCluster, color: "#ff2d55" },
+                      ].map(({ label, data, color }) => (
+                        <div key={label} style={{ background: "#080f1a", border: `1px solid ${data?.detected ? color + "30" : "rgba(74,109,140,0.2)"}`, borderRadius: 4, padding: 10 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                            <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{label}</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: data?.detected ? color : "#39ff14" }}>{data?.detected ? "DETECTED ⚠" : "NONE ✓"}</span>
+                          </div>
+                          {data?.tickers?.length > 0 && <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 4 }}>{data.tickers.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: color + "15", color }}>{t}</span>)}</div>}
+                          {data?.firms && <div style={{ fontSize: 10, color: "#8aabb8", marginBottom: 3 }}>{data.firms}</div>}
+                          {data?.motive && <div style={{ fontSize: 9, color: "#4a6d8c", fontStyle: "italic" }}>{data.motive}</div>}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Hedge fund + short seller */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+                      {allianceData.hedgeFundAlliance?.detected && (
+                        <div style={{ background: "#080f1a", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 4, padding: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#b24fff", marginBottom: 6 }}>HEDGE FUND ALLIANCE ⚠</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#e8f4ff", marginBottom: 4 }}>{allianceData.hedgeFundAlliance.targetTicker}</div>
+                          <div style={{ fontSize: 9, fontFamily: "monospace", color: "#b24fff", marginBottom: 3 }}>STRATEGY: {allianceData.hedgeFundAlliance.strategy?.toUpperCase()}</div>
+                          <div style={{ fontSize: 10, color: "#8aabb8" }}>{allianceData.hedgeFundAlliance.parties}</div>
+                        </div>
+                      )}
+                      {allianceData.shortSellerCoordination?.detected && (
+                        <div style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 6 }}>SHORT SELLER COORDINATION ⚠</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55", marginBottom: 4 }}>{allianceData.shortSellerCoordination.target}</div>
+                          <div style={{ fontSize: 10, color: "#8aabb8" }}>{allianceData.shortSellerCoordination.parties}</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Manufactured vs Real */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+                      {allianceData.manufacturedConsensus?.detected && (
+                        <div style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 6 }}>⚠ MANUFACTURED CONSENSUS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ff2d55", marginBottom: 4 }}>{allianceData.manufacturedConsensus.ticker}</div>
+                          <div style={{ fontSize: 10, color: "#8aabb8" }}>{allianceData.manufacturedConsensus.evidence}</div>
+                        </div>
+                      )}
+                      {allianceData.realConviction?.ticker && (
+                        <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 6 }}>✓ REAL INSTITUTIONAL CONVICTION</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#39ff14", marginBottom: 4 }}>{allianceData.realConviction.ticker}</div>
+                          <div style={{ fontSize: 10, color: "#8aabb8" }}>{allianceData.realConviction.evidence}</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Special signals */}
+                    {(allianceData.darkPoolSignal || allianceData.activistSignal || allianceData.mergerArbitrageSignal) && (
+                      <div style={{ background: "#080f1a", border: "1px solid rgba(255,100,0,0.2)", borderRadius: 4, padding: 12, marginBottom: 14 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6400", letterSpacing: 2, marginBottom: 8 }}>SPECIAL SITUATION SIGNALS</div>
+                        {allianceData.darkPoolSignal && <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 6 }}>🌑 DARK POOL: {allianceData.darkPoolSignal}</div>}
+                        {allianceData.activistSignal && <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 6 }}>⚡ ACTIVIST: {allianceData.activistSignal}</div>}
+                        {allianceData.mergerArbitrageSignal && <div style={{ fontSize: 11, color: "#8aabb8" }}>🤝 M&A: {allianceData.mergerArbitrageSignal}</div>}
+                      </div>
+                    )}
+
+                    {/* Trading opportunities */}
+                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6400", letterSpacing: 3, marginBottom: 10 }}>INSTITUTIONAL TRADING OPPORTUNITIES</div>
+
+                    {allianceData.frontrunOpportunity?.ticker && (
+                      <div style={{ background: "rgba(57,255,20,0.05)", border: "2px solid rgba(57,255,20,0.3)", borderRadius: 6, padding: 12, marginBottom: 10 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 2, marginBottom: 6 }}>🚀 FRONTRUN OPPORTUNITY</div>
+                        <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: allianceData.frontrunOpportunity.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{allianceData.frontrunOpportunity.ticker}</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 2, background: allianceData.frontrunOpportunity.direction === "CALL" ? "rgba(57,255,20,0.1)" : "rgba(255,45,85,0.1)", color: allianceData.frontrunOpportunity.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{allianceData.frontrunOpportunity.direction}</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800" }}>{allianceData.frontrunOpportunity.timing}</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 9, color: allianceData.frontrunOpportunity.confidence === "HIGH" ? "#39ff14" : "#ffb800" }}>{allianceData.frontrunOpportunity.confidence}</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: "#c8dce8" }}>{allianceData.frontrunOpportunity.description}</div>
+                      </div>
+                    )}
+
+                    {allianceData.squeezeSetup?.ticker && (
+                      <div style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: 12, marginBottom: 10 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff2d55", letterSpacing: 2, marginBottom: 6 }}>⚡ SHORT SQUEEZE SETUP</div>
+                        <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#ff2d55" }}>{allianceData.squeezeSetup.ticker}</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800" }}>{allianceData.squeezeSetup.probability} probability</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: "#c8dce8" }}>{allianceData.squeezeSetup.description}</div>
+                      </div>
+                    )}
+
+                    {allianceData.pumpDumpCycle?.detected && (
+                      <div style={{ background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 4, padding: 12, marginBottom: 10 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 2, marginBottom: 6 }}>⚠ PUMP & DUMP CYCLE DETECTED</div>
+                        <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#ffb800" }}>{allianceData.pumpDumpCycle.ticker}</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "rgba(255,184,0,0.1)", color: "#ffb800" }}>STAGE: {allianceData.pumpDumpCycle.stage?.toUpperCase()}</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: "#c8dce8" }}>{allianceData.pumpDumpCycle.description}</div>
+                      </div>
+                    )}
+
+                    {allianceData.insiderPattern?.ticker && (
+                      <div style={{ background: "rgba(178,79,255,0.05)", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 4, padding: 12, marginBottom: 10 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 2, marginBottom: 6 }}>🔍 INSIDER PATTERN</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#b24fff", marginBottom: 4 }}>{allianceData.insiderPattern.ticker}</div>
+                        <div style={{ fontSize: 11, color: "#c8dce8", marginBottom: 4 }}>{allianceData.insiderPattern.description}</div>
+                        <div style={{ fontSize: 10, color: "#8aabb8" }}>{allianceData.insiderPattern.evidence}</div>
+                      </div>
+                    )}
+
+                    {/* Safest play + avoid */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+                      {allianceData.safestPlay?.play && (
+                        <div style={{ background: "rgba(57,255,20,0.04)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 4 }}>SAFEST PLAY</div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: "#e8f4ff", marginBottom: 4 }}>{allianceData.safestPlay.play}</div>
+                          <div style={{ fontSize: 10, color: "#8aabb8" }}>{allianceData.safestPlay.reasoning}</div>
+                        </div>
+                      )}
+                      {allianceData.avoidCompletely?.length > 0 && (
+                        <div style={{ background: "rgba(255,45,85,0.04)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 4 }}>AVOID COMPLETELY</div>
+                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>{allianceData.avoidCompletely.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>{t}</span>)}</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Institutional flow predictions */}
+                    {allianceData.institutionalFlow?.day7 && (
+                      <div style={{ background: "#080f1a", border: "1px solid rgba(255,100,0,0.15)", borderRadius: 4, padding: 12, marginBottom: 12 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6400", letterSpacing: 2, marginBottom: 8 }}>INSTITUTIONAL MONEY FLOW PREDICTIONS</div>
+                        {[["7 DAYS", allianceData.institutionalFlow.day7], ["14 DAYS", allianceData.institutionalFlow.day14], ["21 DAYS", allianceData.institutionalFlow.day21]].filter(([,v]) => v).map(([label, val]) => (
+                          <div key={label} style={{ marginBottom: 6 }}>
+                            <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginRight: 8 }}>{label}:</span>
+                            <span style={{ fontSize: 11, color: "#c8dce8" }}>{val}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>
+                      Scanned: {new Date(allianceData.timestamp).toLocaleString()} · Alliance signals injected into pipeline scoring
+                      <button onClick={() => loadAlliance(true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳ refresh</button>
                     </div>
                   </div>
                 )}
