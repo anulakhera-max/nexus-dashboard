@@ -252,6 +252,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [newsBias, setNewsBias] = useState(null);
   const [loadingBias, setLoadingBias] = useState(false);
   const [biasError, setBiasError] = useState(null);
+  const [earningsDive, setEarningsDive] = useState({});
+  const [loadingDive, setLoadingDive] = useState({});
+  const [diveSearch, setDiveSearch] = useState("");
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -628,6 +631,17 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadEarningsDive = async (ticker, force = false) => {
+    const t = ticker.toUpperCase();
+    setLoadingDive(prev => ({ ...prev, [t]: true }));
+    try {
+      const res = await fetch(nexusUrl + "/api/earnings-dive?ticker=" + t + (force ? "&force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setEarningsDive(prev => ({ ...prev, [t]: data }));
+    } catch {}
+    setLoadingDive(prev => ({ ...prev, [t]: false }));
   };
 
   const loadNewsBias = async (force = false) => {
@@ -1092,6 +1106,9 @@ export default function NexusDashboard({ user, onLogout }) {
             </button>
             <button style={{ background: tab === "bias" ? "rgba(255,184,0,0.15)" : "transparent", color: tab === "bias" ? "#ffb800" : "#4a6d8c", border: tab === "bias" ? "1px solid rgba(255,184,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("bias"); if (!newsBias) loadNewsBias(); }}>
               🔍 BIAS
+            </button>
+            <button style={{ background: tab === "earnings" ? "rgba(0,212,255,0.15)" : "transparent", color: tab === "earnings" ? "#00d4ff" : "#4a6d8c", border: tab === "earnings" ? "1px solid rgba(0,212,255,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => handleTab("earnings")}>
+              📊 EARNINGS
             </button>
           </div>
 
@@ -2273,6 +2290,134 @@ export default function NexusDashboard({ user, onLogout }) {
                       Scanned: {new Date(unusualFlow.timestamp).toLocaleString()} · Vol/OI threshold: 3x+ · Min premium: $10K · {unusualFlow.qtPowered ? "Powered by Questrade live data" : "Powered by GDELT signals (connect Questrade for live data)"}
                     </div>
                   </div>
+                )}
+              </div>
+            )}
+
+            {/* EARNINGS DEEP DIVE TAB */}
+            {tab === "earnings" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                <div style={{ background: "linear-gradient(135deg,rgba(0,212,255,0.1),rgba(0,212,255,0.03))", border: "1px solid rgba(0,212,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16 }}>
+                  <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00d4ff", letterSpacing: 3, marginBottom: 4 }}>📊 EARNINGS DEEP DIVE</div>
+                  <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 12 }}>4-week pre-earnings research — analyst consensus, Reddit sentiment, historical patterns, 7/14/21 day predictions</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input value={diveSearch} onChange={e => setDiveSearch(e.target.value.toUpperCase())} placeholder="Enter ticker (e.g. NVDA)" style={{ background: "#0d1829", border: "1px solid rgba(0,212,255,0.3)", color: "#e8f4ff", borderRadius: 3, padding: "8px 12px", fontSize: 12, fontFamily: "monospace", flex: 1, outline: "none" }} onKeyDown={e => { if (e.key === "Enter" && diveSearch) loadEarningsDive(diveSearch, true); }} />
+                    <button onClick={() => diveSearch && loadEarningsDive(diveSearch, true)} disabled={!diveSearch || loadingDive[diveSearch]} style={{ background: "rgba(0,212,255,0.15)", border: "1px solid rgba(0,212,255,0.4)", color: "#00d4ff", borderRadius: 3, padding: "8px 18px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>
+                      {loadingDive[diveSearch] ? "ANALYZING..." : "📊 DIVE"}
+                    </button>
+                  </div>
+                  {/* Quick access buttons for earnings calendar stocks */}
+                  {earnings.filter(e => e.daysOut >= 0 && e.daysOut <= 30).length > 0 && (
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
+                      <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", alignSelf: "center" }}>QUICK:</span>
+                      {earnings.filter(e => e.daysOut >= 0 && e.daysOut <= 30).map(e => (
+                        <button key={e.ticker} onClick={() => { setDiveSearch(e.ticker); loadEarningsDive(e.ticker); }} style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 8px", borderRadius: 2, background: e.daysOut <= 7 ? "rgba(255,45,85,0.1)" : "rgba(0,212,255,0.08)", color: e.daysOut <= 7 ? "#ff2d55" : "#00d4ff", border: `1px solid ${e.daysOut <= 7 ? "rgba(255,45,85,0.3)" : "rgba(0,212,255,0.2)"}`, cursor: "pointer" }}>
+                          {e.ticker} +{e.daysOut}d
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Dive results */}
+                {Object.entries(earningsDive).map(([ticker, dive]) => (
+                  <div key={ticker} style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 6, padding: 16, marginBottom: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+                      <div>
+                        <span style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 700, color: "#00d4ff", marginRight: 12 }}>{ticker}</span>
+                        {dive.currentPrice && <span style={{ fontFamily: "monospace", fontSize: 13, color: "#e8f4ff" }}>${dive.currentPrice?.toFixed(2)}</span>}
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        {dive.earningsDate && <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800" }}>EARNINGS: {dive.earningsDate}</div>}
+                        {dive.daysToEarnings && <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: parseInt(dive.daysToEarnings) <= 7 ? "#ff2d55" : "#ffb800" }}>{dive.daysToEarnings} days away</div>}
+                      </div>
+                    </div>
+
+                    {/* Key metrics row */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6, marginBottom: 12 }}>
+                      {[
+                        ["CONSENSUS", dive.analystConsensus, dive.analystConsensus === "BUY" ? "#39ff14" : dive.analystConsensus === "SELL" ? "#ff2d55" : "#ffb800"],
+                        ["PRICE TARGET", dive.analystPriceTarget, "#00d4ff"],
+                        ["BEAT PROB", dive.beatProbability, "#39ff14"],
+                        ["MISS PROB", dive.missProbability, "#ff2d55"],
+                      ].map(([label, val, color]) => (
+                        <div key={label} style={{ background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.1)", borderRadius: 3, padding: "6px 8px", textAlign: "center" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: color || "#e8f4ff" }}>{val || "—"}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Market expectation + key metric */}
+                    {dive.marketExpectation && <div style={{ fontSize: 11, color: "#c8dce8", marginBottom: 8, paddingLeft: 10, borderLeft: "2px solid rgba(0,212,255,0.3)", lineHeight: 1.6 }}>{dive.marketExpectation}</div>}
+                    {dive.keyMetric && <div style={{ fontSize: 10, fontFamily: "monospace", color: "#ffb800", marginBottom: 10 }}>KEY METRIC: {dive.keyMetric}</div>}
+
+                    {/* Historical pattern */}
+                    {dive.historicalPattern && (
+                      <div style={{ background: "rgba(178,79,255,0.05)", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 3, padding: "8px 10px", marginBottom: 10 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#b24fff", marginBottom: 4 }}>HISTORICAL PATTERN</div>
+                        <div style={{ fontSize: 11, color: "#c8dce8" }}>{dive.historicalPattern}</div>
+                        {dive.postEarningsMoveSize && <div style={{ fontFamily: "monospace", fontSize: 10, color: dive.postEarningsDirection === "up" ? "#39ff14" : "#ff2d55", marginTop: 4 }}>Typical move: {dive.postEarningsDirection?.toUpperCase()} {dive.postEarningsMoveSize}</div>}
+                      </div>
+                    )}
+
+                    {/* Sentiment */}
+                    {dive.sentiment && (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 10 }}>
+                        {[["REDDIT", dive.sentiment.reddit, dive.sentiment.reddit?.includes("bullish") ? "#39ff14" : dive.sentiment.reddit?.includes("bearish") ? "#ff2d55" : "#ffb800"],
+                          ["INSTITUTIONS", dive.sentiment.institutionalPositioning, dive.sentiment.institutionalPositioning === "accumulating" ? "#39ff14" : dive.sentiment.institutionalPositioning === "distributing" ? "#ff2d55" : "#ffb800"],
+                          ["OPTIONS BIAS", dive.sentiment.optionsBias, dive.sentiment.optionsBias === "calls" ? "#39ff14" : dive.sentiment.optionsBias === "puts" ? "#ff2d55" : "#ffb800"],
+                        ].map(([label, val, color]) => (
+                          <div key={label} style={{ background: "#080f1a", border: "1px solid #1a2d47", borderRadius: 3, padding: "6px 8px", textAlign: "center" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: color || "#8aabb8" }}>{val || "—"}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Predictions */}
+                    {dive.predictions && (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 10 }}>
+                        {[["7 DAYS", dive.predictions.day7], ["14 DAYS", dive.predictions.day14], ["21 DAYS", dive.predictions.day21]].map(([label, pred]) => (
+                          <div key={label} style={{ background: "rgba(0,212,255,0.03)", border: "1px solid rgba(0,212,255,0.1)", borderRadius: 3, padding: "6px 8px", textAlign: "center" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
+                            <div style={{ fontSize: 10, color: "#e8f4ff" }}>{pred || "—"}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Trade recommendation */}
+                    {dive.trade?.thesis && (
+                      <div style={{ background: dive.trade.direction === "CALL" ? "rgba(57,255,20,0.05)" : "rgba(255,45,85,0.05)", border: `1px solid ${dive.trade.direction === "CALL" ? "rgba(57,255,20,0.3)" : "rgba(255,45,85,0.3)"}`, borderRadius: 4, padding: 12 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: dive.trade.direction === "CALL" ? "#39ff14" : "#ff2d55", letterSpacing: 2, marginBottom: 6 }}>EARNINGS TRADE RECOMMENDATION</div>
+                        <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: dive.trade.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{ticker} {dive.trade.direction}</span>
+                          {dive.trade.expiry && <span style={{ fontSize: 11, color: "#8aabb8", fontFamily: "monospace" }}>exp {dive.trade.expiry}</span>}
+                          <span style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 2, background: dive.trade.confidence === "HIGH" ? "rgba(57,255,20,0.1)" : "rgba(255,184,0,0.1)", color: dive.trade.confidence === "HIGH" ? "#39ff14" : "#ffb800" }}>{dive.trade.confidence}</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: "#c8dce8", lineHeight: 1.6, marginBottom: 6 }}>{dive.trade.thesis}</div>
+                        {dive.trade.risk && <div style={{ fontSize: 10, color: "#ff2d55", fontFamily: "monospace" }}>⚠ RISK: {dive.trade.risk}</div>}
+                      </div>
+                    )}
+
+                    {/* Domino stocks */}
+                    {dive.predictions?.dominoStocks && (
+                      <div style={{ marginTop: 10, fontSize: 10, color: "#8aabb8", fontFamily: "monospace" }}>
+                        DOMINO STOCKS when {ticker} reports: {dive.predictions.dominoStocks}
+                      </div>
+                    )}
+
+                    <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 8, fontFamily: "monospace" }}>
+                      Generated: {new Date(dive.timestamp).toLocaleString()}
+                      <button onClick={() => loadEarningsDive(ticker, true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳ refresh</button>
+                    </div>
+                  </div>
+                ))}
+
+                {Object.keys(earningsDive).length === 0 && !Object.values(loadingDive).some(Boolean) && (
+                  <div style={{ textAlign: "center", padding: 40, color: "#4a6d8c", fontSize: 11, fontFamily: "monospace" }}>Enter a ticker above or click a quick-access earnings stock to start deep dive analysis</div>
                 )}
               </div>
             )}
