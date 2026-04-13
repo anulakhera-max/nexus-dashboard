@@ -1061,6 +1061,22 @@ export default function NexusDashboard({ user, onLogout }) {
             </button>
           </div>
 
+          {/* Pipeline run button + status */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
+            <button onClick={runFullPipeline} disabled={pipelineRunning} style={{ background: pipelineRunning ? "#1a2d47" : "linear-gradient(135deg,#7b0000,#ff2d55)", color: pipelineRunning ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "7px 18px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: pipelineRunning ? "not-allowed" : "pointer", fontFamily: "monospace", flexShrink: 0 }}>
+              {pipelineRunning ? pipelineStage : "◎ RUN PIPELINE"}
+            </button>
+            {pipelineStatus && (
+              <div style={{ display: "flex", gap: 5, fontSize: 9, fontFamily: "monospace", flexWrap: "wrap" }}>
+                {[["DATA", pipelineStatus.dataLayer?.ready], ["PWR-A", pipelineStatus.powerIntelA?.ready], ["PWR-B", pipelineStatus.powerIntelB?.ready], ["PICKS", pipelineStatus.intelPicks?.ready], ["TRADES", pipelineStatus.trades?.ready]].map(([label, ready]) => (
+                  <span key={label} style={{ padding: "2px 6px", borderRadius: 2, background: ready ? "rgba(57,255,20,0.1)" : "rgba(74,109,140,0.1)", color: ready ? "#39ff14" : "#4a6d8c", border: `1px solid ${ready ? "rgba(57,255,20,0.3)" : "rgba(74,109,140,0.2)"}` }}>{label}</span>
+                ))}
+                {pipelineStatus.dataLayer?.topGainer && <span style={{ color: "#39ff14", fontSize: 9 }}>↑{pipelineStatus.dataLayer.topGainer}</span>}
+                {pipelineStatus.dataLayer?.topLoser && <span style={{ color: "#ff2d55", fontSize: 9 }}>↓{pipelineStatus.dataLayer.topLoser}</span>}
+              </div>
+            )}
+          </div>
+
           {/* Daily movers strip */}
           {movers && Array.isArray(movers.gainers) && Array.isArray(movers.losers) && (movers.gainers.length > 0 || movers.losers.length > 0) && (
             <div style={{ display: "flex", gap: 5, flexWrap: "wrap", padding: "4px 0 4px", alignItems: "center", borderBottom: "1px solid rgba(26,45,71,0.6)", marginBottom: 4 }}>
