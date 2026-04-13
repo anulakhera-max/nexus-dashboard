@@ -246,6 +246,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [earnings, setEarnings] = useState([]);
   const [unusualFlow, setUnusualFlow] = useState(null);
   const [movers, setMovers] = useState(null);
+  const [warRipple, setWarRipple] = useState(null);
+  const [loadingWar, setLoadingWar] = useState(false);
+  const [warError, setWarError] = useState(null);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -622,6 +625,17 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadWarRipple = async (force = false) => {
+    setLoadingWar(true); setWarError(null);
+    try {
+      const res = await fetch(nexusUrl + "/api/war-ripple" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setWarRipple(data);
+      else setWarError(data.error || "Failed");
+    } catch (err) { setWarError(err.message); }
+    setLoadingWar(false);
   };
 
   const loadMovers = async () => {
@@ -1058,6 +1072,9 @@ export default function NexusDashboard({ user, onLogout }) {
             </button>
             <button style={{ background: tab === "flow" ? "rgba(178,79,255,0.15)" : "transparent", color: tab === "flow" ? "#b24fff" : "#4a6d8c", border: tab === "flow" ? "1px solid rgba(178,79,255,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("flow"); if (!unusualFlow) loadUnusualFlow(); }}>
               ⚡ FLOW
+            </button>
+            <button style={{ background: tab === "war" ? "rgba(255,60,0,0.15)" : "transparent", color: tab === "war" ? "#ff3c00" : "#4a6d8c", border: tab === "war" ? "1px solid rgba(255,60,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("war"); if (!warRipple) loadWarRipple(); }}>
+              ☢ WAR
             </button>
           </div>
 
@@ -2237,6 +2254,179 @@ export default function NexusDashboard({ user, onLogout }) {
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 12, fontFamily: "monospace" }}>
                       Scanned: {new Date(unusualFlow.timestamp).toLocaleString()} · Vol/OI threshold: 3x+ · Min premium: $10K · {unusualFlow.qtPowered ? "Powered by Questrade live data" : "Powered by GDELT signals (connect Questrade for live data)"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* WAR RIPPLE TAB */}
+            {tab === "war" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                <div style={{ background: "linear-gradient(135deg,rgba(255,60,0,0.1),rgba(255,60,0,0.03))", border: "1px solid rgba(255,60,0,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff3c00", letterSpacing: 3, marginBottom: 4 }}>☢ WAR RIPPLE ENGINE</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Iran-Israel-US conflict → full economic cascade → 7/14/21 day predictions</div>
+                  </div>
+                  <button onClick={() => loadWarRipple(true)} disabled={loadingWar} style={{ background: loadingWar ? "#1a2d47" : "rgba(255,60,0,0.15)", border: "1px solid rgba(255,60,0,0.4)", color: loadingWar ? "#4a6d8c" : "#ff3c00", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingWar ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                    {loadingWar ? "ANALYZING..." : "☢ ANALYZE NOW"}
+                  </button>
+                </div>
+
+                {warError && <div style={{ padding: 12, background: "rgba(255,60,0,0.1)", border: "1px solid rgba(255,60,0,0.3)", borderRadius: 4, color: "#ff6b35", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>⚠ {warError}</div>}
+
+                {!warRipple && !loadingWar && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>☢</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ff3c00", letterSpacing: 3, marginBottom: 8 }}>WAR RIPPLE ANALYSIS</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Maps the full economic cascade from the Iran-Israel-US conflict to specific stocks with 7/14/21 day predictions</div>
+                    <button onClick={() => loadWarRipple(true)} style={{ background: "rgba(255,60,0,0.15)", border: "1px solid rgba(255,60,0,0.4)", color: "#ff3c00", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>☢ ANALYZE WAR RIPPLE</button>
+                  </div>
+                )}
+
+                {warRipple && (
+                  <div>
+                    {/* War status header */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 16 }}>
+                      {[
+                        ["WAR STATUS", warRipple.warStatus?.toUpperCase(), warRipple.warStatus === "escalating" ? "#ff2d55" : warRipple.warStatus === "de-escalating" ? "#39ff14" : "#ffb800"],
+                        ["HORMUZ", warRipple.hormuz?.status?.toUpperCase(), warRipple.hormuz?.status === "closed" ? "#ff2d55" : warRipple.hormuz?.status === "threatened" ? "#ffb800" : "#39ff14"],
+                        ["OIL TREND", warRipple.oil?.direction?.toUpperCase(), warRipple.oil?.direction === "rising" ? "#ff2d55" : warRipple.oil?.direction === "falling" ? "#39ff14" : "#ffb800"],
+                        ["CLOSURE RISK", warRipple.hormuz?.closureProbability, "#ff3c00"],
+                      ].map(([label, val, color]) => (
+                        <div key={label} style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.2)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 4 }}>{label}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color }}>{val || "—"}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Who needs this war */}
+                    {warRipple.warGoodForPower && (
+                      <div style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.3)", borderRadius: 4, padding: 14, marginBottom: 14 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", letterSpacing: 2, marginBottom: 8 }}>☢ WHO NEEDS THIS WAR</div>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: "#e8f4ff", marginBottom: 6 }}>{warRipple.warGoodForPower}</div>
+                        <div style={{ fontSize: 11, color: "#8aabb8", lineHeight: 1.6 }}>{warRipple.warSurvivalThesis}</div>
+                      </div>
+                    )}
+
+                    {/* Objectives */}
+                    {warRipple.objectives && (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+                        {[["🇮🇷 IRAN", warRipple.objectives.iran], ["🇮🇱 ISRAEL", warRipple.objectives.israel], ["🇺🇸 US", warRipple.objectives.us], ["🇷🇺 RUSSIA", warRipple.objectives.russia]].filter(([,v]) => v).map(([label, val]) => (
+                          <div key={label} style={{ background: "#080f1a", border: "1px solid #1a2d47", borderRadius: 4, padding: "8px 12px" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 4 }}>{label} OBJECTIVE</div>
+                            <div style={{ fontSize: 11, color: "#c8dce8", lineHeight: 1.5 }}>{val}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Oil predictions */}
+                    <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
+                      {[["7-DAY OIL TARGET", warRipple.oil?.target7d], ["21-DAY OIL TARGET", warRipple.oil?.target21d]].filter(([,v]) => v).map(([label, val]) => (
+                        <div key={label} style={{ flex: 1, minWidth: 120, background: "#080f1a", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 4, padding: "8px 12px", textAlign: "center" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 4 }}>{label}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 700, color: "#ffb800" }}>{val}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Ripple layers */}
+                    {warRipple.rippleLayers?.length > 0 && (
+                      <div style={{ marginBottom: 16 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", letterSpacing: 3, marginBottom: 10 }}>ECONOMIC CASCADE — LAYER BY LAYER</div>
+                        {warRipple.rippleLayers.map((layer, i) => (
+                          <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.15)", borderRadius: 4, padding: 12, marginBottom: 8 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ff3c00" }}>LAYER {layer.layer} — {layer.event}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{layer.timing}</span>
+                            </div>
+                            <div style={{ display: "flex", gap: 12 }}>
+                              {layer.stocksUp?.length > 0 && (
+                                <div>
+                                  <div style={{ fontSize: 9, fontFamily: "monospace", color: "#39ff14", marginBottom: 3 }}>CALLS →</div>
+                                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                                    {layer.stocksUp.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>{t}</span>)}
+                                  </div>
+                                </div>
+                              )}
+                              {layer.stocksDown?.length > 0 && (
+                                <div>
+                                  <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ff2d55", marginBottom: 3 }}>PUTS →</div>
+                                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                                    {layer.stocksDown.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>{t}</span>)}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Highest conviction */}
+                    {warRipple.highestConviction?.ticker && (
+                      <div style={{ background: "rgba(255,60,0,0.08)", border: "2px solid rgba(255,60,0,0.4)", borderRadius: 6, padding: 14, marginBottom: 16 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", letterSpacing: 2, marginBottom: 8 }}>☢ HIGHEST CONVICTION WAR PLAY</div>
+                        <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 8 }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 700, color: warRipple.highestConviction.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{warRipple.highestConviction.ticker}</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 11, padding: "3px 10px", borderRadius: 3, background: warRipple.highestConviction.direction === "CALL" ? "rgba(57,255,20,0.1)" : "rgba(255,45,85,0.1)", color: warRipple.highestConviction.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{warRipple.highestConviction.direction}</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: "#c8dce8", lineHeight: 1.6 }}>{warRipple.highestConviction.reason}</div>
+                      </div>
+                    )}
+
+                    {/* 7/14/21 predictions */}
+                    {warRipple.predictions && (
+                      <div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", letterSpacing: 3, marginBottom: 10 }}>STRUCTURED PREDICTIONS</div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
+                          {[["7 DAYS", warRipple.predictions.day7], ["14 DAYS", warRipple.predictions.day14], ["21 DAYS", warRipple.predictions.day21]].map(([label, pred]) => (
+                            <div key={label} style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.2)", borderRadius: 4, padding: 10 }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", marginBottom: 8 }}>{label}</div>
+                              <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 2 }}>OIL</div>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: "#ffb800", marginBottom: 6 }}>{pred?.oilPrice || "—"}</div>
+                              <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 2 }}>SPY</div>
+                              <div style={{ fontSize: 12, fontWeight: 700, color: pred?.spyDirection === "up" ? "#39ff14" : pred?.spyDirection === "down" ? "#ff2d55" : "#ffb800", marginBottom: 6 }}>{pred?.spyDirection?.toUpperCase()} {pred?.spyTarget}</div>
+                              <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 2 }}>BEST PLAY</div>
+                              <div style={{ fontSize: 11, color: "#e8f4ff", marginBottom: 4 }}>{pred?.bestPlay || "—"}</div>
+                              <div style={{ fontSize: 9, fontFamily: "monospace", color: pred?.confidence === "HIGH" ? "#39ff14" : pred?.confidence === "MEDIUM" ? "#ffb800" : "#4a6d8c" }}>{pred?.confidence}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Scenario probabilities */}
+                        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                          {[["ESCALATION", warRipple.predictions.scenarioProbabilities?.escalation, "#ff2d55"], ["DE-ESCALATION", warRipple.predictions.scenarioProbabilities?.deescalation, "#39ff14"], ["BLACK SWAN", warRipple.predictions.scenarioProbabilities?.blackSwan, "#b24fff"]].map(([label, prob, color]) => (
+                            <div key={label} style={{ flex: 1, background: "#080f1a", border: `1px solid ${color}30`, borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 4 }}>{label}</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color }}>{prob || "—"}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Domino chain */}
+                        {warRipple.predictions.dominoChain && (
+                          <div style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.2)", borderRadius: 4, padding: 12 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff3c00", letterSpacing: 2, marginBottom: 6 }}>DOMINO CHAIN — IF ESCALATION</div>
+                            <div style={{ fontSize: 11, color: "#c8dce8", lineHeight: 1.7 }}>{warRipple.predictions.dominoChain}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Wildcard */}
+                    {warRipple.wildcard?.event && (
+                      <div style={{ marginTop: 12, background: "rgba(178,79,255,0.05)", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 4, padding: 12 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#b24fff", letterSpacing: 2, marginBottom: 6 }}>⚡ WILDCARD EVENT</div>
+                        <div style={{ fontSize: 12, color: "#e8f4ff", marginBottom: 4 }}>{warRipple.wildcard.event}</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff" }}>Probability: {warRipple.wildcard.probability}</div>
+                      </div>
+                    )}
+
+                    <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 12, fontFamily: "monospace" }}>
+                      Generated: {new Date(warRipple.timestamp).toLocaleString()} · War signals injected into pipeline scoring (2x boost)
                     </div>
                   </div>
                 )}
