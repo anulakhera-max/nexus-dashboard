@@ -255,6 +255,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [earningsDive, setEarningsDive] = useState({});
   const [loadingDive, setLoadingDive] = useState({});
   const [diveSearch, setDiveSearch] = useState("");
+  const [rippleChain, setRippleChain] = useState(null);
+  const [loadingRipple, setLoadingRipple] = useState(false);
+  const [rippleInput, setRippleInput] = useState("");
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -631,6 +634,17 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadRippleChain = async (event, force = false) => {
+    setLoadingRipple(true);
+    try {
+      const url = nexusUrl + "/api/ripple-chain" + (event ? "?event=" + encodeURIComponent(event) : "?event=auto") + (force ? "&force=true" : "");
+      const res = await fetch(url, { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setRippleChain(data);
+    } catch {}
+    setLoadingRipple(false);
   };
 
   const loadEarningsDive = async (ticker, force = false) => {
@@ -1109,6 +1123,9 @@ export default function NexusDashboard({ user, onLogout }) {
             </button>
             <button style={{ background: tab === "earnings" ? "rgba(0,212,255,0.15)" : "transparent", color: tab === "earnings" ? "#00d4ff" : "#4a6d8c", border: tab === "earnings" ? "1px solid rgba(0,212,255,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => handleTab("earnings")}>
               📊 EARNINGS
+            </button>
+            <button style={{ background: tab === "ripple" ? "rgba(0,255,136,0.15)" : "transparent", color: tab === "ripple" ? "#00ff88" : "#4a6d8c", border: tab === "ripple" ? "1px solid rgba(0,255,136,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => handleTab("ripple")}>
+              🌊 RIPPLE
             </button>
           </div>
 
@@ -2288,6 +2305,115 @@ export default function NexusDashboard({ user, onLogout }) {
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 12, fontFamily: "monospace" }}>
                       Scanned: {new Date(unusualFlow.timestamp).toLocaleString()} · Vol/OI threshold: 3x+ · Min premium: $10K · {unusualFlow.qtPowered ? "Powered by Questrade live data" : "Powered by GDELT signals (connect Questrade for live data)"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* RIPPLE CHAIN TAB */}
+            {tab === "ripple" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                <div style={{ background: "linear-gradient(135deg,rgba(0,255,136,0.08),rgba(0,255,136,0.02))", border: "1px solid rgba(0,255,136,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16 }}>
+                  <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00ff88", letterSpacing: 3, marginBottom: 4 }}>🌊 RIPPLE CHAIN ENGINE</div>
+                  <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 12 }}>Any event → full domino chain → historical pattern matching → 7/14/21 day predictions → contrarian plays</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input value={rippleInput} onChange={e => setRippleInput(e.target.value)} placeholder="Enter event (e.g. 'Fed raises rates') or leave blank for auto-detect" style={{ background: "#0d1829", border: "1px solid rgba(0,255,136,0.3)", color: "#e8f4ff", borderRadius: 3, padding: "8px 12px", fontSize: 12, fontFamily: "monospace", flex: 1, outline: "none" }} onKeyDown={e => { if (e.key === "Enter") loadRippleChain(rippleInput, true); }} />
+                    <button onClick={() => loadRippleChain(rippleInput, true)} disabled={loadingRipple} style={{ background: loadingRipple ? "#1a2d47" : "rgba(0,255,136,0.15)", border: "1px solid rgba(0,255,136,0.4)", color: loadingRipple ? "#4a6d8c" : "#00ff88", borderRadius: 3, padding: "8px 18px", fontSize: 11, fontWeight: 700, cursor: loadingRipple ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                      {loadingRipple ? "MAPPING..." : "🌊 MAP CHAIN"}
+                    </button>
+                  </div>
+                </div>
+
+                {!rippleChain && !loadingRipple && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>🌊</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#00ff88", letterSpacing: 3, marginBottom: 8 }}>DOMINO CHAIN MAPPER</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Enter any event or click below for auto-detect from today's headlines</div>
+                    <button onClick={() => loadRippleChain("", true)} style={{ background: "rgba(0,255,136,0.15)", border: "1px solid rgba(0,255,136,0.4)", color: "#00ff88", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>🌊 AUTO-DETECT & MAP</button>
+                  </div>
+                )}
+
+                {rippleChain && (
+                  <div>
+                    {/* Event header */}
+                    <div style={{ background: "#080f1a", border: "1px solid rgba(0,255,136,0.3)", borderRadius: 6, padding: 14, marginBottom: 16 }}>
+                      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
+                        <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00ff88" }}>{rippleChain.eventAnalyzed}</span>
+                        {rippleChain.eventType && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 8px", borderRadius: 2, background: "rgba(0,255,136,0.1)", color: "#00ff88" }}>{rippleChain.eventType.toUpperCase()}</span>}
+                        {rippleChain.eventSeverity && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 8px", borderRadius: 2, background: rippleChain.eventSeverity === "systemic" ? "rgba(255,45,85,0.15)" : "rgba(255,184,0,0.1)", color: rippleChain.eventSeverity === "systemic" ? "#ff2d55" : "#ffb800" }}>{rippleChain.eventSeverity.toUpperCase()}</span>}
+                      </div>
+                    </div>
+
+                    {/* Domino chain */}
+                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00ff88", letterSpacing: 3, marginBottom: 10 }}>DOMINO CHAIN — TIMEFRAME BY TIMEFRAME</div>
+                    {rippleChain.chain?.map((c, i) => (
+                      <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(0,255,136,0.1)", borderRadius: 4, padding: 12, marginBottom: 8, borderLeft: "3px solid " + (i === 0 ? "#ff2d55" : i === 1 ? "#ffb800" : i === 2 ? "#00d4ff" : "#00ff88") }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: i === 0 ? "#ff2d55" : i === 1 ? "#ffb800" : i === 2 ? "#00d4ff" : "#00ff88", marginBottom: 6 }}>{c.timeframe}</div>
+                        <div style={{ fontSize: 11, color: "#c8dce8", lineHeight: 1.6, marginBottom: 8 }}>{c.description}</div>
+                        <div style={{ display: "flex", gap: 16 }}>
+                          {c.stocksUp?.length > 0 && <div><div style={{ fontSize: 9, fontFamily: "monospace", color: "#39ff14", marginBottom: 3 }}>CALLS →</div><div style={{ display: "flex", gap: 4 }}>{c.stocksUp.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>{t}</span>)}</div></div>}
+                          {c.stocksDown?.length > 0 && <div><div style={{ fontSize: 9, fontFamily: "monospace", color: "#ff2d55", marginBottom: 3 }}>PUTS →</div><div style={{ display: "flex", gap: 4 }}>{c.stocksDown.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>{t}</span>)}</div></div>}
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Surprises */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+                      {rippleChain.unexpectedWinner && <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 10 }}><div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 4 }}>UNEXPECTED WINNER</div><div style={{ fontSize: 11, color: "#c8dce8" }}>{rippleChain.unexpectedWinner}</div></div>}
+                      {rippleChain.unexpectedLoser && <div style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: 10 }}><div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 4 }}>UNEXPECTED LOSER</div><div style={{ fontSize: 11, color: "#c8dce8" }}>{rippleChain.unexpectedLoser}</div></div>}
+                    </div>
+
+                    {/* Feedback loop + circuit breaker */}
+                    {(rippleChain.feedbackLoop || rippleChain.circuitBreaker) && (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+                        {rippleChain.feedbackLoop && <div style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.2)", borderRadius: 4, padding: 10 }}><div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff3c00", marginBottom: 4 }}>FEEDBACK LOOP</div><div style={{ fontSize: 11, color: "#c8dce8" }}>{rippleChain.feedbackLoop}</div></div>}
+                        {rippleChain.circuitBreaker && <div style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 10 }}><div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 4 }}>CIRCUIT BREAKER</div><div style={{ fontSize: 11, color: "#c8dce8" }}>{rippleChain.circuitBreaker}</div></div>}
+                      </div>
+                    )}
+
+                    {/* Highest conviction */}
+                    {rippleChain.highestConvictionPlay && (
+                      <div style={{ background: "rgba(0,255,136,0.05)", border: "2px solid rgba(0,255,136,0.3)", borderRadius: 6, padding: 12, marginBottom: 14 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00ff88", letterSpacing: 2, marginBottom: 6 }}>🌊 HIGHEST CONVICTION RIPPLE PLAY</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#00ff88" }}>{rippleChain.highestConvictionPlay}</div>
+                      </div>
+                    )}
+
+                    {/* Historical pattern */}
+                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00ff88", letterSpacing: 3, marginBottom: 10 }}>HISTORICAL PATTERN MATCHING</div>
+                    <div style={{ background: "#080f1a", border: "1px solid rgba(0,255,136,0.15)", borderRadius: 4, padding: 14, marginBottom: 14 }}>
+                      {rippleChain.historicalAnalogue && <div style={{ marginBottom: 8 }}><span style={{ fontFamily: "monospace", fontSize: 10, color: "#00ff88" }}>ANALOGUE: </span><span style={{ fontSize: 12, color: "#e8f4ff" }}>{rippleChain.historicalAnalogue}</span>{rippleChain.patternRepeatProbability && <span style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", marginLeft: 8 }}>{rippleChain.patternRepeatProbability} repeat chance</span>}</div>}
+                      {rippleChain.whatHappenedThen && <div style={{ fontSize: 11, color: "#8aabb8", lineHeight: 1.6, marginBottom: 8 }}>{rippleChain.whatHappenedThen}</div>}
+                      {rippleChain.keyDifference && <div style={{ fontSize: 11, color: "#ffb800", marginBottom: 6 }}>KEY DIFFERENCE: {rippleChain.keyDifference}</div>}
+                      {rippleChain.naturalPattern && <div style={{ fontSize: 11, color: "#8aabb8" }}>NATURAL CYCLE: {rippleChain.naturalPattern}</div>}
+                    </div>
+
+                    {/* Psychology */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
+                      {[["SMART MONEY", rippleChain.smartMoneyMove, "#39ff14"], ["RETAIL TRAP", rippleChain.retailTrap, "#ff2d55"], ["CONTRARIAN", rippleChain.contrarianView, "#b24fff"]].map(([label, val, color]) => val ? (
+                        <div key={label} style={{ background: "#080f1a", border: `1px solid ${color}25`, borderRadius: 4, padding: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color, marginBottom: 4 }}>{label}</div>
+                          <div style={{ fontSize: 10, color: "#c8dce8", lineHeight: 1.5 }}>{val}</div>
+                        </div>
+                      ) : null)}
+                    </div>
+
+                    {/* Predictions */}
+                    {rippleChain.predictions && (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
+                        {[["7 DAYS", rippleChain.predictions.day7], ["14 DAYS", rippleChain.predictions.day14], ["21 DAYS", rippleChain.predictions.day21]].map(([label, val]) => val ? (
+                          <div key={label} style={{ background: "rgba(0,255,136,0.04)", border: "1px solid rgba(0,255,136,0.15)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 4 }}>{label}</div>
+                            <div style={{ fontSize: 10, color: "#e8f4ff" }}>{val}</div>
+                          </div>
+                        ) : null)}
+                      </div>
+                    )}
+
+                    <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>
+                      Generated: {new Date(rippleChain.timestamp).toLocaleString()} · Ripple signals injected into pipeline scoring (1.5x boost)
+                      <button onClick={() => loadRippleChain(rippleInput, true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳ refresh</button>
                     </div>
                   </div>
                 )}
