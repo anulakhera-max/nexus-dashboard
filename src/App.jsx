@@ -258,6 +258,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [rippleChain, setRippleChain] = useState(null);
   const [loadingRipple, setLoadingRipple] = useState(false);
   const [rippleInput, setRippleInput] = useState("");
+  const [patternMemory, setPatternMemory] = useState(null);
+  const [loadingPattern, setLoadingPattern] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -634,6 +636,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadPatternMemory = async (force = false) => {
+    setLoadingPattern(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/pattern-memory" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setPatternMemory(data);
+    } catch {}
+    setLoadingPattern(false);
   };
 
   const loadRippleChain = async (event, force = false) => {
@@ -1126,6 +1138,9 @@ export default function NexusDashboard({ user, onLogout }) {
             </button>
             <button style={{ background: tab === "ripple" ? "rgba(0,255,136,0.15)" : "transparent", color: tab === "ripple" ? "#00ff88" : "#4a6d8c", border: tab === "ripple" ? "1px solid rgba(0,255,136,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => handleTab("ripple")}>
               🌊 RIPPLE
+            </button>
+            <button style={{ background: tab === "pattern" ? "rgba(255,215,0,0.15)" : "transparent", color: tab === "pattern" ? "#ffd700" : "#4a6d8c", border: tab === "pattern" ? "1px solid rgba(255,215,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("pattern"); if (!patternMemory) loadPatternMemory(); }}>
+              🧠 PATTERN
             </button>
           </div>
 
@@ -2306,6 +2321,180 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 12, fontFamily: "monospace" }}>
                       Scanned: {new Date(unusualFlow.timestamp).toLocaleString()} · Vol/OI threshold: 3x+ · Min premium: $10K · {unusualFlow.qtPowered ? "Powered by Questrade live data" : "Powered by GDELT signals (connect Questrade for live data)"}
                     </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PATTERN MEMORY TAB */}
+            {tab === "pattern" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                <div style={{ background: "linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02))", border: "1px solid rgba(255,215,0,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffd700", letterSpacing: 3, marginBottom: 4 }}>🧠 PATTERN MEMORY</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Learns from YOUR win/loss history — identifies recurring setups, feeds patterns back into pipeline scoring</div>
+                  </div>
+                  <button onClick={() => loadPatternMemory(true)} disabled={loadingPattern} style={{ background: loadingPattern ? "#1a2d47" : "rgba(255,215,0,0.15)", border: "1px solid rgba(255,215,0,0.4)", color: loadingPattern ? "#4a6d8c" : "#ffd700", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingPattern ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                    {loadingPattern ? "ANALYZING..." : "🧠 ANALYZE PATTERNS"}
+                  </button>
+                </div>
+
+                {!patternMemory && !loadingPattern && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>🧠</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ffd700", letterSpacing: 3, marginBottom: 8 }}>PATTERN MEMORY ENGINE</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 8 }}>Analyzes your complete pick history to find recurring winning setups</div>
+                    <div style={{ fontSize: 11, color: "#4a6d8c", marginBottom: 24 }}>Needs 5+ logged picks. Run the pipeline daily and log outcomes to build memory.</div>
+                    <button onClick={() => loadPatternMemory(true)} style={{ background: "rgba(255,215,0,0.15)", border: "1px solid rgba(255,215,0,0.4)", color: "#ffd700", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>🧠 ANALYZE NOW</button>
+                  </div>
+                )}
+
+                {patternMemory && (
+                  <div>
+                    {/* Not enough data yet */}
+                    {patternMemory.message && (
+                      <div style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: 4, padding: 16, textAlign: "center" }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 12, color: "#ffd700", marginBottom: 6 }}>{patternMemory.message}</div>
+                        <div style={{ fontSize: 11, color: "#4a6d8c" }}>{patternMemory.picksLogged} picks logged so far. Keep running the pipeline and logging outcomes.</div>
+                      </div>
+                    )}
+
+                    {/* Summary stats */}
+                    {patternMemory.summary && (
+                      <div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 14 }}>
+                          {[
+                            ["OVERALL WIN RATE", patternMemory.summary.overallWinRate !== null ? patternMemory.summary.overallWinRate + "%" : "—", patternMemory.summary.overallWinRate >= 60 ? "#39ff14" : patternMemory.summary.overallWinRate >= 40 ? "#ffb800" : "#ff2d55"],
+                            ["RECENT WIN RATE", patternMemory.summary.recentWinRate !== null ? patternMemory.summary.recentWinRate + "%" : "—", patternMemory.summary.recentWinRate >= 60 ? "#39ff14" : "#ffb800"],
+                            ["CALL WIN RATE", patternMemory.summary.callWinRate !== null ? patternMemory.summary.callWinRate + "%" : "—", "#39ff14"],
+                            ["PUT WIN RATE", patternMemory.summary.putWinRate !== null ? patternMemory.summary.putWinRate + "%" : "—", "#ff2d55"],
+                          ].map(([label, val, color]) => (
+                            <div key={label} style={{ background: "#080f1a", border: "1px solid rgba(255,215,0,0.15)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 4 }}>{label}</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color }}>{val}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Score correlation */}
+                        {patternMemory.summary.avgWinScore && (
+                          <div style={{ background: "#080f1a", border: "1px solid rgba(255,215,0,0.15)", borderRadius: 4, padding: 10, marginBottom: 14, display: "flex", gap: 20 }}>
+                            <div><div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 3 }}>AVG WIN SCORE</div><div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#39ff14" }}>{patternMemory.summary.avgWinScore}</div></div>
+                            <div><div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 3 }}>AVG LOSS SCORE</div><div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ff2d55" }}>{patternMemory.summary.avgLossScore}</div></div>
+                            <div style={{ fontSize: 11, color: "#8aabb8", alignSelf: "center" }}>Picks scoring above {patternMemory.summary.avgWinScore} win significantly more often</div>
+                          </div>
+                        )}
+
+                        {/* Sector win rates */}
+                        {patternMemory.sectorWinRates?.length > 0 && (
+                          <div style={{ marginBottom: 14 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffd700", letterSpacing: 2, marginBottom: 8 }}>SECTOR WIN RATES</div>
+                            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                              {patternMemory.sectorWinRates.map(s => (
+                                <div key={s.sector} style={{ background: "#080f1a", border: `1px solid ${s.winRate >= 60 ? "rgba(57,255,20,0.2)" : s.winRate >= 40 ? "rgba(255,184,0,0.2)" : "rgba(255,45,85,0.2)"}`, borderRadius: 3, padding: "6px 10px", textAlign: "center" }}>
+                                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 2 }}>{s.sector}</div>
+                                  <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: s.winRate >= 60 ? "#39ff14" : s.winRate >= 40 ? "#ffb800" : "#ff2d55" }}>{s.winRate}%</div>
+                                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>{s.wins}/{s.total}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Winning patterns */}
+                        {patternMemory.patterns?.winningSetup1?.description && (
+                          <div style={{ marginBottom: 14 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffd700", letterSpacing: 2, marginBottom: 8 }}>RECURRING WINNING SETUPS</div>
+                            {[patternMemory.patterns.winningSetup1, patternMemory.patterns.winningSetup2].filter(s => s?.description).map((setup, i) => (
+                              <div key={i} style={{ background: "rgba(57,255,20,0.04)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 12, marginBottom: 8 }}>
+                                <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>SETUP {i+1}</span>
+                                  <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: setup.confidence === "HIGH" ? "rgba(57,255,20,0.1)" : "rgba(255,184,0,0.1)", color: setup.confidence === "HIGH" ? "#39ff14" : "#ffb800" }}>{setup.confidence}</span>
+                                </div>
+                                <div style={{ fontSize: 11, color: "#c8dce8", lineHeight: 1.6, marginBottom: 6 }}>{setup.description}</div>
+                                {setup.tickers?.length > 0 && (
+                                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                                    <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>NOW:</span>
+                                    {setup.tickers.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>{t}</span>)}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Losing patterns to avoid */}
+                        {patternMemory.patterns?.losingPattern1 && (
+                          <div style={{ marginBottom: 14 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff2d55", letterSpacing: 2, marginBottom: 8 }}>PATTERNS TO AVOID</div>
+                            {[patternMemory.patterns.losingPattern1, patternMemory.patterns.losingPattern2].filter(Boolean).map((p, i) => (
+                              <div key={i} style={{ background: "rgba(255,45,85,0.04)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: 10, marginBottom: 6 }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginRight: 8 }}>AVOID {i+1}</span>
+                                <span style={{ fontSize: 11, color: "#c8dce8" }}>{p}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Recommendations */}
+                        {patternMemory.recommendations && (
+                          <div style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: 6, padding: 14, marginBottom: 14 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffd700", letterSpacing: 2, marginBottom: 12 }}>🧠 PIPELINE FEEDBACK ACTIVE — PATTERN WEIGHTS</div>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 10 }}>
+                              {[["BEST SECTOR", patternMemory.recommendations.bestSector], ["BEST DIRECTION", patternMemory.recommendations.bestDirection], ["BEST URGENCY", patternMemory.recommendations.bestUrgency]].map(([label, val]) => val && (
+                                <div key={label} style={{ textAlign: "center" }}>
+                                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
+                                  <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffd700" }}>{val}</div>
+                                </div>
+                              ))}
+                            </div>
+                            {patternMemory.recommendations.nextBestSetup && (
+                              <div style={{ marginBottom: 10 }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ffd700", marginBottom: 4 }}>NEXT IDEAL SETUP</div>
+                                <div style={{ fontSize: 11, color: "#c8dce8", lineHeight: 1.6 }}>{patternMemory.recommendations.nextBestSetup}</div>
+                              </div>
+                            )}
+                            {patternMemory.recommendations.nextBestTickers?.length > 0 && (
+                              <div style={{ marginBottom: 10 }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ffd700", marginBottom: 4 }}>TICKERS MATCHING IDEAL SETUP</div>
+                                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                  {patternMemory.recommendations.nextBestTickers.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 11, padding: "2px 8px", borderRadius: 2, background: "rgba(255,215,0,0.1)", color: "#ffd700" }}>{t}</span>)}
+                                </div>
+                              </div>
+                            )}
+                            {patternMemory.recommendations.accuracyEstimate && (
+                              <div style={{ fontFamily: "monospace", fontSize: 11, color: "#39ff14", marginBottom: 6 }}>ACCURACY ESTIMATE: {patternMemory.recommendations.accuracyEstimate}</div>
+                            )}
+                            {patternMemory.recommendations.improvementSuggestion && (
+                              <div style={{ fontSize: 11, color: "#ffb800" }}>💡 {patternMemory.recommendations.improvementSuggestion}</div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Human + seasonal patterns */}
+                        {(patternMemory.recommendations?.humanPattern || patternMemory.recommendations?.seasonalPattern) && (
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
+                            {patternMemory.recommendations.humanPattern && (
+                              <div style={{ background: "#080f1a", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 4, padding: 10 }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 9, color: "#b24fff", marginBottom: 4 }}>HUMAN BEHAVIORAL PATTERN</div>
+                                <div style={{ fontSize: 11, color: "#c8dce8" }}>{patternMemory.recommendations.humanPattern}</div>
+                              </div>
+                            )}
+                            {patternMemory.recommendations.seasonalPattern && (
+                              <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 4, padding: 10 }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", marginBottom: 4 }}>SEASONAL / CYCLE PATTERN</div>
+                                <div style={{ fontSize: 11, color: "#c8dce8" }}>{patternMemory.recommendations.seasonalPattern}</div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>
+                          Analyzed: {new Date(patternMemory.timestamp).toLocaleString()} · Pattern weights injected into pipeline (4x boost for matching setups)
+                          <button onClick={() => loadPatternMemory(true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳ refresh</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
