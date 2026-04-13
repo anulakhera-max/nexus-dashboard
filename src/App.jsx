@@ -1062,18 +1062,18 @@ export default function NexusDashboard({ user, onLogout }) {
           </div>
 
           {/* Daily movers strip */}
-          {movers && (movers.gainers?.length > 0 || movers.losers?.length > 0) && (
+          {movers && Array.isArray(movers.gainers) && Array.isArray(movers.losers) && (movers.gainers.length > 0 || movers.losers.length > 0) && (
             <div style={{ display: "flex", gap: 5, flexWrap: "wrap", padding: "4px 0 4px", alignItems: "center", borderBottom: "1px solid rgba(26,45,71,0.6)", marginBottom: 4 }}>
               <span style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", letterSpacing: 2, flexShrink: 0 }}>TOP GAIN:</span>
               {(movers.gainers || []).slice(0, 5).map(g => (
                 <span key={g.ticker} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: "rgba(57,255,20,0.1)", color: "#39ff14", border: "1px solid rgba(57,255,20,0.25)" }}>
-                  {g.ticker} +{g.changePct?.toFixed(1)}% {g.volRatio > 2 ? g.volRatio + "x vol" : ""}
+                  {g.ticker} +{g.changePct != null ? Number(g.changePct).toFixed(1) : "?"}% {g.volRatio > 2 ? g.volRatio + "x" : ""}
                 </span>
               ))}
               <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", letterSpacing: 2, flexShrink: 0, marginLeft: 8 }}>TOP LOSS:</span>
               {(movers.losers || []).slice(0, 5).map(l => (
                 <span key={l.ticker} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55", border: "1px solid rgba(255,45,85,0.25)" }}>
-                  {l.ticker} {l.changePct?.toFixed(1)}%
+                  {l.ticker} {l.changePct != null ? Number(l.changePct).toFixed(1) : "?"}%
                 </span>
               ))}
             </div>
@@ -1096,7 +1096,7 @@ export default function NexusDashboard({ user, onLogout }) {
             {tab === "events" && (
               <>
                 {/* Daily Movers Analysis */}
-                {movers && (movers.gainers?.length > 0 || movers.losers?.length > 0) && (
+                {movers && Array.isArray(movers.gainers) && Array.isArray(movers.losers) && (movers.gainers.length > 0 || movers.losers.length > 0) && (
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d8c", letterSpacing: 3, marginBottom: 10 }}>TODAY'S MARKET MOVERS — VOLUME ANALYSIS</div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -1107,7 +1107,7 @@ export default function NexusDashboard({ user, onLogout }) {
                           <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.15)", borderRadius: 3, padding: "8px 10px", marginBottom: 6 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14" }}>{g.ticker}</span>
-                              <span style={{ fontFamily: "monospace", fontSize: 12, color: "#39ff14" }}>+{g.changePct?.toFixed(1)}%</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 12, color: "#39ff14" }}>+{g.changePct != null ? Number(g.changePct).toFixed(1) : "?"}%</span>
                             </div>
                             <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 2 }}>{g.name}</div>
                             <div style={{ display: "flex", gap: 10, marginTop: 4, fontSize: 9, fontFamily: "monospace" }}>
@@ -1124,7 +1124,7 @@ export default function NexusDashboard({ user, onLogout }) {
                           <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.15)", borderRadius: 3, padding: "8px 10px", marginBottom: 6 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55" }}>{l.ticker}</span>
-                              <span style={{ fontFamily: "monospace", fontSize: 12, color: "#ff2d55" }}>{l.changePct?.toFixed(1)}%</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 12, color: "#ff2d55" }}>{l.changePct != null ? Number(l.changePct).toFixed(1) : "?"}%</span>
                             </div>
                             <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 2 }}>{l.name}</div>
                             <div style={{ display: "flex", gap: 10, marginTop: 4, fontSize: 9, fontFamily: "monospace" }}>
