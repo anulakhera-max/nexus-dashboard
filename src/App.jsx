@@ -282,6 +282,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingDarkPool, setLoadingDarkPool] = useState(false);
   const [whisperData, setWhisperData] = useState(null);
   const [loadingWhisper, setLoadingWhisper] = useState(false);
+  const [aiInfraData, setAiInfraData] = useState(null);
+  const [loadingAiInfra, setLoadingAiInfra] = useState(false);
+  const [aiInfraPillar, setAiInfraPillar] = useState(null);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -658,6 +661,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadAiInfra = async (force = false) => {
+    setLoadingAiInfra(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/ai-infrastructure" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setAiInfraData(data);
+    } catch {}
+    setLoadingAiInfra(false);
   };
 
   const AV_KEY = "TBE04AZ0JKO7RN4O";
@@ -2420,12 +2433,13 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
                   {[
+                    { label: "🤖 AI INFRA", active: !!aiInfraData, color: "#00ff9d", count: aiInfraData?.totalStocks, onClick: () => loadAiInfra(true) },
                     { label: "🎯 WHISPER", active: !!whisperData, color: "#ff6eb4", count: whisperData?.tickersAnalyzed, onClick: () => loadWhispers(true) },
                     { label: "🌑 DARK POOL", active: !!darkPoolData, color: darkPoolData?.accumulation?.length > 0 ? "#39ff14" : "#9d7fff", count: darkPoolData?.accumulation?.length, onClick: () => loadDarkPool(true) },
                     { label: "🔄 SECTOR", active: !!sectorData, color: sectorData?.riskRegime === "RISK_ON" ? "#39ff14" : sectorData?.riskRegime === "RISK_OFF" ? "#ff2d55" : "#ffb800", count: null, onClick: () => loadSectorRotation(true) },
@@ -2848,6 +2862,99 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div style={{ fontSize: 8, color: "#2a3d57", fontFamily: "monospace" }}>
                         Sources: FINRA Reg SHO short volume + Yahoo Finance volume anomaly detection · {darkPoolData.tickersScanned} tickers scanned
                       </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* AI INFRASTRUCTURE section */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(0,255,157,0.25)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00ff9d", letterSpacing: 2 }}>🤖 AI INFRASTRUCTURE STACK</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>30 stocks across 8 pillars: GPU → Networking → Power → Cooling → Data Center → MLOps → Energy</div>
+                    </div>
+                    {aiInfraData && <button onClick={() => loadAiInfra(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
+                  </div>
+
+                  {!aiInfraData ? (
+                    <button onClick={() => loadAiInfra(true)} disabled={loadingAiInfra} style={{ background: "rgba(0,255,157,0.1)", border: "1px solid rgba(0,255,157,0.3)", color: "#00ff9d", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingAiInfra ? "SCANNING 30 TICKERS..." : "🤖 SCAN AI STACK"}</button>
+                  ) : (
+                    <div>
+                      {/* Best trade */}
+                      {aiInfraData.analysis?.bestTrade && (
+                        <div style={{ background: "rgba(0,255,157,0.06)", border: "1px solid rgba(0,255,157,0.2)", borderRadius: 4, padding: "8px 12px", marginBottom: 10, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 9, color: "#00ff9d" }}>BEST AI INFRA TRADE</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ffd700" }}>{aiInfraData.analysis.bestTrade}</span>
+                          {aiInfraData.analysis.hottestPillar && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 7px", borderRadius: 10, background: "rgba(0,255,157,0.1)", color: "#00ff9d" }}>🔥 {aiInfraData.analysis.hottestPillar}</span>}
+                        </div>
+                      )}
+
+                      {/* Pillar performance */}
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 4, marginBottom: 10 }}>
+                        {aiInfraData.pillarScores?.slice(0, 8).map((p, i) => (
+                          <div key={i} onClick={() => setAiInfraPillar(aiInfraPillar === p.pillar ? null : p.pillar)} style={{ background: aiInfraPillar === p.pillar ? "rgba(0,255,157,0.1)" : "rgba(0,0,0,0.3)", border: `1px solid ${p.tier1Avg >= 3 ? "rgba(0,255,157,0.3)" : p.tier1Avg >= 0 ? "rgba(74,109,140,0.2)" : "rgba(255,45,85,0.2)"}`, borderRadius: 3, padding: "5px 6px", cursor: "pointer" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.pillar}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: p.tier1Avg >= 3 ? "#00ff9d" : p.tier1Avg >= 0 ? "#ffb800" : "#ff2d55" }}>{p.tier1Avg >= 0 ? "+" : ""}{p.tier1Avg}%</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 7, color: "#2a3d57" }}>{p.count} stocks</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Selected pillar stocks */}
+                      {aiInfraPillar && aiInfraData.byPillar?.[aiInfraPillar] && (
+                        <div style={{ background: "rgba(0,255,157,0.04)", border: "1px solid rgba(0,255,157,0.15)", borderRadius: 4, padding: 10, marginBottom: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00ff9d", marginBottom: 6 }}>{aiInfraPillar.toUpperCase()} — CLICK PILLAR TO FILTER</div>
+                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                            {aiInfraData.byPillar[aiInfraPillar].filter(s => s.hasData).map((s, i) => (
+                              <div key={i} style={{ background: "rgba(0,0,0,0.4)", borderRadius: 3, padding: "4px 8px", textAlign: "center" }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: s.chg1w >= 0 ? "#00ff9d" : "#ff2d55" }}>{s.ticker}</div>
+                                <div style={{ fontFamily: "monospace", fontSize: 9, color: s.chg1w >= 0 ? "#00ff9d" : "#ff2d55" }}>{s.chg1w >= 0 ? "+" : ""}{s.chg1w}%</div>
+                                <div style={{ fontSize: 7, color: "#4a6d8c" }}>{s.tier === 1 ? "★" : "·"} ${s.price}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Top gainers/losers */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00ff9d", marginBottom: 4 }}>TOP AI INFRA GAINERS (1W)</div>
+                          {aiInfraData.topGainers?.slice(0, 4).map((s, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#e8f4ff" }}>{s.ticker} <span style={{ fontSize: 8, color: "#4a6d8c" }}>{s.pillar?.slice(0,8)}</span></span>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#00ff9d" }}>+{s.chg1w}%</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 4 }}>UNDERPERFORMERS (1W)</div>
+                          {aiInfraData.topLosers?.slice(0, 4).map((s, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#e8f4ff" }}>{s.ticker} <span style={{ fontSize: 8, color: "#4a6d8c" }}>{s.pillar?.slice(0,8)}</span></span>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55" }}>{s.chg1w}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Claude insights */}
+                      {(aiInfraData.analysis?.rotationSignal || aiInfraData.analysis?.contrarianPick) && (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                          {aiInfraData.analysis.rotationSignal && (
+                            <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "6px 8px" }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>CAPITAL FLOWING INTO</div>
+                              <div style={{ fontSize: 10, color: "#00ff9d" }}>{aiInfraData.analysis.rotationSignal}</div>
+                            </div>
+                          )}
+                          {aiInfraData.analysis.contrarianPick && (
+                            <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "6px 8px" }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>CONTRARIAN PICK</div>
+                              <div style={{ fontSize: 10, color: "#ffb800" }}>{aiInfraData.analysis.contrarianPick}</div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
