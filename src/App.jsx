@@ -268,6 +268,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [paperBook, setPaperBook] = useState(null);
   const [loadingPaper, setLoadingPaper] = useState(false);
   const [paperFilter, setPaperFilter] = useState("all");
+  const [insiderData, setInsiderData] = useState(null);
+  const [loadingInsider, setLoadingInsider] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -644,6 +646,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadInsiderFilings = async (force = false) => {
+    setLoadingInsider(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/insider-filings" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setInsiderData(data);
+    } catch {}
+    setLoadingInsider(false);
   };
 
   const loadPaperBook = async () => {
@@ -1189,6 +1201,9 @@ export default function NexusDashboard({ user, onLogout }) {
             </button>
             <button style={{ background: tab === "paper" ? "rgba(0,255,200,0.15)" : "transparent", color: tab === "paper" ? "#00ffc8" : "#4a6d8c", border: tab === "paper" ? "1px solid rgba(0,255,200,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("paper"); if (!paperBook) loadPaperBook(); }}>
               📋 PAPER
+            </button>
+            <button style={{ background: tab === "insider" ? "rgba(255,140,0,0.15)" : "transparent", color: tab === "insider" ? "#ff8c00" : "#4a6d8c", border: tab === "insider" ? "1px solid rgba(255,140,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("insider"); if (!insiderData) loadInsiderFilings(); }}>
+              🔎 INSIDER
             </button>
           </div>
 
@@ -2368,6 +2383,156 @@ export default function NexusDashboard({ user, onLogout }) {
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 12, fontFamily: "monospace" }}>
                       Scanned: {new Date(unusualFlow.timestamp).toLocaleString()} · Vol/OI threshold: 3x+ · Min premium: $10K · {unusualFlow.qtPowered ? "Powered by Questrade live data" : "Powered by GDELT signals (connect Questrade for live data)"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* INSIDER FILINGS TAB */}
+            {tab === "insider" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                <div style={{ background: "linear-gradient(135deg,rgba(255,140,0,0.08),rgba(255,140,0,0.02))", border: "1px solid rgba(255,140,0,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff8c00", letterSpacing: 3, marginBottom: 4 }}>🔎 SEC FORM 4 INSIDER DETECTOR</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>When CEOs and CFOs buy their own stock — the strongest signal in the market. SEC Form 4 filings analyzed in real time.</div>
+                  </div>
+                  <button onClick={() => loadInsiderFilings(true)} disabled={loadingInsider} style={{ background: loadingInsider ? "#1a2d47" : "rgba(255,140,0,0.15)", border: "1px solid rgba(255,140,0,0.4)", color: loadingInsider ? "#4a6d8c" : "#ff8c00", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingInsider ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                    {loadingInsider ? "SCANNING..." : "🔎 SCAN INSIDERS"}
+                  </button>
+                </div>
+
+                {!insiderData && !loadingInsider && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>🔎</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ff8c00", letterSpacing: 3, marginBottom: 8 }}>SEC FORM 4 INSIDER TRACKER</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Scans SEC EDGAR and Yahoo Finance for insider buying and selling activity across your watchlist and key tickers</div>
+                    <button onClick={() => loadInsiderFilings(true)} style={{ background: "rgba(255,140,0,0.15)", border: "1px solid rgba(255,140,0,0.4)", color: "#ff8c00", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>🔎 SCAN NOW</button>
+                  </div>
+                )}
+
+                {insiderData && (
+                  <div>
+                    {/* Summary */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 14 }}>
+                      {[
+                        ["TICKERS SCANNED", insiderData.tickersScanned, "#ff8c00"],
+                        ["STRONG BUYS", insiderData.strongBuys?.length || 0, "#39ff14"],
+                        ["INSIDER SELLS", insiderData.sells?.length || 0, "#ff2d55"],
+                        ["OVERALL SENTIMENT", insiderData.interpretation?.overallSentiment || "—", insiderData.interpretation?.overallSentiment === "BULLISH" ? "#39ff14" : insiderData.interpretation?.overallSentiment === "BEARISH" ? "#ff2d55" : "#ffb800"],
+                      ].map(([label, val, color]) => (
+                        <div key={label} style={{ background: "#080f1a", border: "1px solid rgba(255,140,0,0.15)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color }}>{val}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Claude interpretation */}
+                    {insiderData.interpretation && (
+                      <div style={{ background: "#080f1a", border: "1px solid rgba(255,140,0,0.25)", borderRadius: 6, padding: 14, marginBottom: 14 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff8c00", letterSpacing: 2, marginBottom: 10 }}>INSIDER INTELLIGENCE ANALYSIS</div>
+
+                        {insiderData.interpretation.bestTrade && (
+                          <div style={{ background: "rgba(255,140,0,0.08)", border: "1px solid rgba(255,140,0,0.3)", borderRadius: 4, padding: "10px 12px", marginBottom: 10 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff8c00", marginBottom: 4 }}>BEST INSIDER TRADE</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ffd700" }}>{insiderData.interpretation.bestTrade}</div>
+                          </div>
+                        )}
+
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+                          {insiderData.interpretation.topBuy?.ticker && (
+                            <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 10 }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 4 }}>TOP INSIDER BUY</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#39ff14", marginBottom: 4 }}>{insiderData.interpretation.topBuy.ticker}</div>
+                              <div style={{ fontSize: 10, color: "#8aabb8", marginBottom: 3 }}>{insiderData.interpretation.topBuy.signal}</div>
+                              {insiderData.interpretation.topBuy.urgency && <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800" }}>{insiderData.interpretation.topBuy.urgency}</div>}
+                            </div>
+                          )}
+                          {insiderData.interpretation.topSell?.ticker && (
+                            <div style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: 10 }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 4 }}>TOP INSIDER SELL</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ff2d55", marginBottom: 4 }}>{insiderData.interpretation.topSell.ticker}</div>
+                              <div style={{ fontSize: 10, color: "#8aabb8" }}>{insiderData.interpretation.topSell.signal}</div>
+                            </div>
+                          )}
+                        </div>
+
+                        {insiderData.interpretation.contrarianInsight && (
+                          <div style={{ fontSize: 11, color: "#c8dce8", lineHeight: 1.6, paddingLeft: 10, borderLeft: "2px solid rgba(255,140,0,0.4)" }}>
+                            {insiderData.interpretation.contrarianInsight}
+                          </div>
+                        )}
+                        {insiderData.interpretation.clusterBuy && (
+                          <div style={{ marginTop: 8, fontSize: 11, color: "#39ff14" }}>CLUSTER BUY: {insiderData.interpretation.clusterBuy}</div>
+                        )}
+                        {insiderData.interpretation.clusterSell && (
+                          <div style={{ marginTop: 4, fontSize: 11, color: "#ff2d55" }}>CLUSTER SELL: {insiderData.interpretation.clusterSell}</div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Strong buy signals */}
+                    {insiderData.strongBuys?.length > 0 && (
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 8 }}>INSIDER BUY SIGNALS → PIPELINE (3x boost)</div>
+                        {insiderData.strongBuys.map((d, i) => (
+                          <div key={i} style={{ background: "rgba(57,255,20,0.04)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 12, marginBottom: 8 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#39ff14" }}>{d.ticker}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 2, background: d.signal === "STRONG_BUY" ? "rgba(57,255,20,0.15)" : "rgba(57,255,20,0.08)", color: "#39ff14" }}>{d.signal.replace("_", " ")}</span>
+                              </div>
+                              <div style={{ display: "flex", gap: 6 }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14" }}>{d.execBuys} exec buy{d.execBuys !== 1 ? "s" : ""}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{d.recentBuys} total</span>
+                              </div>
+                            </div>
+                            {d.biggestBuy && (
+                              <div style={{ fontSize: 11, color: "#8aabb8" }}>
+                                Biggest: {d.biggestBuy.name} ({d.biggestBuy.relation}) — {d.biggestBuy.shares?.toLocaleString()} shares
+                                {d.biggestBuy.value > 0 && " ($" + Math.round(d.biggestBuy.value / 1000) + "K)"}
+                                {d.biggestBuy.date && " on " + d.biggestBuy.date}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Sell signals */}
+                    {insiderData.sells?.length > 0 && (
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff2d55", letterSpacing: 3, marginBottom: 8 }}>INSIDER SELL SIGNALS (score reduced 40%)</div>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          {insiderData.sells.map(d => (
+                            <div key={d.ticker} style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: "8px 12px" }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55" }}>{d.ticker}</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{d.recentSells} recent sells</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Full table */}
+                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff8c00", letterSpacing: 3, marginBottom: 8 }}>ALL INSIDER ACTIVITY</div>
+                    {insiderData.insiderData?.map((d, i) => (
+                      <div key={i} style={{ background: "#080f1a", border: `1px solid ${d.signal === "STRONG_BUY" || d.signal === "BUY" ? "rgba(57,255,20,0.15)" : d.signal === "SELL" ? "rgba(255,45,85,0.15)" : "rgba(74,109,140,0.1)"}`, borderRadius: 4, padding: 10, marginBottom: 6 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                            <span style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: d.signal.includes("BUY") ? "#39ff14" : d.signal === "SELL" ? "#ff2d55" : "#8aabb8" }}>{d.ticker}</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{d.recentBuys}B / {d.recentSells}S</span>
+                            {d.execBuys > 0 && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffd700" }}>{d.execBuys} exec</span>}
+                          </div>
+                          <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: d.signal.includes("BUY") ? "rgba(57,255,20,0.1)" : d.signal === "SELL" ? "rgba(255,45,85,0.1)" : "rgba(74,109,140,0.1)", color: d.signal.includes("BUY") ? "#39ff14" : d.signal === "SELL" ? "#ff2d55" : "#8aabb8" }}>{d.signal.replace("_", " ")}</span>
+                        </div>
+                      </div>
+                    ))}
+
+                    <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginTop: 8 }}>
+                      Scanned: {new Date(insiderData.timestamp).toLocaleString()} · Sources: SEC EDGAR + Yahoo Finance · Insider buy signals injected into pipeline (3x boost)
+                      <button onClick={() => loadInsiderFilings(true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳ refresh</button>
                     </div>
                   </div>
                 )}
