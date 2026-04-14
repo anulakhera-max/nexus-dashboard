@@ -1306,6 +1306,18 @@ export default function NexusDashboard({ user, onLogout }) {
 
   const suggestions = ["Commodities rising next 30 days", "Critical global shortages", "Red Sea shipping price impact", "Rare earth supply chain risk", "Food security by region", "Oil price predictions 90 days", "Tech supply chain vulnerabilities", "Stocks that benefit from conflicts"];
 
+  // NEXUS ACTION SHORTCUTS — replaces generic quick queries
+  const NEXUS_ACTIONS = [
+    { label: "⚡ MORNING SCAN", color: "#39ff14", desc: "Seed + Pipeline + WSB", action: async () => { await Promise.all([loadOptionsOI(true), loadSpikeDetector(true), loadRedditWSB(true)]); runFullPipeline(); } },
+    { label: "🔥 RUN PIPELINE", color: "#b24fff", desc: "Full intelligence run", action: () => runFullPipeline() },
+    { label: "📊 OI OVERNIGHT", color: "#00ff9d", desc: "Smart money positioning", action: () => loadOptionsOI(true) },
+    { label: "🌍 GEO UPDATE", color: "#ffb800", desc: "Scenarios + Polymarket", action: () => loadGeoScenarios(true) },
+    { label: "🐋 SMART MONEY", color: "#ff69b4", desc: "Congress + 13F + Whales", action: () => loadSmartMoney(true) },
+    { label: "📡 WATCHLIST", color: "#00d4ff", desc: "89 tickers × 16 themes", action: () => loadWatchlistScan(true) },
+    { label: "⚡ SPIKE SCAN", color: "#ff4500", desc: "FDA + metals + penny", action: () => loadSpikeDetector(true) },
+    { label: "🧠 AUTO STATUS", color: "#9d7fff", desc: "Learning loop status", action: () => { handleTab("research"); loadLearningStats(); } },
+  ];
+
   return (
     <div style={S.app}>
       <style>{`
@@ -1377,35 +1389,60 @@ export default function NexusDashboard({ user, onLogout }) {
         {/* SIDEBAR */}
         <div style={S.sidebar}>
           <div style={S.sideScroll}>
-            <div style={S.sectionLabel}>CATEGORIES</div>
-            {[["all","○","#fff","All Events"],["weather","●","#00d4ff","Weather/Climate"],["conflict","●","#ff2d55","Armed Conflicts"],["diplomatic","●","#ffb800","Diplomatic"],["economic","●","#39ff14","Economic/Trade"],["tech","●","#b24fff","Disruptive Tech"],["health","●","#ff6b35","Health/Disease"]].map(([cat,icon,col,label]) => (
-              <button key={cat} style={S.filterBtn(filter === cat)} onClick={() => setFilter(cat)}>
-                <span style={{ color: col }}>{icon}</span>
-                <span style={{ flex: 1 }}>{label}</span>
-                <span style={{ fontFamily: "monospace", fontSize: 10, background: "#1a2d47", padding: "1px 6px", borderRadius: 2 }}>
-                  {cat === "all" ? events.length : events.filter(e => e.category === cat).length}
-                </span>
+            {/* CATEGORIES — compact, trading-action labels */}
+            <div style={{ padding: "8px 10px 4px", fontFamily: "monospace", fontSize: 9, color: "#2a3d57", letterSpacing: 2 }}>EVENTS FILTER</div>
+            {[
+              ["all","○","#fff","ALL EVENTS", events.length],
+              ["conflict","●","#ff2d55","🔴 CRITICAL", events.filter(e=>e.category==="conflict").length],
+              ["economic","●","#39ff14","💰 MARKET MOVERS", events.filter(e=>e.category==="economic").length],
+              ["diplomatic","●","#ffb800","🌍 GEO RISK", events.filter(e=>e.category==="diplomatic").length],
+              ["tech","●","#b24fff","⚡ CATALYST", events.filter(e=>e.category==="tech"||e.category==="health").length],
+              ["weather","●","#00d4ff","🌊 CLIMATE", events.filter(e=>e.category==="weather").length],
+            ].map(([cat,icon,col,label,count]) => (
+              <button key={cat} style={{ ...S.filterBtn(filter === cat), display: "flex", alignItems: "center", gap: 6 }} onClick={() => setFilter(cat)}>
+                <span style={{ color: col, fontSize: 8 }}>{icon}</span>
+                <span style={{ flex: 1, fontSize: 10 }}>{label}</span>
+                {count > 0 && <span style={{ fontFamily: "monospace", fontSize: 9, background: filter===cat ? "rgba(0,212,255,0.2)" : "#1a2d47", padding: "1px 5px", borderRadius: 2, color: col }}>{count}</span>}
               </button>
             ))}
 
-            <div style={S.sectionLabel}>OPTIONS SCHEDULE</div>
-            <div style={{ padding: "4px 16px 12px" }}>
-              <div style={{ fontSize: 11, color: "#ffb800", fontFamily: "monospace", marginBottom: 4 }}>📅 {fridays.first}</div>
-              <div style={{ fontSize: 11, color: "#ff6b35", fontFamily: "monospace", marginBottom: 8 }}>📅 {fridays.second}</div>
-              <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.6 }}>Closes 3:30 PM ET · Refreshes 8:00 AM daily</div>
-              {lastGenerated && <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginTop: 4 }}>Last: {lastGenerated.toLocaleTimeString()}</div>}
-            </div>
+            {/* DIVIDER */}
+            <div style={{ height: 1, background: "rgba(26,45,71,0.8)", margin: "10px 10px" }}/>
 
-            <div style={S.sectionLabel}>QUICK QUERIES</div>
-            <div style={{ padding: "0 10px", display: "flex", flexWrap: "wrap", gap: 5 }}>
-              {suggestions.map(s => (
-                <button key={s} onClick={() => setQuery(s)} style={{ fontSize: 10, padding: "4px 8px", background: "#0d1829", border: "1px solid #1a2d47", borderRadius: 2, color: "#4a6d8c", cursor: "pointer", textAlign: "left", fontFamily: "monospace" }}>{s}</button>
+            {/* NEXUS ACTION SHORTCUTS — replaces generic quick queries */}
+            <div style={{ padding: "4px 10px 6px", fontFamily: "monospace", fontSize: 9, color: "#2a3d57", letterSpacing: 2 }}>QUICK ACTIONS</div>
+            <div style={{ padding: "0 8px", display: "flex", flexDirection: "column", gap: 3 }}>
+              {NEXUS_ACTIONS.map((a, i) => (
+                <button key={i} onClick={a.action} style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 8px", background: "rgba(0,0,0,0.2)", border: "1px solid rgba(26,45,71,0.6)", borderRadius: 3, cursor: "pointer", textAlign: "left", transition: "all 0.15s" }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = a.color; e.currentTarget.style.background = "rgba(0,0,0,0.4)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(26,45,71,0.6)"; e.currentTarget.style.background = "rgba(0,0,0,0.2)"; }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: a.color, fontWeight: 600, fontFamily: "monospace" }}>{a.label}</div>
+                    <div style={{ fontSize: 8, color: "#2a3d57" }}>{a.desc}</div>
+                  </div>
+                </button>
               ))}
             </div>
 
+            {/* DIVIDER */}
+            <div style={{ height: 1, background: "rgba(26,45,71,0.8)", margin: "10px 10px" }}/>
+
+            {/* OPTIONS EXPIRY — compact, integrated */}
+            <div style={{ padding: "4px 10px 6px", fontFamily: "monospace", fontSize: 9, color: "#2a3d57", letterSpacing: 2 }}>OPTIONS EXPIRY</div>
+            <div style={{ padding: "0 10px 8px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+                <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>📅 {fridays.first}</span>
+                <span style={{ fontSize: 8, padding: "1px 5px", borderRadius: 2, background: "rgba(255,184,0,0.1)", color: "#ffb800", fontFamily: "monospace" }}>WK</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <span style={{ fontSize: 10, color: "#ff6b35", fontFamily: "monospace" }}>📅 {fridays.second}</span>
+                <span style={{ fontSize: 8, padding: "1px 5px", borderRadius: 2, background: "rgba(255,107,53,0.1)", color: "#ff6b35", fontFamily: "monospace" }}>WK</span>
+              </div>
+              <div style={{ fontSize: 9, color: "#2a3d57" }}>Closes 3:30 PM ET</div>
+            </div>
+
             <div style={{ margin: "12px 10px 0", padding: "10px 12px", background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 3 }}>
-              <div style={{ fontSize: 9, color: "#ffb800", fontFamily: "monospace", marginBottom: 4, letterSpacing: 2 }}>⚠ NOT FINANCIAL ADVICE</div>
-              <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.6 }}>AI picks are educational only. Options carry substantial risk of total loss. Always verify on Questrade before trading.</div>
+              <div style={{ fontSize: 8, color: "#2a3d57" }}>⚠ Educational only · Not financial advice · Verify on Questrade</div>
             </div>
           </div>
         </div>
