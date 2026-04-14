@@ -1159,51 +1159,19 @@ export default function NexusDashboard({ user, onLogout }) {
           </div>
 
           <div style={S.tabs}>
-            {[["events","EVENTS FEED"],["predictions","PRICE PREDICTIONS"],["supply","SUPPLY CHAIN"],["sources","SOURCE MAP"]].map(([t,l]) => (
-              <button key={t} style={S.tab(tab === t, false)} onClick={() => handleTab(t)}>{l}</button>
+            {/* CORE tabs */}
+            {[["events","📡 EVENTS"],["intel","⬡ PICKS"],["power","◈ POWER"],["trades","TRADES"],["watch","WATCHLIST"]].map(([t,l]) => (
+              <button key={t} style={{ ...S.tab(tab === t, t==="intel"||t==="power"), color: tab === "intel" ? "#b24fff" : tab === "power" ? "#ff6b35" : undefined }} onClick={() => handleTab(t)}>{l}</button>
             ))}
-
-            <button style={{ ...S.tab(tab === "intel", true), color: tab === "intel" ? "#b24fff" : "#4a6d8c", borderBottom: tab === "intel" ? "2px solid #b24fff" : "2px solid transparent", animation: tab !== "intel" ? "none" : "none" }} onClick={() => handleTab("intel")}>
-              ⬡ INTEL PICKS
+            <span style={{ width: 1, background: "#1a2d47", margin: "4px 4px", flexShrink: 0 }}/>
+            {/* SIGNALS tab */}
+            <button style={{ background: tab === "signals" ? "rgba(57,255,20,0.15)" : "transparent", color: tab === "signals" ? "#39ff14" : "#4a6d8c", border: tab === "signals" ? "1px solid rgba(57,255,20,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace" }} onClick={() => { handleTab("signals"); if (!unusualFlow) loadUnusualFlow(); if (!warRipple) loadWarRipple(); if (!newsBias) loadNewsBias(); if (!insiderData) loadInsiderFilings(); if (!allianceData) loadAlliance(); if (!chartPatterns) loadChartPatterns(""); }}>
+              ⚡ SIGNALS
             </button>
-            <button style={{ ...S.tab(tab === "power", true), color: tab === "power" ? "#ff6b35" : "#4a6d8c", borderBottom: tab === "power" ? "2px solid #ff6b35" : "2px solid transparent" }} onClick={() => handleTab("power")}>
-              ◈ POWER INTEL
-            </button>
-            <button style={{ background: tab === "watch" ? "rgba(0,212,255,0.15)" : "transparent", color: tab === "watch" ? "#00d4ff" : "#4a6d8c", border: tab === "watch" ? "1px solid rgba(0,212,255,0.4)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => handleTab("watch")}>
-              WATCHLIST
-            </button>
-            <button style={{ background: tab === "trades" ? "rgba(255,45,85,0.15)" : "transparent", color: tab === "trades" ? "#ff2d55" : "#4a6d8c", border: tab === "trades" ? "1px solid rgba(255,45,85,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => handleTab("trades")}>
-              TRADES
-            </button>
-            <button style={{ background: tab === "flow" ? "rgba(178,79,255,0.15)" : "transparent", color: tab === "flow" ? "#b24fff" : "#4a6d8c", border: tab === "flow" ? "1px solid rgba(178,79,255,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("flow"); if (!unusualFlow) loadUnusualFlow(); }}>
-              ⚡ FLOW
-            </button>
-            <button style={{ background: tab === "war" ? "rgba(255,60,0,0.15)" : "transparent", color: tab === "war" ? "#ff3c00" : "#4a6d8c", border: tab === "war" ? "1px solid rgba(255,60,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("war"); if (!warRipple) loadWarRipple(); }}>
-              ☢ WAR
-            </button>
-            <button style={{ background: tab === "bias" ? "rgba(255,184,0,0.15)" : "transparent", color: tab === "bias" ? "#ffb800" : "#4a6d8c", border: tab === "bias" ? "1px solid rgba(255,184,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("bias"); if (!newsBias) loadNewsBias(); }}>
-              🔍 BIAS
-            </button>
-            <button style={{ background: tab === "earnings" ? "rgba(0,212,255,0.15)" : "transparent", color: tab === "earnings" ? "#00d4ff" : "#4a6d8c", border: tab === "earnings" ? "1px solid rgba(0,212,255,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => handleTab("earnings")}>
-              📊 EARNINGS
-            </button>
-            <button style={{ background: tab === "ripple" ? "rgba(0,255,136,0.15)" : "transparent", color: tab === "ripple" ? "#00ff88" : "#4a6d8c", border: tab === "ripple" ? "1px solid rgba(0,255,136,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => handleTab("ripple")}>
-              🌊 RIPPLE
-            </button>
-            <button style={{ background: tab === "pattern" ? "rgba(255,215,0,0.15)" : "transparent", color: tab === "pattern" ? "#ffd700" : "#4a6d8c", border: tab === "pattern" ? "1px solid rgba(255,215,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("pattern"); if (!patternMemory) loadPatternMemory(); }}>
-              🧠 PATTERN
-            </button>
-            <button style={{ background: tab === "alliance" ? "rgba(255,100,0,0.15)" : "transparent", color: tab === "alliance" ? "#ff6400" : "#4a6d8c", border: tab === "alliance" ? "1px solid rgba(255,100,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("alliance"); if (!allianceData) loadAlliance(); }}>
-              🕵 ALLIANCE
-            </button>
-            <button style={{ background: tab === "chart" ? "rgba(100,200,255,0.15)" : "transparent", color: tab === "chart" ? "#64c8ff" : "#4a6d8c", border: tab === "chart" ? "1px solid rgba(100,200,255,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("chart"); if (!chartPatterns) loadChartPatterns(""); }}>
-              📈 CHART
-            </button>
-            <button style={{ background: tab === "paper" ? "rgba(0,255,200,0.15)" : "transparent", color: tab === "paper" ? "#00ffc8" : "#4a6d8c", border: tab === "paper" ? "1px solid rgba(0,255,200,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("paper"); if (!paperBook) loadPaperBook(); }}>
-              📋 PAPER
-            </button>
-            <button style={{ background: tab === "insider" ? "rgba(255,140,0,0.15)" : "transparent", color: tab === "insider" ? "#ff8c00" : "#4a6d8c", border: tab === "insider" ? "1px solid rgba(255,140,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("insider"); if (!insiderData) loadInsiderFilings(); }}>
-              🔎 INSIDER
+            <span style={{ width: 1, background: "#1a2d47", margin: "4px 4px", flexShrink: 0 }}/>
+            {/* RESEARCH tab */}
+            <button style={{ background: tab === "research" ? "rgba(0,212,255,0.15)" : "transparent", color: tab === "research" ? "#00d4ff" : "#4a6d8c", border: tab === "research" ? "1px solid rgba(0,212,255,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace" }} onClick={() => handleTab("research")}>
+              🔬 RESEARCH
             </button>
           </div>
 
@@ -2297,6 +2265,150 @@ export default function NexusDashboard({ user, onLogout }) {
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* SIGNALS TAB — All intelligence layers in one view */}
+            {tab === "signals" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+
+                {/* Header */}
+                <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: "12px 16px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
+                  </div>
+                  <button onClick={() => { loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                </div>
+
+                {/* Signal summary pills */}
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+                  {[
+                    { label: "⚡ FLOW", active: !!unusualFlow, color: "#b24fff", count: unusualFlow?.signals?.length, onClick: () => loadUnusualFlow(true) },
+                    { label: "☢ WAR", active: !!warRipple, color: "#ff3c00", count: warRipple?.rippleLayers?.length, onClick: () => loadWarRipple(true) },
+                    { label: "🔍 BIAS", active: !!newsBias, color: "#ffb800", count: newsBias?.headlinesAnalyzed, onClick: () => loadNewsBias(true) },
+                    { label: "🔎 INSIDER", active: !!insiderData, color: "#ff8c00", count: insiderData?.strongBuys?.length, onClick: () => loadInsiderFilings(true) },
+                    { label: "🕵 ALLIANCE", active: !!allianceData, color: "#ff6400", count: allianceData?.insiderData?.length, onClick: () => loadAlliance(true) },
+                    { label: "📈 CHART", active: !!chartPatterns, color: "#64c8ff", count: chartPatterns?.patternSignals?.length, onClick: () => loadChartPatterns("", true) },
+                  ].map(s => (
+                    <button key={s.label} onClick={s.onClick} style={{ background: s.active ? `rgba(0,0,0,0.3)` : "rgba(26,45,71,0.3)", border: `1px solid ${s.active ? s.color + "50" : "#1a2d47"}`, borderRadius: 20, padding: "4px 12px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", color: s.active ? s.color : "#4a6d8c", display: "flex", alignItems: "center", gap: 5 }}>
+                      {s.label} {s.active && s.count !== undefined && <span style={{ background: s.color + "20", borderRadius: 10, padding: "0 5px", fontSize: 9 }}>{s.count}</span>}
+                    </button>
+                  ))}
+                </div>
+
+                {/* INSIDER section */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(255,140,0,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff8c00", letterSpacing: 2 }}>🔎 SEC INSIDER FILINGS</div>
+                    {insiderData && <span style={{ fontFamily: "monospace", fontSize: 9, color: insiderData.interpretation?.overallSentiment === "BULLISH" ? "#39ff14" : "#ff2d55" }}>{insiderData.interpretation?.overallSentiment}</span>}
+                  </div>
+                  {!insiderData ? <button onClick={() => loadInsiderFilings(true)} disabled={loadingInsider} style={{ background: "rgba(255,140,0,0.1)", border: "1px solid rgba(255,140,0,0.3)", color: "#ff8c00", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingInsider ? "SCANNING..." : "🔎 SCAN INSIDERS"}</button>
+                  : <div>
+                      {insiderData.interpretation?.bestTrade && <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffd700", marginBottom: 8 }}>BEST TRADE: {insiderData.interpretation.bestTrade}</div>}
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 6 }}>
+                        {insiderData.strongBuys?.map(d => <span key={d.ticker} style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 3, background: "rgba(57,255,20,0.1)", color: "#39ff14", border: "1px solid rgba(57,255,20,0.3)" }}>{d.ticker} ▲ {d.signal.replace("_"," ")}</span>)}
+                        {insiderData.sells?.map(d => <span key={d.ticker} style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 3, background: "rgba(255,45,85,0.1)", color: "#ff2d55", border: "1px solid rgba(255,45,85,0.3)" }}>{d.ticker} ▼ SELL</span>)}
+                      </div>
+                      {insiderData.interpretation?.contrarianInsight && <div style={{ fontSize: 11, color: "#8aabb8", lineHeight: 1.5 }}>{insiderData.interpretation.contrarianInsight}</div>}
+                    </div>}
+                </div>
+
+                {/* WAR RIPPLE section */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff3c00", letterSpacing: 2 }}>☢ WAR RIPPLE ENGINE</div>
+                    {warRipple && <div style={{ display: "flex", gap: 6 }}><span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800" }}>{warRipple.warStatus?.toUpperCase()}</span><span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff8c00" }}>HORMUZ: {warRipple.hormuz?.status?.toUpperCase()}</span></div>}
+                  </div>
+                  {!warRipple ? <button onClick={() => loadWarRipple(true)} disabled={loadingWar} style={{ background: "rgba(255,60,0,0.1)", border: "1px solid rgba(255,60,0,0.3)", color: "#ff3c00", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingWar ? "ANALYZING..." : "☢ ANALYZE"}</button>
+                  : <div>
+                      {warRipple.highestConviction?.ticker && <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: warRipple.highestConviction.direction === "CALL" ? "#39ff14" : "#ff2d55", marginBottom: 8 }}>TOP PLAY: {warRipple.highestConviction.ticker} {warRipple.highestConviction.direction}</div>}
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
+                        {[["7D OIL",warRipple.oil?.target7d,"#ffb800"],["21D OIL",warRipple.oil?.target21d,"#ff8c00"]].filter(([,v])=>v).map(([l,v,c])=><span key={l} style={{ fontFamily:"monospace",fontSize:9,color:c }}>{l}: {v}</span>)}
+                        {warRipple.predictions?.day7?.bestPlay && <span style={{ fontFamily:"monospace",fontSize:9,color:"#39ff14" }}>7D: {warRipple.predictions.day7.bestPlay}</span>}
+                      </div>
+                      <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                        {warRipple.rippleLayers?.slice(0,3).map((l,i) => <span key={i} style={{ fontSize:9, fontFamily:"monospace", color:"#4a6d8c" }}>L{l.layer}: {l.stocksUp?.slice(0,2).join(",")} ▲ {l.stocksDown?.slice(0,2).join(",")} ▼</span>)}
+                      </div>
+                    </div>}
+                </div>
+
+                {/* BIAS section */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2 }}>🔍 NEWS BIAS FILTER</div>
+                    {newsBias && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: newsBias.manipulationRisk === "HIGH" || newsBias.manipulationRisk === "CRITICAL" ? "rgba(255,45,85,0.1)" : "rgba(57,255,20,0.1)", color: newsBias.manipulationRisk === "HIGH" || newsBias.manipulationRisk === "CRITICAL" ? "#ff2d55" : "#39ff14" }}>{newsBias.manipulationRisk} RISK</span>}
+                  </div>
+                  {!newsBias ? <button onClick={() => loadNewsBias(true)} disabled={loadingBias} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", color: "#ffb800", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingBias ? "SCANNING..." : "🔍 SCAN BIAS"}</button>
+                  : <div>
+                      {newsBias.contrarianPlay && <div style={{ fontSize: 11, color: "#39ff14", marginBottom: 6 }}>CONTRARIAN: {newsBias.contrarianPlay}</div>}
+                      <div style={{ display: "flex", gap: 8 }}>
+                        {newsBias.pumpTickers?.length > 0 && <span style={{ fontSize:10, color:"#ff2d55", fontFamily:"monospace" }}>PUMP: {newsBias.pumpTickers.join(",")} ⚠</span>}
+                        {newsBias.realSignal?.ticker && <span style={{ fontSize:10, color:"#39ff14", fontFamily:"monospace" }}>REAL: {newsBias.realSignal.ticker} ✓</span>}
+                      </div>
+                    </div>}
+                </div>
+
+                {/* UNUSUAL FLOW section */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#b24fff", letterSpacing: 2 }}>⚡ UNUSUAL OPTIONS FLOW</div>
+                    {unusualFlow && <span style={{ fontFamily: "monospace", fontSize: 9, color: unusualFlow.interpretation?.marketBias === "BULLISH" ? "#39ff14" : unusualFlow.interpretation?.marketBias === "BEARISH" ? "#ff2d55" : "#ffb800" }}>{unusualFlow.interpretation?.marketBias}</span>}
+                  </div>
+                  {!unusualFlow ? <button onClick={() => loadUnusualFlow(true)} disabled={loadingFlow} style={{ background: "rgba(178,79,255,0.1)", border: "1px solid rgba(178,79,255,0.3)", color: "#b24fff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingFlow ? "SCANNING..." : "⚡ SCAN FLOW"}</button>
+                  : <div>
+                      {unusualFlow.interpretation?.topSignal?.ticker && <div style={{ fontFamily:"monospace",fontSize:13,fontWeight:700, color: unusualFlow.interpretation.topSignal.direction==="CALL"?"#39ff14":"#ff2d55",marginBottom:6 }}>TOP: {unusualFlow.interpretation.topSignal.ticker} {unusualFlow.interpretation.topSignal.direction} · {unusualFlow.interpretation.topSignal.urgency}</div>}
+                      <div style={{ display:"flex",gap:4,flexWrap:"wrap" }}>
+                        {unusualFlow.signals?.slice(0,6).map((s,i)=><span key={i} style={{ fontFamily:"monospace",fontSize:9,padding:"1px 6px",borderRadius:2,background:s.optionType==="CALL"?"rgba(57,255,20,0.08)":"rgba(255,45,85,0.08)",color:s.optionType==="CALL"?"#39ff14":"#ff2d55" }}>{s.ticker} {s.optionType} {s.volOiRatio}x</span>)}
+                      </div>
+                    </div>}
+                </div>
+
+                {/* CHART PATTERNS section */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(100,200,255,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#64c8ff", letterSpacing: 2 }}>📈 CHART PATTERNS</div>
+                    {chartPatterns && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#64c8ff" }}>{chartPatterns.tickersScanned} scanned · {chartPatterns.patternSignals?.length} signals</span>}
+                  </div>
+                  {!chartPatterns ? <button onClick={() => loadChartPatterns("", true)} disabled={loadingPatterns} style={{ background: "rgba(100,200,255,0.1)", border: "1px solid rgba(100,200,255,0.3)", color: "#64c8ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingPatterns ? "SCANNING..." : "📈 SCAN PATTERNS"}</button>
+                  : <div style={{ display:"flex",gap:4,flexWrap:"wrap" }}>
+                      {chartPatterns.patternSignals?.slice(0,8).map((s,i)=><span key={i} style={{ fontFamily:"monospace",fontSize:9,padding:"2px 7px",borderRadius:3,background:s.direction==="CALL"?"rgba(57,255,20,0.08)":"rgba(255,45,85,0.08)",color:s.direction==="CALL"?"#39ff14":"#ff2d55",border:`1px solid ${s.direction==="CALL"?"rgba(57,255,20,0.2)":"rgba(255,45,85,0.2)"}` }}>{s.ticker} {s.direction} {s.strength==="HIGH"?"★":""}</span>)}
+                    </div>}
+                </div>
+
+                {/* ALLIANCE section */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(255,100,0,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff6400", letterSpacing: 2 }}>🕵 ALLIANCE DETECTION</div>
+                    {allianceData && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: "rgba(255,100,0,0.1)", color: "#ff6400" }}>{allianceData.allianceRiskLevel} RISK</span>}
+                  </div>
+                  {!allianceData ? <button onClick={() => loadAlliance(true)} disabled={loadingAlliance} style={{ background: "rgba(255,100,0,0.1)", border: "1px solid rgba(255,100,0,0.3)", color: "#ff6400", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingAlliance ? "SCANNING..." : "🕵 DETECT"}</button>
+                  : <div>
+                      {allianceData.safestPlay?.play && <div style={{ fontSize:11, color:"#39ff14", marginBottom:6 }}>SAFEST: {allianceData.safestPlay.play}</div>}
+                      <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
+                        {allianceData.frontrunOpportunity?.ticker && <span style={{ fontFamily:"monospace",fontSize:10,color:"#39ff14" }}>FRONTRUN: {allianceData.frontrunOpportunity.ticker} {allianceData.frontrunOpportunity.direction}</span>}
+                        {allianceData.squeezeSetup?.ticker && <span style={{ fontFamily:"monospace",fontSize:10,color:"#ffb800" }}>SQUEEZE: {allianceData.squeezeSetup.ticker} {allianceData.squeezeSetup.probability}</span>}
+                        {allianceData.avoidCompletely?.length>0 && <span style={{ fontFamily:"monospace",fontSize:10,color:"#ff2d55" }}>AVOID: {allianceData.avoidCompletely.join(",")}</span>}
+                      </div>
+                    </div>}
+                </div>
+
+                <div style={{ fontSize: 9, color: "#2a3d57", fontFamily: "monospace", textAlign: "center" }}>All signals auto-inject into pipeline scoring every run</div>
+              </div>
+            )}
+
+            {/* RESEARCH TAB — Earnings + Ripple + Pattern + Paper */}
+            {tab === "research" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                <div style={{ background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 4, padding: "12px 16px", marginBottom: 14 }}>
+                  <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00d4ff", letterSpacing: 3, marginBottom: 2 }}>🔬 RESEARCH TOOLS</div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+                    {[["📊 Earnings Deep Dive","earnings"],["🌊 Ripple Chain","ripple"],["🧠 Pattern Memory","pattern"],["📋 Paper Trading","paper"]].map(([label,t])=>(
+                      <button key={t} onClick={() => handleTab(t)} style={{ fontFamily:"monospace",fontSize:10,padding:"4px 12px",borderRadius:3,background:"rgba(0,212,255,0.08)",border:"1px solid rgba(0,212,255,0.2)",color:"#00d4ff",cursor:"pointer" }}>{label}</button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: "#4a6d8c", textAlign: "center", padding: 20, fontFamily: "monospace" }}>Click a research tool above to navigate to it</div>
               </div>
             )}
 
@@ -3773,5 +3885,3 @@ export default function NexusDashboard({ user, onLogout }) {
     </div>
   );
 }
-
-
