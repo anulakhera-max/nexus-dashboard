@@ -274,6 +274,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingVix, setLoadingVix] = useState(false);
   const [fedData, setFedData] = useState(null);
   const [loadingFed, setLoadingFed] = useState(false);
+  const [pcrData, setPcrData] = useState(null);
+  const [loadingPcr, setLoadingPcr] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -652,6 +654,16 @@ export default function NexusDashboard({ user, onLogout }) {
     saveTrackedPicks(updated);
   };
 
+  const loadPCR = async (force = false) => {
+    setLoadingPcr(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/put-call-ratio" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setPcrData(data);
+    } catch {}
+    setLoadingPcr(false);
+  };
+
   const loadFedCalendar = async (force = false) => {
     setLoadingFed(true);
     try {
@@ -957,7 +969,7 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   // Auto-connect Questrade on load
-  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); loadTrackerData(); loadEarnings(); loadMovers(); loadVixSentiment(); loadFedCalendar(); }, []);
+  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); loadTrackerData(); loadEarnings(); loadMovers(); loadVixSentiment(); loadFedCalendar(); loadPCR(); }, []);
 
   const generatePowerIntel = async (force = false) => {
     if (loadingPower) return;
@@ -1225,6 +1237,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 </span>
               ))}
               {vixData?.vix && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 8px", borderRadius: 10, background: vixData.vix.current >= 25 ? "rgba(255,45,85,0.15)" : "rgba(0,212,255,0.1)", color: vixData.vix.current >= 25 ? "#ff2d55" : "#00d4ff", border: `1px solid ${vixData.vix.current >= 25 ? "rgba(255,45,85,0.3)" : "rgba(0,212,255,0.2)"}`, marginLeft: 8, flexShrink: 0 }}>VIX {vixData.vix.current} · F/G {vixData.fearGreed?.score}</span>}
+              {pcrData?.ratio && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 8px", borderRadius: 10, background: pcrData.ratio >= 1.2 ? "rgba(57,255,20,0.1)" : pcrData.ratio <= 0.6 ? "rgba(255,45,85,0.1)" : "rgba(74,109,140,0.1)", color: pcrData.ratio >= 1.2 ? "#39ff14" : pcrData.ratio <= 0.6 ? "#ff2d55" : "#8aabb8", border: "1px solid rgba(74,109,140,0.2)", marginLeft: 4, flexShrink: 0 }}>P/C {pcrData.ratio.toFixed(2)}</span>}
               <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", letterSpacing: 2, flexShrink: 0, marginLeft: 8 }}>TOP LOSS:</span>
               {(movers.losers || []).slice(0, 5).map(l => (
                 <span key={l.ticker} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55", border: "1px solid rgba(255,45,85,0.25)" }}>
@@ -2311,12 +2324,13 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
                   {[
+                    { label: "📉 P/C", active: !!pcrData, color: pcrData?.ratio >= 1.2 ? "#39ff14" : pcrData?.ratio <= 0.6 ? "#ff2d55" : "#00d4ff", count: pcrData?.ratio, onClick: () => loadPCR(true) },
                     { label: "🏛 FED", active: !!fedData, color: "#9d7fff", count: fedData?.nextMeeting?.daysOut, onClick: () => loadFedCalendar(true) },
                     { label: "📊 VIX/FG", active: !!vixData, color: "#00d4ff", count: vixData?.fearGreed?.score, onClick: () => loadVixSentiment(true) },
                     { label: "⚡ FLOW", active: !!unusualFlow, color: "#b24fff", count: unusualFlow?.signals?.length, onClick: () => loadUnusualFlow(true) },
@@ -2437,6 +2451,59 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* Contrarian insight */}
                       {vixData.fearGreed?.contrarianSignal && (
                         <div style={{ fontSize: 10, color: "#8aabb8", fontFamily: "monospace" }}>{vixData.fearGreed.contrarianSignal}</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* PUT/CALL RATIO section */}
+                <div style={{ background: "#080f1a", border: `1px solid ${pcrData?.ratio >= 1.2 ? "rgba(57,255,20,0.3)" : pcrData?.ratio <= 0.6 ? "rgba(255,45,85,0.3)" : "rgba(0,212,255,0.2)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>📉 PUT/CALL RATIO</div>
+                    {pcrData && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 8px", borderRadius: 10, background: pcrData.ratio >= 1.2 ? "rgba(57,255,20,0.15)" : pcrData.ratio <= 0.6 ? "rgba(255,45,85,0.15)" : "rgba(0,212,255,0.1)", color: pcrData.ratio >= 1.2 ? "#39ff14" : pcrData.ratio <= 0.6 ? "#ff2d55" : "#00d4ff" }}>{pcrData.signal}</span>}
+                  </div>
+                  {!pcrData ? (
+                    <button onClick={() => loadPCR(true)} disabled={loadingPcr} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingPcr ? "LOADING..." : "📉 LOAD P/C RATIO"}</button>
+                  ) : (
+                    <div>
+                      {/* Main ratio gauge */}
+                      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
+                        <div style={{ textAlign: "center", background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "10px 20px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 2 }}>P/C RATIO</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 28, fontWeight: 700, color: pcrData.ratio >= 1.2 ? "#39ff14" : pcrData.ratio >= 1.0 ? "#ffb800" : pcrData.ratio <= 0.6 ? "#ff2d55" : "#00d4ff" }}>{pcrData.ratio?.toFixed(2) || "—"}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>source: {pcrData.marketPCR?.source?.replace(/_/g," ")}</div>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          {/* Scale visualization */}
+                          <div style={{ position: "relative", height: 8, background: "linear-gradient(90deg,#39ff14,#ffb800,#ff2d55)", borderRadius: 4, marginBottom: 4 }}>
+                            {pcrData.ratio !== null && <div style={{ position: "absolute", top: -2, width: 12, height: 12, borderRadius: 6, background: "#fff", border: "2px solid #1a2d47", left: `${Math.min(95, Math.max(5, (pcrData.ratio - 0.4) / 1.2 * 100))}%`, transform: "translateX(-50%)" }}/>}
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>
+                            <span>0.5 GREED</span><span>0.8 NORMAL</span><span>1.2+ FEAR</span>
+                          </div>
+                          <div style={{ marginTop: 8, fontSize: 11, color: pcrData.ratio >= 1.2 ? "#39ff14" : pcrData.ratio <= 0.6 ? "#ff2d55" : "#ffb800" }}>{pcrData.sentiment}</div>
+                        </div>
+                      </div>
+
+                      {/* Trade bias + historical context */}
+                      <div style={{ background: pcrData.tradeBias === "BULLISH_CONTRARIAN" ? "rgba(57,255,20,0.05)" : pcrData.tradeBias === "BEARISH_CONTRARIAN" ? "rgba(255,45,85,0.05)" : "rgba(0,212,255,0.03)", border: `1px solid ${pcrData.tradeBias === "BULLISH_CONTRARIAN" ? "rgba(57,255,20,0.2)" : pcrData.tradeBias === "BEARISH_CONTRARIAN" ? "rgba(255,45,85,0.2)" : "rgba(0,212,255,0.1)"}`, borderRadius: 4, padding: "8px 10px", marginBottom: 8 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 3 }}>TRADE BIAS</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: pcrData.tradeBias === "BULLISH_CONTRARIAN" ? "#39ff14" : pcrData.tradeBias === "BEARISH_CONTRARIAN" ? "#ff2d55" : "#ffb800" }}>{pcrData.tradeBias?.replace(/_/g," ")}</div>
+                        <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 3 }}>{pcrData.historicalContext}</div>
+                      </div>
+
+                      {/* Ticker-level P/C */}
+                      {pcrData.tickerPCR?.length > 0 && (
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 4 }}>TICKER P/C BREAKDOWN</div>
+                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                            {pcrData.tickerPCR.slice(0, 8).map(t => (
+                              <span key={t.ticker} style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 7px", borderRadius: 3, background: t.bias === "PUT_HEAVY" ? "rgba(255,45,85,0.08)" : t.bias === "CALL_HEAVY" ? "rgba(57,255,20,0.08)" : "rgba(74,109,140,0.1)", color: t.bias === "PUT_HEAVY" ? "#ff2d55" : t.bias === "CALL_HEAVY" ? "#39ff14" : "#8aabb8", border: `1px solid ${t.bias === "PUT_HEAVY" ? "rgba(255,45,85,0.2)" : t.bias === "CALL_HEAVY" ? "rgba(57,255,20,0.2)" : "rgba(74,109,140,0.15)"}` }}>
+                                {t.ticker} {t.ratio !== null ? t.ratio.toFixed(1) : "—"}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
                       )}
                     </div>
                   )}
