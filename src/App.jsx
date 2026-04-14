@@ -290,6 +290,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [geoScenario, setGeoScenario] = useState(null);
   const [smartMoneyData, setSmartMoneyData] = useState(null);
   const [loadingSmartMoney, setLoadingSmartMoney] = useState(false);
+  const [watchlistScan, setWatchlistScan] = useState(null);
+  const [loadingWatchlist, setLoadingWatchlist] = useState(false);
+  const [watchTheme, setWatchTheme] = useState(null);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -666,6 +669,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadWatchlistScan = async (force = false) => {
+    setLoadingWatchlist(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/watchlist-scan" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setWatchlistScan(data);
+    } catch {}
+    setLoadingWatchlist(false);
   };
 
   const loadSmartMoney = async (force = false) => {
@@ -2458,12 +2471,13 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadSmartMoney(true); loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadWatchlistScan(true); loadSmartMoney(true); loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
                   {[
+                    { label: "📡 WATCH", active: !!watchlistScan, color: "#00d4ff", count: watchlistScan?.totalScanned, onClick: () => loadWatchlistScan(true) },
                     { label: "🐋 SMART$", active: !!smartMoneyData, color: "#ff69b4", count: smartMoneyData?.smartMoney?.buyTickers?.length, onClick: () => loadSmartMoney(true) },
                     { label: "🌍 GEO", active: !!geoData, color: geoData?.activeScenario === "ESCALATION" ? "#ff2d55" : geoData?.activeScenario === "RESOLUTION" ? "#39ff14" : geoData?.activeScenario === "BLOCKADE" ? "#9d7fff" : "#ffb800", count: geoData?.activeScenario?.slice(0,4), onClick: () => loadGeoScenarios(true) },
                     { label: "🤖 AI INFRA", active: !!aiInfraData, color: "#00ff9d", count: aiInfraData?.totalStocks, onClick: () => loadAiInfra(true) },
@@ -2484,6 +2498,113 @@ export default function NexusDashboard({ user, onLogout }) {
                       {s.label} {s.active && s.count !== undefined && <span style={{ background: s.color + "20", borderRadius: 10, padding: "0 5px", fontSize: 9 }}>{s.count}</span>}
                     </button>
                   ))}
+                </div>
+
+                {/* MASTER WATCHLIST SCAN */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.25)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>📡 MASTER WATCHLIST — 89 TICKERS × 12 THEMES</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>AI · Quantum · Space · Nuclear · Defense · Optical · Crypto · Biotech · Energy · Transport · Macro + 15 smart money operators</div>
+                    </div>
+                    {watchlistScan && <button onClick={() => loadWatchlistScan(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
+                  </div>
+
+                  {!watchlistScan ? (
+                    <button onClick={() => loadWatchlistScan(true)} disabled={loadingWatchlist} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingWatchlist ? "SCANNING 89 TICKERS..." : "📡 SCAN MASTER WATCHLIST"}</button>
+                  ) : (
+                    <div>
+                      {/* Best setup + hidden gem */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 10 }}>
+                        {watchlistScan.analysis?.bestSetup && (
+                          <div style={{ background: "rgba(57,255,20,0.06)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: "8px 10px" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 3 }}>BEST SETUP TODAY</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#ffd700" }}>{watchlistScan.analysis.bestSetup}</div>
+                            {watchlistScan.analysis.operatorAlignment && <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 3 }}>{watchlistScan.analysis.operatorAlignment?.slice(0,40)}</div>}
+                          </div>
+                        )}
+                        {watchlistScan.analysis?.bestTheme && (
+                          <div style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 4, padding: "8px 10px" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff", marginBottom: 3 }}>HOTTEST THEME</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#00d4ff" }}>{watchlistScan.analysis.bestTheme}</div>
+                          </div>
+                        )}
+                        {watchlistScan.analysis?.hiddenGem && (
+                          <div style={{ background: "rgba(255,184,0,0.04)", border: "1px solid rgba(255,184,0,0.15)", borderRadius: 4, padding: "8px 10px" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 3 }}>HIDDEN GEM 💎</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ffb800" }}>{watchlistScan.analysis.hiddenGem}</div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Theme grid — click to expand */}
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 4, marginBottom: 10 }}>
+                        {Object.entries(watchlistScan.themeScores || {}).map(([key, theme]) => (
+                          <div key={key} onClick={() => setWatchTheme(watchTheme === key ? null : key)} style={{ background: watchTheme === key ? "rgba(0,212,255,0.08)" : "rgba(0,0,0,0.3)", border: `1px solid ${theme.avg1w >= 3 ? "rgba(57,255,20,0.3)" : theme.avg1w >= 0 ? "rgba(74,109,140,0.2)" : "rgba(255,45,85,0.2)"}`, borderRadius: 3, padding: "5px 6px", cursor: "pointer", textAlign: "center" }}>
+                            <div style={{ fontSize: 10 }}>{theme.emoji}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", marginBottom: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{theme.label?.slice(0,10)}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: theme.avg1w >= 3 ? "#39ff14" : theme.avg1w >= 0 ? "#ffb800" : "#ff2d55" }}>{theme.avg1w >= 0 ? "+" : ""}{theme.avg1w}%</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Expanded theme */}
+                      {watchTheme && watchlistScan.themeScores?.[watchTheme] && (
+                        <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 4, padding: 10, marginBottom: 8 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", marginBottom: 6 }}>{watchlistScan.themeScores[watchTheme].emoji} {watchlistScan.themeScores[watchTheme].label?.toUpperCase()} — {watchlistScan.themeScores[watchTheme].rationale}</div>
+                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                            {watchlistScan.themeScores[watchTheme].tickers?.map((s, i) => (
+                              <div key={i} style={{ background: s.chg1w >= 0 ? "rgba(57,255,20,0.06)" : "rgba(255,45,85,0.06)", border: `1px solid ${s.chg1w >= 0 ? "rgba(57,255,20,0.2)" : "rgba(255,45,85,0.2)"}`, borderRadius: 3, padding: "4px 8px", textAlign: "center" }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: s.chg1w >= 3 ? "#39ff14" : s.chg1w >= 0 ? "#a8cce0" : "#ff2d55" }}>{s.ticker}</div>
+                                <div style={{ fontFamily: "monospace", fontSize: 9, color: s.chg1w >= 0 ? "#39ff14" : "#ff2d55" }}>{s.chg1w >= 0 ? "+" : ""}{s.chg1w}%</div>
+                                {s.volRatio >= 2 && <div style={{ fontFamily: "monospace", fontSize: 7, color: "#ffb800" }}>{s.volRatio}x vol</div>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Top setups + weekly watch */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 4 }}>TOP SETUPS (momentum + volume)</div>
+                          {watchlistScan.topSetups?.slice(0,5).map((s, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#e8f4ff" }}>{s.ticker} <span style={{ fontSize: 8, color: "#4a6d8c" }}>{s.theme?.slice(0,8)}</span></span>
+                              <span style={{ fontFamily: "monospace", fontSize: 9 }}>
+                                <span style={{ color: "#39ff14" }}>+{s.chg1w}%</span>
+                                <span style={{ color: "#ffb800", marginLeft: 4 }}>{s.volRatio}x</span>
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 4 }}>WEEKLY WATCHLIST</div>
+                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                            {watchlistScan.analysis?.weeklyWatch?.map(t => (
+                              <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 6px", borderRadius: 3, background: "rgba(255,184,0,0.08)", color: "#ffb800", border: "1px solid rgba(255,184,0,0.2)" }}>{t}</span>
+                            ))}
+                          </div>
+                          {watchlistScan.watchAlerts?.length > 0 && (
+                            <div style={{ marginTop: 6 }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 2 }}>⚡ VOLUME ALERTS</div>
+                              {watchlistScan.watchAlerts.slice(0,3).map((s, i) => (
+                                <div key={i} style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55" }}>{s.ticker} {s.chg1w >= 0 ? "+" : ""}{s.chg1w}% {s.volRatio}x</div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Accuracy booster */}
+                      {watchlistScan.analysis?.accuracyBooster && (
+                        <div style={{ background: "rgba(0,212,255,0.03)", border: "1px solid rgba(0,212,255,0.1)", borderRadius: 3, padding: "6px 8px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 7, color: "#00d4ff", marginBottom: 2 }}>ACCURACY BOOSTER INSIGHT</div>
+                          <div style={{ fontSize: 9, color: "#8aabb8" }}>{watchlistScan.analysis.accuracyBooster}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* SMART MONEY INTELLIGENCE */}
