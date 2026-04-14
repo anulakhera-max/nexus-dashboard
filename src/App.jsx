@@ -288,6 +288,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [geoData, setGeoData] = useState(null);
   const [loadingGeo, setLoadingGeo] = useState(false);
   const [geoScenario, setGeoScenario] = useState(null);
+  const [smartMoneyData, setSmartMoneyData] = useState(null);
+  const [loadingSmartMoney, setLoadingSmartMoney] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -664,6 +666,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadSmartMoney = async (force = false) => {
+    setLoadingSmartMoney(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/smart-money" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setSmartMoneyData(data);
+    } catch {}
+    setLoadingSmartMoney(false);
   };
 
   const loadGeoScenarios = async (force = false) => {
@@ -2446,12 +2458,13 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadSmartMoney(true); loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
                   {[
+                    { label: "🐋 SMART$", active: !!smartMoneyData, color: "#ff69b4", count: smartMoneyData?.smartMoney?.buyTickers?.length, onClick: () => loadSmartMoney(true) },
                     { label: "🌍 GEO", active: !!geoData, color: geoData?.activeScenario === "ESCALATION" ? "#ff2d55" : geoData?.activeScenario === "RESOLUTION" ? "#39ff14" : geoData?.activeScenario === "BLOCKADE" ? "#9d7fff" : "#ffb800", count: geoData?.activeScenario?.slice(0,4), onClick: () => loadGeoScenarios(true) },
                     { label: "🤖 AI INFRA", active: !!aiInfraData, color: "#00ff9d", count: aiInfraData?.totalStocks, onClick: () => loadAiInfra(true) },
                     { label: "🎯 WHISPER", active: !!whisperData, color: "#ff6eb4", count: whisperData?.tickersAnalyzed, onClick: () => loadWhispers(true) },
@@ -2471,6 +2484,123 @@ export default function NexusDashboard({ user, onLogout }) {
                       {s.label} {s.active && s.count !== undefined && <span style={{ background: s.color + "20", borderRadius: 10, padding: "0 5px", fontSize: 9 }}>{s.count}</span>}
                     </button>
                   ))}
+                </div>
+
+                {/* SMART MONEY INTELLIGENCE */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(255,105,180,0.25)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff69b4", letterSpacing: 2 }}>🐋 SMART MONEY INTELLIGENCE</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Polymarket whales · Congressional trades · Billionaire 13F · Prediction market probabilities</div>
+                    </div>
+                    {smartMoneyData && <button onClick={() => loadSmartMoney(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
+                  </div>
+
+                  {!smartMoneyData ? (
+                    <button onClick={() => loadSmartMoney(true)} disabled={loadingSmartMoney} style={{ background: "rgba(255,105,180,0.1)", border: "1px solid rgba(255,105,180,0.3)", color: "#ff69b4", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingSmartMoney ? "SCANNING..." : "🐋 LOAD SMART MONEY"}</button>
+                  ) : (
+                    <div>
+                      {/* Best buy + sell */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+                        {smartMoneyData.analysis?.topBuy && (
+                          <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: "8px 10px" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 3 }}>SMART MONEY BUYING</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#39ff14" }}>{smartMoneyData.analysis.topBuy}</div>
+                            {smartMoneyData.analysis.billionaireConviction && <div style={{ fontSize: 9, color: "#8aabb8", marginTop: 3 }}>{smartMoneyData.analysis.billionaireConviction}</div>}
+                          </div>
+                        )}
+                        {smartMoneyData.analysis?.topSell && (
+                          <div style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: "8px 10px" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 3 }}>SMART MONEY EXITING</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ff2d55" }}>{smartMoneyData.analysis.topSell}</div>
+                            {smartMoneyData.analysis.divergence && <div style={{ fontSize: 9, color: "#8aabb8", marginTop: 3 }}>{smartMoneyData.analysis.divergence?.slice(0,50)}</div>}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 4 source grid */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>
+                        {/* Polymarket */}
+                        <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,105,180,0.15)", borderRadius: 4, padding: "8px 10px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff69b4", marginBottom: 4 }}>🎯 POLYMARKET MARKETS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 11, color: "#e8f4ff", marginBottom: 3 }}>{smartMoneyData.polymarket?.marketCount || 0} geo markets</div>
+                          {smartMoneyData.polymarket?.geoMarkets?.slice(0,2).map((m, i) => (
+                            <div key={i} style={{ fontSize: 9, color: "#8aabb8", marginBottom: 2 }}>
+                              <span style={{ color: m.probability > 60 ? "#39ff14" : m.probability > 40 ? "#ffb800" : "#ff2d55" }}>{m.probability}%</span> {m.question?.slice(0,35)}
+                            </div>
+                          ))}
+                          {smartMoneyData.polymarket?.megaWhales?.length > 0 && (
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff69b4", marginTop: 4 }}>🐋 {smartMoneyData.polymarket.megaWhales.length} MEGA-WHALE trades</div>
+                          )}
+                          {smartMoneyData.analysis?.polymarketSignal && <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 3 }}>{smartMoneyData.analysis.polymarketSignal?.slice(0,50)}</div>}
+                        </div>
+
+                        {/* Congressional */}
+                        <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,105,180,0.15)", borderRadius: 4, padding: "8px 10px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff69b4", marginBottom: 4 }}>🏛 CONGRESSIONAL TRADES</div>
+                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 4 }}>
+                            {smartMoneyData.congressional?.buyTickers?.map(t => (
+                              <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 4px", borderRadius: 2, background: "rgba(57,255,20,0.08)", color: "#39ff14" }}>{t} ▲</span>
+                            ))}
+                            {smartMoneyData.congressional?.sellTickers?.map(t => (
+                              <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 4px", borderRadius: 2, background: "rgba(255,45,85,0.08)", color: "#ff2d55" }}>{t} ▼</span>
+                            ))}
+                          </div>
+                          {smartMoneyData.congressional?.bipartisanBuys?.length > 0 && (
+                            <div style={{ fontSize: 9, color: "#ffd700", fontFamily: "monospace" }}>⭐ BIPARTISAN: {smartMoneyData.congressional.bipartisanBuys.join(",")}</div>
+                          )}
+                          {smartMoneyData.analysis?.congressEdge && <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 3 }}>{smartMoneyData.analysis.congressEdge?.slice(0,55)}</div>}
+                        </div>
+
+                        {/* Billionaires */}
+                        <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,105,180,0.15)", borderRadius: 4, padding: "8px 10px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff69b4", marginBottom: 4 }}>💎 BILLIONAIRE 13F</div>
+                          {smartMoneyData.billionaires?.consensusBuys?.length > 0 && (
+                            <div style={{ fontSize: 9, color: "#ffd700", fontFamily: "monospace", marginBottom: 3 }}>CONSENSUS: {smartMoneyData.billionaires.consensusBuys.join(",")}</div>
+                          )}
+                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                            {smartMoneyData.billionaires?.buyTickers?.slice(0,5).map(t => (
+                              <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 4px", borderRadius: 2, background: "rgba(57,255,20,0.08)", color: "#39ff14" }}>{t}</span>
+                            ))}
+                            {smartMoneyData.billionaires?.shortTickers?.map(t => (
+                              <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 4px", borderRadius: 2, background: "rgba(255,45,85,0.08)", color: "#ff2d55" }}>{t} SHORT</span>
+                            ))}
+                          </div>
+                          {smartMoneyData.billionaires?.topBillionaireBuy && (
+                            <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 3 }}>{smartMoneyData.billionaires.topBillionaireBuy.manager}: {smartMoneyData.billionaires.topBillionaireBuy.ticker} {smartMoneyData.billionaires.topBillionaireBuy.action}</div>
+                          )}
+                        </div>
+
+                        {/* Whale detector */}
+                        <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,105,180,0.15)", borderRadius: 4, padding: "8px 10px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff69b4", marginBottom: 4 }}>🐳 POLYMARKET WHALES</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 11, color: "#e8f4ff", marginBottom: 3 }}>{smartMoneyData.polymarket?.whaleCount || 0} trades $50K+</div>
+                          {smartMoneyData.polymarket?.whales?.slice(0,3).map((w, i) => (
+                            <div key={i} style={{ fontSize: 9, color: "#8aabb8", marginBottom: 1 }}>
+                              {w.tier === "MEGA_WHALE" ? "🐋" : "🐳"} ${(w.size/1000).toFixed(0)}K {w.side} @ {w.price}%
+                            </div>
+                          ))}
+                          {smartMoneyData.polymarket?.whaleCount === 0 && <div style={{ fontSize: 9, color: "#2a3d57" }}>No whale activity detected today</div>}
+                        </div>
+                      </div>
+
+                      {/* Pipeline boost/avoid */}
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        {smartMoneyData.analysis?.pipelineBoost?.length > 0 && (
+                          <div>
+                            <span style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginRight: 4 }}>PIPELINE BOOST (3x):</span>
+                            {smartMoneyData.analysis.pipelineBoost.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: "rgba(57,255,20,0.08)", color: "#39ff14", marginRight: 3, border: "1px solid rgba(57,255,20,0.2)" }}>{t}</span>)}
+                          </div>
+                        )}
+                        {smartMoneyData.analysis?.pipelineAvoid?.length > 0 && (
+                          <div>
+                            <span style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginRight: 4 }}>AVOID:</span>
+                            {smartMoneyData.analysis.pipelineAvoid.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: "rgba(255,45,85,0.08)", color: "#ff2d55", marginRight: 3 }}>{t}</span>)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* GEOPOLITICAL SCENARIO ENGINE */}
