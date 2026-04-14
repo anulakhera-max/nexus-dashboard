@@ -301,6 +301,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [resolverData, setResolverData] = useState(null);
   const [loadingResolver, setLoadingResolver] = useState(false);
+  const [redditData, setRedditData] = useState(null);
+  const [loadingReddit, setLoadingReddit] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -677,6 +679,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadRedditWSB = async (force = false) => {
+    setLoadingReddit(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/reddit-wsb" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setRedditData(data);
+    } catch {}
+    setLoadingReddit(false);
   };
 
   const runSignalResolver = async (tickers) => {
@@ -2536,7 +2548,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadSpikeDetector(true); loadWatchlistScan(true); loadSmartMoney(true); loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadRedditWSB(true); loadSpikeDetector(true); loadWatchlistScan(true); loadSmartMoney(true); loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
@@ -2544,6 +2556,7 @@ export default function NexusDashboard({ user, onLogout }) {
                   {[
                     { label: "⚡ SPIKE", active: !!spikeData, color: spikeData?.analysis?.direction === "UP" ? "#39ff14" : "#ff2d55", count: spikeData?.topAlerts?.length, onClick: () => loadSpikeDetector(true) },
                     { label: "📡 WATCH", active: !!watchlistScan, color: "#00d4ff", count: watchlistScan?.totalScanned, onClick: () => loadWatchlistScan(true) },
+                    { label: "🔥 WSB", active: !!redditData, color: "#ff4500", count: redditData?.spikeBuys?.length, onClick: () => loadRedditWSB(true) },
                     { label: "🐋 SMART$", active: !!smartMoneyData, color: "#ff69b4", count: smartMoneyData?.smartMoney?.buyTickers?.length, onClick: () => loadSmartMoney(true) },
                     { label: "🌍 GEO", active: !!geoData, color: geoData?.activeScenario === "ESCALATION" ? "#ff2d55" : geoData?.activeScenario === "RESOLUTION" ? "#39ff14" : geoData?.activeScenario === "BLOCKADE" ? "#9d7fff" : "#ffb800", count: geoData?.activeScenario?.slice(0,4), onClick: () => loadGeoScenarios(true) },
                     { label: "🤖 AI INFRA", active: !!aiInfraData, color: "#00ff9d", count: aiInfraData?.totalStocks, onClick: () => loadAiInfra(true) },
@@ -2564,6 +2577,99 @@ export default function NexusDashboard({ user, onLogout }) {
                       {s.label} {s.active && s.count !== undefined && <span style={{ background: s.color + "20", borderRadius: 10, padding: "0 5px", fontSize: 9 }}>{s.count}</span>}
                     </button>
                   ))}
+                </div>
+
+                {/* REDDIT WSB VELOCITY */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(255,69,0,0.3)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff4500", letterSpacing: 2 }}>🔥 REDDIT WSB MENTION VELOCITY</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>r/wallstreetbets · r/stocks · r/options · r/pennystocks · r/investing — velocity spikes precede retail-driven moves</div>
+                    </div>
+                    {redditData && (
+                      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                        <span style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>{redditData.postsScanned} posts · {redditData.uniqueTickers} tickers</span>
+                        <button onClick={() => loadRedditWSB(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>
+                      </div>
+                    )}
+                  </div>
+
+                  {!redditData ? (
+                    <button onClick={() => loadRedditWSB(true)} disabled={loadingReddit} style={{ background: "rgba(255,69,0,0.1)", border: "1px solid rgba(255,69,0,0.3)", color: "#ff4500", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingReddit ? "SCANNING REDDIT..." : "🔥 LOAD WSB VELOCITY"}</button>
+                  ) : (
+                    <div>
+                      {/* Velocity spike callouts */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+                        {/* Spike buys */}
+                        <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: "8px 10px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 4 }}>🚀 VELOCITY SPIKE — BULLISH</div>
+                          {redditData.spikeBuys?.length > 0 ? redditData.spikeBuys.map((m, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffd700" }}>{m.ticker}</span>
+                              <div style={{ textAlign: "right" }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff4500" }}>{m.velocity}x velocity</div>
+                                <div style={{ fontSize: 8, color: "#4a6d8c" }}>{m.count6h}posts/6h · {m.count24h}/24h</div>
+                              </div>
+                            </div>
+                          )) : <div style={{ fontSize: 9, color: "#2a3d57" }}>No spike buys detected</div>}
+                        </div>
+
+                        {/* Bearish spikes */}
+                        <div style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: "8px 10px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 4 }}>⚠️ BEARISH SENTIMENT SPIKE</div>
+                          {redditData.bearishSpikes?.length > 0 ? redditData.bearishSpikes.map((m, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ff2d55" }}>{m.ticker}</span>
+                              <div style={{ textAlign: "right" }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff4500" }}>{m.velocity}x velocity</div>
+                                <div style={{ fontSize: 8, color: "#4a6d8c" }}>{m.count24h} bearish posts</div>
+                              </div>
+                            </div>
+                          )) : <div style={{ fontSize: 9, color: "#2a3d57" }}>No bearish spikes</div>}
+                        </div>
+                      </div>
+
+                      {/* Top mentioned + accelerating */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 4 }}>📈 ACCELERATING MENTIONS</div>
+                          {redditData.accelerating?.slice(0,4).map((m, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#e8f4ff" }}>{m.ticker} <span style={{ fontSize: 8, color: m.sentimentBias === "BULLISH" ? "#39ff14" : "#ff2d55" }}>{m.sentimentBias}</span></span>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800" }}>{m.velocity}x · {m.count24h}posts</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 4 }}>💬 MOST MENTIONED TODAY</div>
+                          {redditData.topMentioned?.slice(0,4).map((m, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#e8f4ff" }}>{m.ticker}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#9d7fff" }}>{m.count24h} mentions</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Viral posts */}
+                      {redditData.viralPosts?.length > 0 && (
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff4500", marginBottom: 4 }}>🔥 VIRAL WSB POSTS</div>
+                          {redditData.viralPosts.slice(0,3).map((p, i) => (
+                            <div key={i} style={{ padding: "4px 8px", marginBottom: 3, background: "rgba(255,69,0,0.04)", border: "1px solid rgba(255,69,0,0.15)", borderRadius: 3 }}>
+                              <div style={{ fontSize: 9, color: "#e8f4ff", marginBottom: 2 }}>{p.title}</div>
+                              <div style={{ display: "flex", gap: 8 }}>
+                                <span style={{ fontSize: 8, color: "#ffb800" }}>↑ {p.score}</span>
+                                <span style={{ fontSize: 8, color: "#4a6d8c" }}>💬 {p.comments}</span>
+                                {p.tickers?.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 8, color: "#ff4500" }}>${t}</span>)}
+                                <span style={{ fontSize: 8, color: p.sentiment === "BULLISH" ? "#39ff14" : p.sentiment === "BEARISH" ? "#ff2d55" : "#4a6d8c" }}>{p.sentiment}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* SPIKE DETECTOR */}
