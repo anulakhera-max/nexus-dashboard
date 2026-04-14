@@ -308,6 +308,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [weightsData, setWeightsData] = useState(null);
   const [loadingWeights, setLoadingWeights] = useState(false);
   const [weightsScenario, setWeightsScenario] = useState("STALL");
+  const [autonomousData, setAutonomousData] = useState(null);
+  const [loadingAutonomous, setLoadingAutonomous] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -723,14 +725,16 @@ export default function NexusDashboard({ user, onLogout }) {
 
   const loadLearningStats = async () => {
     try {
-      const [lr, sg, wt] = await Promise.all([
+      const [lr, sg, wt, au] = await Promise.all([
         fetch(nexusUrl + "/api/learning-stats", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
         fetch(nexusUrl + "/api/improvement-suggestions", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
         fetch(nexusUrl + "/api/learned-weights", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
+        fetch(nexusUrl + "/api/autonomous-status", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
       ]);
       if (lr.success) setLearningData(lr);
       if (sg.success) setSuggestionsData(sg);
       if (wt.success) setWeightsData(wt);
+      if (au.success) setAutonomousData(au);
     } catch {}
   };
 
@@ -3886,6 +3890,123 @@ export default function NexusDashboard({ user, onLogout }) {
             {/* RESEARCH TAB — Earnings + Ripple + Pattern + Paper */}
             {tab === "research" && (
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+
+                {/* AUTONOMOUS INTELLIGENCE STATUS */}
+                <div style={{ background: "linear-gradient(135deg,rgba(0,212,255,0.08),rgba(57,255,20,0.04))", border: "2px solid rgba(0,212,255,0.3)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>
+                        🧠 NEXUS AUTONOMOUS INTELLIGENCE — ALWAYS RUNNING
+                      </div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Harvests every 15min · Patterns every hour · Simulates at 9:30am ET · Checks outcomes at 4:30pm ET · Synthesizes weekly · Target: 90%</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <div style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 8px", borderRadius: 10, background: "rgba(57,255,20,0.15)", color: "#39ff14" }}>● RUNNING</div>
+                    </div>
+                  </div>
+
+                  {!autonomousData ? (
+                    <div style={{ fontSize: 10, color: "#4a6d8c" }}>Click LOAD STATS above to see autonomous system status</div>
+                  ) : (
+                    <div>
+                      {/* 5 component status */}
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 4, marginBottom: 10 }}>
+                        {[
+                          { name: "HARVESTER", icon: "📡", comp: autonomousData.components?.harvester, detail: autonomousData.components?.harvester?.harvests24h + " harvests/24h" },
+                          { name: "PATTERNS", icon: "🔍", comp: autonomousData.components?.patternEngine, detail: autonomousData.components?.patternEngine?.patternsFound + " patterns found" },
+                          { name: "SIMULATOR", icon: "🎯", comp: autonomousData.components?.simulationEngine, detail: autonomousData.components?.simulationEngine?.totalSimulations + " sims total" },
+                          { name: "OUTCOMES", icon: "✓", comp: autonomousData.components?.outcomeChecker, detail: autonomousData.components?.simulationEngine?.resolved + " resolved" },
+                          { name: "SYNTHESIZER", icon: "🧬", comp: autonomousData.components?.insightSynthesizer, detail: autonomousData.components?.insightSynthesizer?.overallWinRate ? autonomousData.components.insightSynthesizer.overallWinRate + "% win rate" : "Awaiting data" },
+                        ].map((c, i) => (
+                          <div key={i} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "6px 8px", textAlign: "center" }}>
+                            <div style={{ fontSize: 14, marginBottom: 2 }}>{c.icon}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>{c.name}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 7, color: "#39ff14" }}>● ACTIVE</div>
+                            <div style={{ fontSize: 7, color: "#2a3d57", marginTop: 2 }}>{c.detail}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Performance dashboard */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 10 }}>
+                        <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>CURRENT WIN RATE</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 700, color: autonomousData.performance?.winRate?.includes("%") && parseInt(autonomousData.performance.winRate) >= 80 ? "#39ff14" : "#ffb800" }}>
+                            {autonomousData.performance?.winRate || "—"}
+                          </div>
+                          <div style={{ fontSize: 7, color: "#4a6d8c" }}>Target: 90%</div>
+                        </div>
+                        <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>SIMULATIONS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 700, color: "#e8f4ff" }}>
+                            {autonomousData.components?.simulationEngine?.totalSimulations || 0}
+                          </div>
+                          <div style={{ fontSize: 7, color: "#4a6d8c" }}>{autonomousData.performance?.totalResolved || 0} resolved</div>
+                        </div>
+                        <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>GAP TO TARGET</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ffb800" }}>
+                            {autonomousData.performance?.gap || "Building..."}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Recent simulations with WHY */}
+                      {autonomousData.performance?.recentSims?.length > 0 && (
+                        <div style={{ marginBottom: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 4 }}>RECENT SIMULATIONS — WITH OUTCOME ANALYSIS</div>
+                          {autonomousData.performance.recentSims.map((s, i) => (
+                            <div key={i} style={{ padding: "5px 8px", marginBottom: 3, background: "rgba(0,0,0,0.3)", borderRadius: 3, border: `1px solid ${s.correct === true ? "rgba(57,255,20,0.15)" : s.correct === false ? "rgba(255,45,85,0.15)" : "rgba(74,109,140,0.1)"}` }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: "#ffd700" }}>{s.ticker}</span>
+                                  <span style={{ fontFamily: "monospace", fontSize: 8, color: s.direction === "BUY" ? "#39ff14" : "#ff2d55" }}>{s.direction}</span>
+                                  <span style={{ fontSize: 7, color: "#4a6d8c" }}>{s.source}</span>
+                                </div>
+                                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                  {s.pnlPct !== null && <span style={{ fontFamily: "monospace", fontSize: 9, color: s.pnlPct >= 0 ? "#39ff14" : "#ff2d55" }}>{s.pnlPct >= 0 ? "+" : ""}{s.pnlPct}%</span>}
+                                  <span style={{ fontFamily: "monospace", fontSize: 8, color: s.correct === true ? "#39ff14" : s.correct === false ? "#ff2d55" : "#4a6d8c" }}>
+                                    {s.correct === true ? "✓ WIN" : s.correct === false ? "✗ LOSS" : "⏳ PENDING"}
+                                  </span>
+                                </div>
+                              </div>
+                              {(s.whyWorked || s.whyFailed) && (
+                                <div style={{ fontSize: 8, color: s.correct ? "#39ff14" : "#ff2d55", opacity: 0.7 }}>
+                                  {s.correct ? "✓ " + s.whyWorked : "✗ " + s.whyFailed}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Weekly insights */}
+                      {autonomousData.weeklyInsights && (
+                        <div style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 4, padding: "8px 10px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff", marginBottom: 4 }}>WEEKLY INSIGHT — {autonomousData.weeklyInsights.timestamp?.slice(0,10)}</div>
+                          <div style={{ fontSize: 10, color: "#c8dce8", marginBottom: 4 }}>{autonomousData.weeklyInsights.recommendation}</div>
+                          {autonomousData.weeklyInsights.topSuccessFactors?.slice(0,2).map((f, i) => (
+                            <div key={i} style={{ fontSize: 8, color: "#39ff14" }}>✓ {f.reason} ({f.count}x)</div>
+                          ))}
+                          {autonomousData.weeklyInsights.topFailureFactors?.slice(0,2).map((f, i) => (
+                            <div key={i} style={{ fontSize: 8, color: "#ff2d55" }}>✗ {f.reason} ({f.count}x)</div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Harvest anomalies */}
+                      {autonomousData.components?.harvester?.lastAnomalies?.length > 0 && (
+                        <div style={{ marginTop: 8, padding: "6px 8px", background: "rgba(255,184,0,0.05)", borderRadius: 3, border: "1px solid rgba(255,184,0,0.15)" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 3 }}>⚡ LATEST HARVEST ANOMALIES</div>
+                          {autonomousData.components.harvester.lastAnomalies.map((a, i) => (
+                            <div key={i} style={{ fontSize: 9, color: "#8aabb8" }}>{a.type}: {a.current || a.to || JSON.stringify(a).slice(0,40)}</div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 {/* ACCURACY TRACKER + IMPROVEMENT SUGGESTIONS */}
                 <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.25)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
