@@ -293,6 +293,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [watchlistScan, setWatchlistScan] = useState(null);
   const [loadingWatchlist, setLoadingWatchlist] = useState(false);
   const [watchTheme, setWatchTheme] = useState(null);
+  const [spikeData, setSpikeData] = useState(null);
+  const [loadingSpike, setLoadingSpike] = useState(false);
+  const [spikeView, setSpikeView] = useState("alerts");
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -669,6 +672,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadSpikeDetector = async (force = false) => {
+    setLoadingSpike(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/spike-detector" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setSpikeData(data);
+    } catch {}
+    setLoadingSpike(false);
   };
 
   const loadWatchlistScan = async (force = false) => {
@@ -2471,12 +2484,13 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadWatchlistScan(true); loadSmartMoney(true); loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadSpikeDetector(true); loadWatchlistScan(true); loadSmartMoney(true); loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
                   {[
+                    { label: "⚡ SPIKE", active: !!spikeData, color: spikeData?.analysis?.direction === "UP" ? "#39ff14" : "#ff2d55", count: spikeData?.topAlerts?.length, onClick: () => loadSpikeDetector(true) },
                     { label: "📡 WATCH", active: !!watchlistScan, color: "#00d4ff", count: watchlistScan?.totalScanned, onClick: () => loadWatchlistScan(true) },
                     { label: "🐋 SMART$", active: !!smartMoneyData, color: "#ff69b4", count: smartMoneyData?.smartMoney?.buyTickers?.length, onClick: () => loadSmartMoney(true) },
                     { label: "🌍 GEO", active: !!geoData, color: geoData?.activeScenario === "ESCALATION" ? "#ff2d55" : geoData?.activeScenario === "RESOLUTION" ? "#39ff14" : geoData?.activeScenario === "BLOCKADE" ? "#9d7fff" : "#ffb800", count: geoData?.activeScenario?.slice(0,4), onClick: () => loadGeoScenarios(true) },
@@ -2498,6 +2512,154 @@ export default function NexusDashboard({ user, onLogout }) {
                       {s.label} {s.active && s.count !== undefined && <span style={{ background: s.color + "20", borderRadius: 10, padding: "0 5px", fontSize: 9 }}>{s.count}</span>}
                     </button>
                   ))}
+                </div>
+
+                {/* SPIKE DETECTOR */}
+                <div style={{ background: "#080f1a", border: `2px solid ${spikeData?.analysis?.direction === "UP" ? "rgba(57,255,20,0.4)" : spikeData?.analysis?.direction === "DOWN" ? "rgba(255,45,85,0.4)" : "rgba(255,184,0,0.25)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2 }}>⚡ SPIKE DETECTOR — PHARMA · METALS · MINING · PENNY</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>FDA approvals · Clinical trials · Pre-market gaps · Volume coiling · Pre-spike pattern recognition</div>
+                    </div>
+                    {spikeData && <button onClick={() => loadSpikeDetector(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
+                  </div>
+
+                  {!spikeData ? (
+                    <button onClick={() => loadSpikeDetector(true)} disabled={loadingSpike} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", color: "#ffb800", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingSpike ? "SCANNING PHARMA + METALS + PENNIES..." : "⚡ DETECT PRE-SPIKE PATTERNS"}</button>
+                  ) : (
+                    <div>
+                      {/* Primary alert */}
+                      {spikeData.analysis?.highestSpikeRisk && (
+                        <div style={{ background: spikeData.analysis.direction === "UP" ? "rgba(57,255,20,0.06)" : "rgba(255,45,85,0.06)", border: `1px solid ${spikeData.analysis.direction === "UP" ? "rgba(57,255,20,0.3)" : "rgba(255,45,85,0.3)"}`, borderRadius: 4, padding: "10px 12px", marginBottom: 10 }}>
+                          <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
+                            <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800" }}>HIGHEST SPIKE RISK</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 700, color: "#ffd700" }}>{spikeData.analysis.highestSpikeRisk}</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 11, padding: "2px 8px", borderRadius: 10, background: spikeData.analysis.direction === "UP" ? "rgba(57,255,20,0.15)" : "rgba(255,45,85,0.15)", color: spikeData.analysis.direction === "UP" ? "#39ff14" : "#ff2d55", fontWeight: 700 }}>{spikeData.analysis.direction} {spikeData.analysis.magnitude}</span>
+                          </div>
+                          <div style={{ fontSize: 10, color: "#c8dce8", marginBottom: 4 }}>📍 {spikeData.analysis.preSpikePattern}</div>
+                          <div style={{ fontSize: 10, color: "#ffb800", marginBottom: 4 }}>⚡ CATALYST: {spikeData.analysis.catalyst}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", fontWeight: 700 }}>🎯 {spikeData.analysis.optionsPlay}</div>
+                        </div>
+                      )}
+
+                      {/* View switcher */}
+                      <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
+                        {["alerts","fda","metals","penny","patterns"].map(v => (
+                          <button key={v} onClick={() => setSpikeView(v)} style={{ fontFamily: "monospace", fontSize: 8, padding: "3px 8px", borderRadius: 2, border: `1px solid ${spikeView === v ? "#ffb800" : "rgba(74,109,140,0.3)"}`, background: spikeView === v ? "rgba(255,184,0,0.1)" : "transparent", color: spikeView === v ? "#ffb800" : "#4a6d8c", cursor: "pointer" }}>{v.toUpperCase()}</button>
+                        ))}
+                      </div>
+
+                      {/* ALERTS view */}
+                      {spikeView === "alerts" && (
+                        <div>
+                          {spikeData.topAlerts?.length > 0 ? spikeData.topAlerts.slice(0,5).map((a, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 8px", marginBottom: 3, background: "rgba(0,0,0,0.3)", borderRadius: 3, border: a.pattern === "STRONG_SETUP" ? "1px solid rgba(57,255,20,0.2)" : "1px solid rgba(74,109,140,0.1)" }}>
+                              <div>
+                                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffd700", marginRight: 8 }}>{a.ticker}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 8, padding: "1px 5px", borderRadius: 2, background: a.pattern === "STRONG_SETUP" ? "rgba(57,255,20,0.1)" : "rgba(255,184,0,0.1)", color: a.pattern === "STRONG_SETUP" ? "#39ff14" : "#ffb800" }}>{a.pattern}</span>
+                                <span style={{ fontSize: 8, color: "#4a6d8c", marginLeft: 6 }}>{a.type}</span>
+                              </div>
+                              <div style={{ textAlign: "right" }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 9, color: a.chg1w >= 0 ? "#39ff14" : "#ff2d55" }}>{a.chg1w >= 0 ? "+" : ""}{a.chg1w}% 1W</div>
+                                {a.volRatio >= 2 && <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800" }}>{a.volRatio}x vol</div>}
+                              </div>
+                            </div>
+                          )) : <div style={{ fontSize: 10, color: "#4a6d8c" }}>No strong setups detected today</div>}
+                          {/* Second best + others */}
+                          <div style={{ display: "flex", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
+                            {spikeData.analysis?.secondBest && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 8px", borderRadius: 3, background: "rgba(255,184,0,0.08)", color: "#ffb800", border: "1px solid rgba(255,184,0,0.2)" }}>2nd: {spikeData.analysis.secondBest}</span>}
+                            {spikeData.analysis?.pennyWatch && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 8px", borderRadius: 3, background: "rgba(157,127,255,0.08)", color: "#9d7fff", border: "1px solid rgba(157,127,255,0.2)" }}>Penny: {spikeData.analysis.pennyWatch}</span>}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* FDA view */}
+                      {spikeView === "fda" && (
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff69b4", marginBottom: 6 }}>📋 RECENT FDA APPROVALS</div>
+                          {spikeData.fdaData?.recentApprovals?.slice(0,4).map((a, i) => (
+                            <div key={i} style={{ padding: "4px 8px", marginBottom: 3, background: "rgba(0,0,0,0.3)", borderRadius: 3, border: "1px solid rgba(255,105,180,0.15)" }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 10, color: "#ff69b4", fontWeight: 700 }}>{a.name}</span>
+                              <span style={{ fontSize: 9, color: "#4a6d8c", marginLeft: 8 }}>{a.company}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 8, marginLeft: 8, color: "#8aabb8" }}>{a.type}</span>
+                            </div>
+                          ))}
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff69b4", margin: "8px 0 4px" }}>🧪 PHASE 3 UPCOMING READOUTS</div>
+                          {spikeData.fdaData?.upcomingReadouts?.slice(0,3).map((t, i) => (
+                            <div key={i} style={{ padding: "4px 8px", marginBottom: 3, background: "rgba(0,0,0,0.3)", borderRadius: 3 }}>
+                              <div style={{ fontSize: 9, color: "#c8dce8" }}>{t.title}</div>
+                              <div style={{ fontSize: 8, color: "#4a6d8c" }}>{t.sponsor} · {t.completionDate}</div>
+                            </div>
+                          ))}
+                          {spikeData.fdaNews?.slice(0,4).map((h, i) => (
+                            <div key={i} style={{ fontSize: 9, color: "#8aabb8", marginBottom: 2, padding: "2px 0", borderBottom: "1px solid rgba(74,109,140,0.05)" }}>• {h.slice(0,80)}</div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* METALS view */}
+                      {spikeView === "metals" && (
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ffd700", marginBottom: 6 }}>🥇 PRECIOUS METALS & MINING</div>
+                          {spikeData.analysis?.metalSignal && (
+                            <div style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: 4, padding: "8px 10px", marginBottom: 8 }}>
+                              <div style={{ fontSize: 10, color: "#ffd700" }}>{spikeData.analysis.metalSignal}</div>
+                            </div>
+                          )}
+                          {spikeData.patterns?.filter(p => ["MINING","PRECIOUS_METALS","URANIUM","RARE_METALS","COPPER","RARE_EARTH"].includes(p.type)).map((p, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "4px 8px", marginBottom: 2, background: "rgba(0,0,0,0.3)", borderRadius: 3 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 10, color: "#ffd700" }}>{p.ticker}</span>
+                              <span style={{ fontSize: 9, color: "#4a6d8c" }}>{p.watch}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: p.chg1w >= 0 ? "#39ff14" : "#ff2d55" }}>{p.chg1w >= 0 ? "+" : ""}{p.chg1w}%</span>
+                            </div>
+                          ))}
+                          {spikeData.metalNews?.slice(0,4).map((h, i) => (
+                            <div key={i} style={{ fontSize: 9, color: "#8aabb8", marginBottom: 2 }}>• {h.slice(0,80)}</div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* PENNY view */}
+                      {spikeView === "penny" && (
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#9d7fff", marginBottom: 6 }}>💊 PENNY STOCKS + SMALL CAPS</div>
+                          {spikeData.patterns?.filter(p => p.type?.includes("PENNY") || p.type?.includes("SMALL")).map((p, i) => (
+                            <div key={i} style={{ padding: "5px 8px", marginBottom: 3, background: "rgba(0,0,0,0.3)", borderRadius: 3, border: `1px solid ${p.score >= 3 ? "rgba(157,127,255,0.3)" : "rgba(74,109,140,0.1)"}` }}>
+                              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <div>
+                                  <span style={{ fontFamily: "monospace", fontSize: 11, color: "#9d7fff", fontWeight: 700, marginRight: 6 }}>{p.ticker}</span>
+                                  <span style={{ fontSize: 8, color: "#4a6d8c" }}>{p.watch}</span>
+                                </div>
+                                <div style={{ textAlign: "right" }}>
+                                  <div style={{ fontFamily: "monospace", fontSize: 9, color: p.chg1w >= 0 ? "#39ff14" : "#ff2d55" }}>{p.chg1w >= 0 ? "+" : ""}{p.chg1w}%</div>
+                                  {p.volRatio >= 2 && <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800" }}>{p.volRatio}x vol</div>}
+                                </div>
+                              </div>
+                              {p.signals?.length > 0 && <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 2 }}>{p.signals.join(" · ")}</div>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* PATTERNS view */}
+                      {spikeView === "patterns" && (
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", marginBottom: 6 }}>📚 PRE-SPIKE PATTERN LIBRARY</div>
+                          {Object.entries(spikeData.spikePatterns || {}).map(([key, p], i) => (
+                            <div key={i} style={{ padding: "6px 8px", marginBottom: 4, background: "rgba(0,0,0,0.3)", borderRadius: 3, border: "1px solid rgba(0,212,255,0.1)" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", fontWeight: 700 }}>{p.name}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14" }}>{p.confidence}% conf</span>
+                              </div>
+                              <div style={{ fontSize: 9, color: "#8aabb8", marginBottom: 2 }}>{p.description}</div>
+                              <div style={{ fontSize: 8, color: "#ffb800" }}>📈 {p.historicalMove}</div>
+                              <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 2 }}>🎯 {p.playbook?.slice(0,80)}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* MASTER WATCHLIST SCAN */}
