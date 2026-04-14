@@ -280,6 +280,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingSector, setLoadingSector] = useState(false);
   const [darkPoolData, setDarkPoolData] = useState(null);
   const [loadingDarkPool, setLoadingDarkPool] = useState(false);
+  const [whisperData, setWhisperData] = useState(null);
+  const [loadingWhisper, setLoadingWhisper] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -656,6 +658,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadWhispers = async (force = false) => {
+    setLoadingWhisper(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/earnings-whisper" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setWhisperData(data);
+    } catch {}
+    setLoadingWhisper(false);
   };
 
   const loadDarkPool = async (force = false) => {
@@ -2348,12 +2360,13 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
                   {[
+                    { label: "🎯 WHISPER", active: !!whisperData, color: "#ff6eb4", count: whisperData?.tickersAnalyzed, onClick: () => loadWhispers(true) },
                     { label: "🌑 DARK POOL", active: !!darkPoolData, color: darkPoolData?.accumulation?.length > 0 ? "#39ff14" : "#9d7fff", count: darkPoolData?.accumulation?.length, onClick: () => loadDarkPool(true) },
                     { label: "🔄 SECTOR", active: !!sectorData, color: sectorData?.riskRegime === "RISK_ON" ? "#39ff14" : sectorData?.riskRegime === "RISK_OFF" ? "#ff2d55" : "#ffb800", count: null, onClick: () => loadSectorRotation(true) },
                     { label: "📉 P/C", active: !!pcrData, color: pcrData?.ratio >= 1.2 ? "#39ff14" : pcrData?.ratio <= 0.6 ? "#ff2d55" : "#00d4ff", count: pcrData?.ratio, onClick: () => loadPCR(true) },
@@ -2775,6 +2788,79 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div style={{ fontSize: 8, color: "#2a3d57", fontFamily: "monospace" }}>
                         Sources: FINRA Reg SHO short volume + Yahoo Finance volume anomaly detection · {darkPoolData.tickersScanned} tickers scanned
                       </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* EARNINGS WHISPER section */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(255,110,180,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff6eb4", letterSpacing: 2 }}>🎯 EARNINGS WHISPER NUMBERS</div>
+                    {whisperData && <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff6eb4" }}>{whisperData.tickersAnalyzed} analyzed</span>
+                      <button onClick={() => loadWhispers(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>
+                    </div>}
+                  </div>
+
+                  {!whisperData ? (
+                    <button onClick={() => loadWhispers(true)} disabled={loadingWhisper} style={{ background: "rgba(255,110,180,0.1)", border: "1px solid rgba(255,110,180,0.3)", color: "#ff6eb4", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingWhisper ? "FETCHING ALPHA VANTAGE..." : "🎯 LOAD WHISPER NUMBERS"}</button>
+                  ) : whisperData.whispers?.length === 0 ? (
+                    <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>No earnings in next 30 days</div>
+                  ) : (
+                    <div>
+                      {/* Best setup callout */}
+                      {whisperData.bestSetup && (
+                        <div style={{ background: "rgba(255,110,180,0.06)", border: "1px solid rgba(255,110,180,0.2)", borderRadius: 4, padding: "10px 12px", marginBottom: 12 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff6eb4", marginBottom: 4 }}>BEST WHISPER SETUP</div>
+                          <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
+                            <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#ffd700" }}>{whisperData.bestSetup.ticker}</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 7px", borderRadius: 10, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>{whisperData.bestSetup.beatRate}% beat rate</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800" }}>+{whisperData.bestSetup.avgSurprisePct}% avg beat</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 9, color: "#8aabb8" }}>{whisperData.bestSetup.daysOut}d away</span>
+                          </div>
+                          {whisperData.bestSetup.impliedWhisper && (
+                            <div style={{ display: "flex", gap: 12, marginBottom: 6 }}>
+                              <div><span style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>CONSENSUS: </span><span style={{ fontFamily: "monospace", fontSize: 11, color: "#e8f4ff" }}>${whisperData.bestSetup.epsNextQ}</span></div>
+                              <div><span style={{ fontSize: 9, color: "#ff6eb4", fontFamily: "monospace" }}>IMPLIED WHISPER: </span><span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ff6eb4" }}>${whisperData.bestSetup.impliedWhisper}</span></div>
+                              <div><span style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>GAP: </span><span style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800" }}>+${whisperData.bestSetup.whisperVsConsensus}</span></div>
+                            </div>
+                          )}
+                          <div style={{ fontSize: 10, color: "#8aabb8" }}>{whisperData.bestSetup.tradeSetup}</div>
+                        </div>
+                      )}
+
+                      {/* All tickers */}
+                      {whisperData.whispers?.map((w, i) => (
+                        <div key={i} style={{ background: "#080f1a", border: `1px solid ${w.barAssessment === "MODERATE_BAR" ? "rgba(57,255,20,0.15)" : w.barAssessment === "HIGH_BAR" ? "rgba(255,45,85,0.15)" : "rgba(74,109,140,0.1)"}`, borderRadius: 4, padding: 10, marginBottom: 6 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: "#e8f4ff" }}>{w.ticker}</span>
+                              <span style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>{w.name?.slice(0,15)}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: "rgba(255,110,180,0.1)", color: "#ff6eb4" }}>{w.daysOut}d</span>
+                            </div>
+                            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: w.beatRate >= 75 ? "#39ff14" : w.beatRate >= 50 ? "#ffb800" : "#ff2d55" }}>{w.beatRate}% beat</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: w.barAssessment === "MODERATE_BAR" ? "rgba(57,255,20,0.1)" : w.barAssessment === "HIGH_BAR" ? "rgba(255,45,85,0.1)" : "rgba(74,109,140,0.1)", color: w.barAssessment === "MODERATE_BAR" ? "#39ff14" : w.barAssessment === "HIGH_BAR" ? "#ff2d55" : "#8aabb8" }}>{w.barAssessment?.replace(/_/g," ")}</span>
+                            </div>
+                          </div>
+                          {/* Last 4 quarters */}
+                          <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
+                            {w.last4Quarters?.map((q, j) => (
+                              <div key={j} style={{ textAlign: "center", background: q.surprisePct > 0 ? "rgba(57,255,20,0.06)" : "rgba(255,45,85,0.06)", borderRadius: 3, padding: "3px 6px", flex: 1 }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>{q.quarter?.slice(0,7)}</div>
+                                <div style={{ fontFamily: "monospace", fontSize: 9, fontWeight: 700, color: q.surprisePct > 0 ? "#39ff14" : "#ff2d55" }}>{q.surprisePct > 0 ? "+" : ""}{q.surprisePct?.toFixed(1)}%</div>
+                              </div>
+                            ))}
+                          </div>
+                          {/* Whisper vs consensus */}
+                          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                            {w.epsNextQ && <span style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c" }}>Consensus: <span style={{ color: "#e8f4ff" }}>${w.epsNextQ}</span></span>}
+                            {w.impliedWhisper && <span style={{ fontSize: 9, fontFamily: "monospace", color: "#ff6eb4" }}>Whisper: <span style={{ color: "#ff6eb4", fontWeight: 700 }}>${w.impliedWhisper}</span></span>}
+                            <span style={{ fontSize: 9, fontFamily: "monospace", color: w.surpriseTrend === "IMPROVING" ? "#39ff14" : w.surpriseTrend === "DETERIORATING" ? "#ff2d55" : "#4a6d8c" }}>Trend: {w.surpriseTrend}</span>
+                            <span style={{ fontSize: 9, fontFamily: "monospace", color: "#ffb800" }}>Avg beat: +{w.avgSurprisePct}%</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
