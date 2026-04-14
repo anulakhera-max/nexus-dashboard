@@ -272,6 +272,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingInsider, setLoadingInsider] = useState(false);
   const [vixData, setVixData] = useState(null);
   const [loadingVix, setLoadingVix] = useState(false);
+  const [fedData, setFedData] = useState(null);
+  const [loadingFed, setLoadingFed] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -650,6 +652,16 @@ export default function NexusDashboard({ user, onLogout }) {
     saveTrackedPicks(updated);
   };
 
+  const loadFedCalendar = async (force = false) => {
+    setLoadingFed(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/fed-calendar" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setFedData(data);
+    } catch {}
+    setLoadingFed(false);
+  };
+
   const loadVixSentiment = async (force = false) => {
     setLoadingVix(true);
     try {
@@ -945,7 +957,7 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   // Auto-connect Questrade on load
-  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); loadTrackerData(); loadEarnings(); loadMovers(); loadVixSentiment(); }, []);
+  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); loadTrackerData(); loadEarnings(); loadMovers(); loadVixSentiment(); loadFedCalendar(); }, []);
 
   const generatePowerIntel = async (force = false) => {
     if (loadingPower) return;
@@ -1219,6 +1231,14 @@ export default function NexusDashboard({ user, onLogout }) {
                   {l.ticker} {l.changePct != null ? Number(l.changePct).toFixed(1) : "?"}%
                 </span>
               ))}
+            </div>
+          )}
+          {/* FOMC countdown pill in header */}
+          {fedData?.nextMeeting && fedData.nextMeeting.daysOut <= 14 && (
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "3px 10px", borderRadius: 10, background: "rgba(157,127,255,0.15)", border: "1px solid rgba(157,127,255,0.4)", marginBottom: 6, fontFamily: "monospace", fontSize: 9 }}>
+              <span style={{ color: "#9d7fff" }}>🏛 FOMC</span>
+              <span style={{ color: "#e8f4ff", fontWeight: 700 }}>{fedData.nextMeeting.daysOut}d</span>
+              <span style={{ color: "#9d7fff" }}>{fedData.analysis?.nextExpectation?.toUpperCase()}</span>
             </div>
           )}
           {/* Earnings strip */}
@@ -2291,12 +2311,13 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
                   {[
+                    { label: "🏛 FED", active: !!fedData, color: "#9d7fff", count: fedData?.nextMeeting?.daysOut, onClick: () => loadFedCalendar(true) },
                     { label: "📊 VIX/FG", active: !!vixData, color: "#00d4ff", count: vixData?.fearGreed?.score, onClick: () => loadVixSentiment(true) },
                     { label: "⚡ FLOW", active: !!unusualFlow, color: "#b24fff", count: unusualFlow?.signals?.length, onClick: () => loadUnusualFlow(true) },
                     { label: "☢ WAR", active: !!warRipple, color: "#ff3c00", count: warRipple?.rippleLayers?.length, onClick: () => loadWarRipple(true) },
@@ -2309,6 +2330,74 @@ export default function NexusDashboard({ user, onLogout }) {
                       {s.label} {s.active && s.count !== undefined && <span style={{ background: s.color + "20", borderRadius: 10, padding: "0 5px", fontSize: 9 }}>{s.count}</span>}
                     </button>
                   ))}
+                </div>
+
+                {/* FED CALENDAR section */}
+                <div style={{ background: "#080f1a", border: `1px solid ${fedData?.nextMeeting?.daysOut <= 7 ? "rgba(157,127,255,0.5)" : "rgba(157,127,255,0.2)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#9d7fff", letterSpacing: 2 }}>🏛 FED CALENDAR + RATES</div>
+                    {fedData?.nextMeeting && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 8px", borderRadius: 10, background: fedData.nextMeeting.daysOut <= 7 ? "rgba(157,127,255,0.2)" : "rgba(157,127,255,0.08)", color: "#9d7fff" }}>FOMC in {fedData.nextMeeting.daysOut}d</span>}
+                  </div>
+                  {!fedData ? (
+                    <button onClick={() => loadFedCalendar(true)} disabled={loadingFed} style={{ background: "rgba(157,127,255,0.1)", border: "1px solid rgba(157,127,255,0.3)", color: "#9d7fff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingFed ? "LOADING..." : "🏛 LOAD FED DATA"}</button>
+                  ) : (
+                    <div>
+                      {/* Yields row */}
+                      <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
+                        {Object.entries(fedData.yields || {}).map(([tenor, data]) => (
+                          <div key={tenor} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "4px 10px", textAlign: "center" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>{tenor}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: "#9d7fff" }}>{data.rate}%</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: data.change >= 0 ? "#ff2d55" : "#39ff14" }}>{data.change >= 0 ? "+" : ""}{data.change}</div>
+                          </div>
+                        ))}
+                        <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "4px 10px", textAlign: "center" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>CURVE</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: fedData.curveShape?.includes("INVERTED") ? "#ff2d55" : fedData.curveShape === "STEEP" ? "#39ff14" : "#ffb800" }}>{fedData.curveShape}</div>
+                        </div>
+                      </div>
+
+                      {/* Fed bias + next meeting */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+                        <div style={{ background: "rgba(157,127,255,0.05)", border: "1px solid rgba(157,127,255,0.15)", borderRadius: 4, padding: "8px 10px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>FED BIAS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: fedData.analysis?.rateBias === "dovish" ? "#39ff14" : fedData.analysis?.rateBias === "hawkish" ? "#ff2d55" : "#ffb800" }}>{fedData.analysis?.rateBias?.toUpperCase()}</div>
+                          <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 3 }}>{fedData.analysis?.rateBiasReason?.slice(0, 60)}</div>
+                        </div>
+                        <div style={{ background: "rgba(157,127,255,0.05)", border: "1px solid rgba(157,127,255,0.15)", borderRadius: 4, padding: "8px 10px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>NEXT FOMC EXPECTATION</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: fedData.analysis?.nextExpectation === "cut" ? "#39ff14" : fedData.analysis?.nextExpectation === "hike" ? "#ff2d55" : "#ffb800" }}>{fedData.analysis?.nextExpectation?.toUpperCase()} · {fedData.analysis?.nextProbability}</div>
+                          <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 3 }}>{fedData.nextMeeting?.decision}</div>
+                        </div>
+                      </div>
+
+                      {/* Pre/Post FOMC trades */}
+                      {fedData.analysis?.preFomcTrade && (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
+                          <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.15)", borderRadius: 3, padding: "6px 8px" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 2 }}>PRE-FOMC TRADE</div>
+                            <div style={{ fontSize: 10, color: "#c8dce8" }}>{fedData.analysis.preFomcTrade}</div>
+                          </div>
+                          <div style={{ background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 3, padding: "6px 8px" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff", marginBottom: 2 }}>POST-FOMC TRADE</div>
+                            <div style={{ fontSize: 10, color: "#c8dce8" }}>{fedData.analysis.postFomcTrade}</div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Rate winners/losers */}
+                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                        {fedData.analysis?.rateWinners?.length > 0 && (
+                          <div><span style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginRight: 4 }}>RATE WINNERS:</span>
+                          {fedData.analysis.rateWinners.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: "rgba(57,255,20,0.08)", color: "#39ff14", marginRight: 3 }}>{t}</span>)}</div>
+                        )}
+                        {fedData.analysis?.rateLosers?.length > 0 && (
+                          <div><span style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginRight: 4 }}>RATE LOSERS:</span>
+                          {fedData.analysis.rateLosers.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: "rgba(255,45,85,0.08)", color: "#ff2d55", marginRight: 3 }}>{t}</span>)}</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* VIX + FEAR/GREED section */}
