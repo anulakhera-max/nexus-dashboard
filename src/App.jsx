@@ -660,12 +660,72 @@ export default function NexusDashboard({ user, onLogout }) {
     saveTrackedPicks(updated);
   };
 
+  const AV_KEY = "TBE04AZ0JKO7RN4O";
+
+  const analyzeWhisper = (ticker, data, earningsDate, daysOut, name) => {
+    const quarterly = data?.quarterlyEarnings || [];
+    if (!quarterly.length) return null;
+    const last4 = quarterly.slice(0, 4).map(q => ({
+      quarter: q.fiscalDateEnding,
+      reported: parseFloat(q.reportedEPS) || 0,
+      estimated: parseFloat(q.estimatedEPS) || 0,
+      surprise: parseFloat(q.surprise) || 0,
+      surprisePct: parseFloat(q.surprisePercentage) || 0,
+    })).filter(q => !isNaN(q.reported) && q.estimated !== 0);
+    if (!last4.length) return null;
+    const beats = last4.filter(q => q.surprisePct > 0).length;
+    const beatRate = Math.round(beats / last4.length * 100);
+    const avgSurprisePct = Math.round(last4.reduce((s, q) => s + q.surprisePct, 0) / last4.length * 10) / 10;
+    const recentSurprise = last4.slice(0, 2).reduce((s, q) => s + q.surprisePct, 0) / 2;
+    const olderSurprise = last4.slice(2).reduce((s, q) => s + q.surprisePct, 0) / Math.max(1, last4.slice(2).length);
+    const surpriseTrend = recentSurprise > olderSurprise + 1 ? "IMPROVING" : recentSurprise < olderSurprise - 1 ? "DETERIORATING" : "STABLE";
+    const barAssessment = beatRate >= 75 && avgSurprisePct >= 8 ? "HIGH_BAR" : beatRate >= 75 ? "MODERATE_BAR" : beatRate <= 50 ? "LOW_BAR" : "NEUTRAL_BAR";
+    const tradeSetup = barAssessment === "MODERATE_BAR" ? "Consistent beater — buy CALL 2 weeks out" : barAssessment === "HIGH_BAR" ? "Bar is high — sell premium or use spread" : barAssessment === "LOW_BAR" ? "Erratic history — use strangle for vol play" : "Mixed — wait for pre-earnings momentum";
+    return { ticker, name, earningsDate, daysOut, last4Quarters: last4, beatRate, avgSurprisePct, surpriseTrend, barAssessment, tradeSetup, mostRecentSurprise: last4[0]?.surprisePct || 0, biggestBeat: Math.max(...last4.map(q => q.surprisePct)), biggestMiss: Math.min(...last4.map(q => q.surprisePct)) };
+  };
+
   const loadWhispers = async (force = false) => {
+    if (loadingWhisper) return;
     setLoadingWhisper(true);
     try {
-      const res = await fetch(nexusUrl + "/api/earnings-whisper" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
-      const data = await res.json();
-      if (data.success) setWhisperData(data);
+      const today = new Date();
+      const knownEarnings = [
+        { ticker: "TSLA", name: "Tesla", earningsDate: "2026-04-22" },
+        { ticker: "GOOGL", name: "Alphabet", earningsDate: "2026-04-29" },
+        { ticker: "MSFT", name: "Microsoft", earningsDate: "2026-04-29" },
+        { ticker: "AMD", name: "AMD", earningsDate: "2026-04-29" },
+        { ticker: "META", name: "Meta Platforms", earningsDate: "2026-04-30" },
+        { ticker: "AMZN", name: "Amazon", earningsDate: "2026-05-01" },
+        { ticker: "AAPL", name: "Apple", earningsDate: "2026-05-01" },
+        { ticker: "PLTR", name: "Palantir", earningsDate: "2026-05-05" },
+        { ticker: "COIN", name: "Coinbase", earningsDate: "2026-05-08" },
+        { ticker: "NVDA", name: "Nvidia", earningsDate: "2026-05-28" },
+      ].map(e => ({ ...e, daysOut: Math.round((new Date(e.earningsDate) - today) / 86400000) }))
+       .filter(e => e.daysOut >= 0 && e.daysOut <= 35)
+       .slice(0, 8);
+
+      const whispers = [];
+      for (const e of knownEarnings) {
+        try {
+          const res = await fetch("https://www.alphavantage.co/query?function=EARNINGS&symbol=" + e.ticker + "&apikey=" + AV_KEY);
+          const data = await res.json();
+          if (data?.Note || data?.Information) { console.log("AV rate limit:", e.ticker); break; }
+          const analysis = analyzeWhisper(e.ticker, data, e.earningsDate, e.daysOut, e.name);
+          if (analysis) {
+            whispers.push(analysis);
+            // Update progressively as each ticker loads
+            setWhisperData(prev => ({
+              success: true, scanning: true,
+              whispers: [...(prev?.whispers || []).filter(w => w.ticker !== e.ticker), analysis].sort((a,b) => a.daysOut - b.daysOut),
+              tickersAnalyzed: (prev?.tickersAnalyzed || 0) + 1,
+            }));
+          }
+          await new Promise(r => setTimeout(r, 1200)); // 1.2s between calls
+        } catch {}
+      }
+
+      const bestSetup = whispers.find(w => w.beatRate >= 75 && w.barAssessment !== "HIGH_BAR" && w.daysOut <= 14);
+      setWhisperData({ success: true, scanning: false, whispers: whispers.sort((a,b) => a.daysOut - b.daysOut), tickersAnalyzed: whispers.length, bestSetup });
     } catch {}
     setLoadingWhisper(false);
   };
