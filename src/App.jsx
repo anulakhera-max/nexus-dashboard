@@ -303,6 +303,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingResolver, setLoadingResolver] = useState(false);
   const [redditData, setRedditData] = useState(null);
   const [loadingReddit, setLoadingReddit] = useState(false);
+  const [oiData, setOiData] = useState(null);
+  const [loadingOI, setLoadingOI] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -679,6 +681,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadOptionsOI = async (force = false) => {
+    setLoadingOI(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/options-oi" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setOiData(data);
+    } catch {}
+    setLoadingOI(false);
   };
 
   const loadRedditWSB = async (force = false) => {
@@ -2548,7 +2560,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadRedditWSB(true); loadSpikeDetector(true); loadWatchlistScan(true); loadSmartMoney(true); loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadOptionsOI(true); loadRedditWSB(true); loadSpikeDetector(true); loadWatchlistScan(true); loadSmartMoney(true); loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
@@ -2556,6 +2568,7 @@ export default function NexusDashboard({ user, onLogout }) {
                   {[
                     { label: "⚡ SPIKE", active: !!spikeData, color: spikeData?.analysis?.direction === "UP" ? "#39ff14" : "#ff2d55", count: spikeData?.topAlerts?.length, onClick: () => loadSpikeDetector(true) },
                     { label: "📡 WATCH", active: !!watchlistScan, color: "#00d4ff", count: watchlistScan?.totalScanned, onClick: () => loadWatchlistScan(true) },
+                    { label: "📊 OI FLOW", active: !!oiData, color: oiData?.totalSignals > 0 ? "#00ff9d" : "#4a6d8c", count: oiData?.totalSignals, onClick: () => loadOptionsOI(true) },
                     { label: "🔥 WSB", active: !!redditData, color: "#ff4500", count: redditData?.spikeBuys?.length, onClick: () => loadRedditWSB(true) },
                     { label: "🐋 SMART$", active: !!smartMoneyData, color: "#ff69b4", count: smartMoneyData?.smartMoney?.buyTickers?.length, onClick: () => loadSmartMoney(true) },
                     { label: "🌍 GEO", active: !!geoData, color: geoData?.activeScenario === "ESCALATION" ? "#ff2d55" : geoData?.activeScenario === "RESOLUTION" ? "#39ff14" : geoData?.activeScenario === "BLOCKADE" ? "#9d7fff" : "#ffb800", count: geoData?.activeScenario?.slice(0,4), onClick: () => loadGeoScenarios(true) },
@@ -2577,6 +2590,111 @@ export default function NexusDashboard({ user, onLogout }) {
                       {s.label} {s.active && s.count !== undefined && <span style={{ background: s.color + "20", borderRadius: 10, padding: "0 5px", fontSize: 9 }}>{s.count}</span>}
                     </button>
                   ))}
+                </div>
+
+                {/* OPTIONS OI OVERNIGHT CHANGE */}
+                <div style={{ background: "#080f1a", border: `1px solid ${oiData?.totalSignals > 0 ? "rgba(0,255,157,0.3)" : "rgba(74,109,140,0.2)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00ff9d", letterSpacing: 2 }}>📊 OPTIONS OI OVERNIGHT CHANGE — SMART MONEY</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>OI buildup after close = institutions positioning before you wake up · 20 tickers monitored · delta vs prior snapshot</div>
+                    </div>
+                    {oiData && (
+                      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                        <span style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>{oiData.tickersAnalyzed} tickers · {oiData.totalSignals} signals</span>
+                        <button onClick={() => loadOptionsOI(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>
+                      </div>
+                    )}
+                  </div>
+
+                  {!oiData ? (
+                    <button onClick={() => loadOptionsOI(true)} disabled={loadingOI} style={{ background: "rgba(0,255,157,0.1)", border: "1px solid rgba(0,255,157,0.3)", color: "#00ff9d", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingOI ? "SCANNING OPTIONS CHAINS..." : "📊 LOAD OI OVERNIGHT CHANGE"}</button>
+                  ) : (
+                    <div>
+                      {/* First run notice */}
+                      {oiData.isFirstRun && (
+                        <div style={{ background: "rgba(255,184,0,0.06)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 3, padding: "6px 10px", marginBottom: 8, fontSize: 9, color: "#ffb800" }}>
+                          📸 First run — OI snapshot saved. Run again tomorrow pre-market to see overnight OI changes vs today's baseline.
+                        </div>
+                      )}
+
+                      {/* Best trade */}
+                      {oiData.bestTrade && oiData.totalSignals > 0 && (
+                        <div style={{ background: "rgba(0,255,157,0.05)", border: "1px solid rgba(0,255,157,0.2)", borderRadius: 4, padding: "8px 12px", marginBottom: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00ff9d", marginBottom: 3 }}>BEST OI SIGNAL</div>
+                          <div style={{ fontSize: 11, color: "#ffd700", fontWeight: 700 }}>{oiData.bestTrade}</div>
+                        </div>
+                      )}
+
+                      {/* Bullish / Bearish OI grid */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+                        <div style={{ background: "rgba(57,255,20,0.04)", border: "1px solid rgba(57,255,20,0.15)", borderRadius: 4, padding: "8px 10px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 4 }}>📈 CALL OI BUILDUP — BULLISH</div>
+                          {oiData.topBullishOI?.length > 0 ? oiData.topBullishOI.map((a, i) => (
+                            <div key={i} style={{ marginBottom: 6, paddingBottom: 6, borderBottom: i < oiData.topBullishOI.length - 1 ? "1px solid rgba(57,255,20,0.08)" : "none" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffd700" }}>{a.ticker}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 8, padding: "1px 5px", borderRadius: 2, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>BULLISH OI</span>
+                              </div>
+                              {a.unusualCallBuildup?.slice(0, 2).map((opt, j) => (
+                                <div key={j} style={{ fontSize: 8, color: "#8aabb8", marginBottom: 1 }}>
+                                  ${opt.strike} CALL {opt.expiration} · +{opt.oiDelta?.toLocaleString()} OI ({opt.oiPct > 0 ? "+" + opt.oiPct + "%" : "new"}) · {opt.moneyness} · IV {opt.iv}%
+                                </div>
+                              ))}
+                              <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>{a.interpretation?.slice(0, 60)}</div>
+                            </div>
+                          )) : <div style={{ fontSize: 9, color: "#2a3d57" }}>No unusual call OI buildup</div>}
+                        </div>
+
+                        <div style={{ background: "rgba(255,45,85,0.04)", border: "1px solid rgba(255,45,85,0.15)", borderRadius: 4, padding: "8px 10px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 4 }}>📉 PUT OI BUILDUP — BEARISH</div>
+                          {oiData.topBearishOI?.length > 0 ? oiData.topBearishOI.map((a, i) => (
+                            <div key={i} style={{ marginBottom: 6 }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ff2d55" }}>{a.ticker}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 8, padding: "1px 5px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>BEARISH OI</span>
+                              </div>
+                              {a.unusualPutBuildup?.slice(0, 2).map((opt, j) => (
+                                <div key={j} style={{ fontSize: 8, color: "#8aabb8", marginBottom: 1 }}>
+                                  ${opt.strike} PUT {opt.expiration} · +{opt.oiDelta?.toLocaleString()} OI · {opt.moneyness} · IV {opt.iv}%
+                                </div>
+                              ))}
+                            </div>
+                          )) : <div style={{ fontSize: 9, color: "#2a3d57" }}>No unusual put OI buildup</div>}
+
+                          {/* Volatile plays */}
+                          {oiData.highVolatilityOI?.length > 0 && (
+                            <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid rgba(255,184,0,0.15)" }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 3 }}>⚡ STRADDLE / VOLATILE</div>
+                              {oiData.highVolatilityOI.map((a, i) => (
+                                <div key={i} style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800", marginBottom: 1 }}>{a.ticker} — {a.interpretation?.slice(0, 40)}</div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* P/C ratio by ticker */}
+                      {oiData.ranked?.length > 0 && (
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 4 }}>PUT/CALL OI RATIO BY TICKER (tonight's snapshot)</div>
+                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                            {oiData.ranked.slice(0, 8).map((a, i) => (
+                              <div key={i} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "3px 8px", textAlign: "center" }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 9, fontWeight: 700, color: a.smartMoneyBias === "BULLISH" ? "#39ff14" : a.smartMoneyBias === "BEARISH" ? "#ff2d55" : "#ffb800" }}>{a.ticker}</div>
+                                <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>P/C: {a.pcRatioOI || "—"}</div>
+                                <div style={{ fontSize: 7, color: a.smartMoneyBias === "BULLISH" ? "#39ff14" : a.smartMoneyBias === "BEARISH" ? "#ff2d55" : "#ffb800" }}>{a.smartMoneyBias}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {oiData.totalSignals === 0 && !oiData.isFirstRun && (
+                        <div style={{ fontSize: 10, color: "#4a6d8c", textAlign: "center", padding: "8px 0" }}>No unusual OI changes detected — market positioned normally. Best signals appear pre-market 8-9am ET.</div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* REDDIT WSB VELOCITY */}
