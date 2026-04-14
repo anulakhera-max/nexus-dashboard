@@ -270,6 +270,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [paperFilter, setPaperFilter] = useState("all");
   const [insiderData, setInsiderData] = useState(null);
   const [loadingInsider, setLoadingInsider] = useState(false);
+  const [vixData, setVixData] = useState(null);
+  const [loadingVix, setLoadingVix] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -648,6 +650,16 @@ export default function NexusDashboard({ user, onLogout }) {
     saveTrackedPicks(updated);
   };
 
+  const loadVixSentiment = async (force = false) => {
+    setLoadingVix(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/vix-sentiment" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success !== false) setVixData(data);
+    } catch {}
+    setLoadingVix(false);
+  };
+
   const loadInsiderFilings = async (force = false) => {
     setLoadingInsider(true);
     try {
@@ -933,7 +945,7 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   // Auto-connect Questrade on load
-  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); loadTrackerData(); loadEarnings(); loadMovers(); }, []);
+  useEffect(() => { connectQuestrade(); loadWatchlist(); loadPipelineStatus(); loadTrackerData(); loadEarnings(); loadMovers(); loadVixSentiment(); }, []);
 
   const generatePowerIntel = async (force = false) => {
     if (loadingPower) return;
@@ -1200,6 +1212,7 @@ export default function NexusDashboard({ user, onLogout }) {
                   {g.ticker} +{g.changePct != null ? Number(g.changePct).toFixed(1) : "?"}% {g.volRatio > 2 ? g.volRatio + "x" : ""}
                 </span>
               ))}
+              {vixData?.vix && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 8px", borderRadius: 10, background: vixData.vix.current >= 25 ? "rgba(255,45,85,0.15)" : "rgba(0,212,255,0.1)", color: vixData.vix.current >= 25 ? "#ff2d55" : "#00d4ff", border: `1px solid ${vixData.vix.current >= 25 ? "rgba(255,45,85,0.3)" : "rgba(0,212,255,0.2)"}`, marginLeft: 8, flexShrink: 0 }}>VIX {vixData.vix.current} · F/G {vixData.fearGreed?.score}</span>}
               <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", letterSpacing: 2, flexShrink: 0, marginLeft: 8 }}>TOP LOSS:</span>
               {(movers.losers || []).slice(0, 5).map(l => (
                 <span key={l.ticker} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55", border: "1px solid rgba(255,45,85,0.25)" }}>
@@ -2278,12 +2291,13 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
                   {[
+                    { label: "📊 VIX/FG", active: !!vixData, color: "#00d4ff", count: vixData?.fearGreed?.score, onClick: () => loadVixSentiment(true) },
                     { label: "⚡ FLOW", active: !!unusualFlow, color: "#b24fff", count: unusualFlow?.signals?.length, onClick: () => loadUnusualFlow(true) },
                     { label: "☢ WAR", active: !!warRipple, color: "#ff3c00", count: warRipple?.rippleLayers?.length, onClick: () => loadWarRipple(true) },
                     { label: "🔍 BIAS", active: !!newsBias, color: "#ffb800", count: newsBias?.headlinesAnalyzed, onClick: () => loadNewsBias(true) },
@@ -2295,6 +2309,48 @@ export default function NexusDashboard({ user, onLogout }) {
                       {s.label} {s.active && s.count !== undefined && <span style={{ background: s.color + "20", borderRadius: 10, padding: "0 5px", fontSize: 9 }}>{s.count}</span>}
                     </button>
                   ))}
+                </div>
+
+                {/* VIX + FEAR/GREED section */}
+                <div style={{ background: "#080f1a", border: `1px solid ${vixData?.vix?.regime === "EXTREME_FEAR" ? "rgba(255,45,85,0.4)" : vixData?.vix?.regime === "COMPLACENT" ? "rgba(255,184,0,0.4)" : "rgba(0,212,255,0.2)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>📊 VIX + FEAR/GREED INDEX</div>
+                    {vixData && <button onClick={() => loadVixSentiment(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
+                  </div>
+                  {!vixData ? (
+                    <button onClick={() => loadVixSentiment(true)} disabled={loadingVix} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingVix ? "LOADING..." : "📊 LOAD"}</button>
+                  ) : (
+                    <div>
+                      {/* VIX + FG gauges */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 10 }}>
+                        <div style={{ textAlign: "center", background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "8px 6px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 2 }}>VIX</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 700, color: vixData.vix?.current >= 30 ? "#ff2d55" : vixData.vix?.current >= 20 ? "#ffb800" : "#39ff14" }}>{vixData.vix?.current}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>{vixData.vix?.regime}</div>
+                        </div>
+                        <div style={{ textAlign: "center", background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "8px 6px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 2 }}>FEAR/GREED</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 700, color: vixData.fearGreed?.score <= 30 ? "#ff2d55" : vixData.fearGreed?.score >= 70 ? "#39ff14" : "#ffb800" }}>{vixData.fearGreed?.score}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>{vixData.fearGreed?.rating?.replace(/_/g, " ")}</div>
+                        </div>
+                        <div style={{ textAlign: "center", background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "8px 6px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 2 }}>TREND</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: vixData.fearGreed?.trend === "RECOVERING" ? "#39ff14" : vixData.fearGreed?.trend === "DETERIORATING" ? "#ff2d55" : "#ffb800", marginTop: 4 }}>{vixData.fearGreed?.trend}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>1wk ago: {vixData.fearGreed?.prev1wk}</div>
+                        </div>
+                      </div>
+                      {/* Market regime */}
+                      <div style={{ background: vixData.pipelineAdjustment === "BOOST_CALLS" ? "rgba(57,255,20,0.06)" : vixData.pipelineAdjustment === "BOOST_PUTS" ? "rgba(255,45,85,0.06)" : "rgba(255,184,0,0.06)", border: `1px solid ${vixData.pipelineAdjustment === "BOOST_CALLS" ? "rgba(57,255,20,0.2)" : vixData.pipelineAdjustment === "BOOST_PUTS" ? "rgba(255,45,85,0.2)" : "rgba(255,184,0,0.2)"}`, borderRadius: 4, padding: "8px 10px", marginBottom: 6 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 3 }}>MARKET REGIME</div>
+                        <div style={{ fontSize: 11, color: "#e8f4ff", marginBottom: 3 }}>{vixData.marketRegime}</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: vixData.pipelineAdjustment === "BOOST_CALLS" ? "#39ff14" : vixData.pipelineAdjustment === "BOOST_PUTS" ? "#ff2d55" : "#ffb800" }}>PIPELINE: {vixData.pipelineAdjustment}</div>
+                      </div>
+                      {/* Contrarian insight */}
+                      {vixData.fearGreed?.contrarianSignal && (
+                        <div style={{ fontSize: 10, color: "#8aabb8", fontFamily: "monospace" }}>{vixData.fearGreed.contrarianSignal}</div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* INSIDER section */}
