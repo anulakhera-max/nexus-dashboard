@@ -276,6 +276,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingFed, setLoadingFed] = useState(false);
   const [pcrData, setPcrData] = useState(null);
   const [loadingPcr, setLoadingPcr] = useState(false);
+  const [sectorData, setSectorData] = useState(null);
+  const [loadingSector, setLoadingSector] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -652,6 +654,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadSectorRotation = async (force = false) => {
+    setLoadingSector(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/sector-rotation" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setSectorData(data);
+    } catch {}
+    setLoadingSector(false);
   };
 
   const loadPCR = async (force = false) => {
@@ -2324,12 +2336,13 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
                   {[
+                    { label: "🔄 SECTOR", active: !!sectorData, color: sectorData?.riskRegime === "RISK_ON" ? "#39ff14" : sectorData?.riskRegime === "RISK_OFF" ? "#ff2d55" : "#ffb800", count: null, onClick: () => loadSectorRotation(true) },
                     { label: "📉 P/C", active: !!pcrData, color: pcrData?.ratio >= 1.2 ? "#39ff14" : pcrData?.ratio <= 0.6 ? "#ff2d55" : "#00d4ff", count: pcrData?.ratio, onClick: () => loadPCR(true) },
                     { label: "🏛 FED", active: !!fedData, color: "#9d7fff", count: fedData?.nextMeeting?.daysOut, onClick: () => loadFedCalendar(true) },
                     { label: "📊 VIX/FG", active: !!vixData, color: "#00d4ff", count: vixData?.fearGreed?.score, onClick: () => loadVixSentiment(true) },
@@ -2452,6 +2465,72 @@ export default function NexusDashboard({ user, onLogout }) {
                       {vixData.fearGreed?.contrarianSignal && (
                         <div style={{ fontSize: 10, color: "#8aabb8", fontFamily: "monospace" }}>{vixData.fearGreed.contrarianSignal}</div>
                       )}
+                    </div>
+                  )}
+                </div>
+
+                {/* SECTOR ROTATION section */}
+                <div style={{ background: "#080f1a", border: `1px solid ${sectorData?.riskRegime === "RISK_ON" ? "rgba(57,255,20,0.3)" : sectorData?.riskRegime === "RISK_OFF" ? "rgba(255,45,85,0.3)" : "rgba(255,184,0,0.2)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2 }}>🔄 SECTOR ROTATION</div>
+                    {sectorData && (
+                      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                        <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 8px", borderRadius: 10, background: sectorData.riskRegime === "RISK_ON" ? "rgba(57,255,20,0.15)" : sectorData.riskRegime === "RISK_OFF" ? "rgba(255,45,85,0.15)" : "rgba(255,184,0,0.15)", color: sectorData.riskRegime === "RISK_ON" ? "#39ff14" : sectorData.riskRegime === "RISK_OFF" ? "#ff2d55" : "#ffb800" }}>{sectorData.riskRegime?.replace("_"," ")}</span>
+                        <button onClick={() => loadSectorRotation(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>
+                      </div>
+                    )}
+                  </div>
+
+                  {!sectorData ? (
+                    <button onClick={() => loadSectorRotation(true)} disabled={loadingSector} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", color: "#ffb800", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingSector ? "SCANNING 15 SECTORS..." : "🔄 SCAN SECTORS"}</button>
+                  ) : (
+                    <div>
+                      {/* Analysis */}
+                      {sectorData.analysis?.rotationTheme && (
+                        <div style={{ fontSize: 11, color: "#c8dce8", marginBottom: 10, lineHeight: 1.5, paddingLeft: 8, borderLeft: "2px solid rgba(255,184,0,0.4)" }}>{sectorData.analysis.rotationTheme}</div>
+                      )}
+
+                      {/* Best play */}
+                      {sectorData.analysis?.bestPlay && (
+                        <div style={{ background: "rgba(57,255,20,0.06)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: "8px 12px", marginBottom: 10, display: "flex", gap: 10, alignItems: "center" }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14" }}>BEST SECTOR PLAY</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffd700" }}>{sectorData.analysis.bestPlay}</span>
+                        </div>
+                      )}
+
+                      {/* Sector performance table */}
+                      <div style={{ marginBottom: 10 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 4 }}>
+                          {sectorData.sectors?.slice(0, 12).map((s, i) => (
+                            <div key={s.etf} style={{ background: s.chg1w >= 2 ? "rgba(57,255,20,0.06)" : s.chg1w <= -2 ? "rgba(255,45,85,0.06)" : "rgba(26,45,71,0.3)", border: `1px solid ${s.chg1w >= 2 ? "rgba(57,255,20,0.2)" : s.chg1w <= -2 ? "rgba(255,45,85,0.2)" : "rgba(74,109,140,0.1)"}`, borderRadius: 3, padding: "5px 7px" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 9, fontWeight: 700, color: s.chg1w >= 2 ? "#39ff14" : s.chg1w <= -2 ? "#ff2d55" : "#a8cce0" }}>{s.etf}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 9, color: s.chg1w >= 0 ? "#39ff14" : "#ff2d55" }}>{s.chg1w >= 0 ? "+" : ""}{s.chg1w}%</span>
+                              </div>
+                              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 1 }}>
+                                <span style={{ fontSize: 8, color: "#4a6d8c" }}>{s.name?.slice(0, 10)}</span>
+                                <span style={{ fontSize: 8, fontFamily: "monospace", color: s.phase === "LEADING" ? "#39ff14" : s.phase === "LAGGING" ? "#ff2d55" : "#4a6d8c" }}>{s.phase?.slice(0, 4)}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Tickers to buy/avoid */}
+                      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                        {sectorData.analysis?.tickersToBuy?.length > 0 && (
+                          <div>
+                            <span style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginRight: 4 }}>BUY (rotation leaders):</span>
+                            {sectorData.analysis.tickersToBuy.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: "rgba(57,255,20,0.08)", color: "#39ff14", marginRight: 3, border: "1px solid rgba(57,255,20,0.2)" }}>{t}</span>)}
+                          </div>
+                        )}
+                        {sectorData.analysis?.tickersToAvoid?.length > 0 && (
+                          <div style={{ marginTop: 4 }}>
+                            <span style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginRight: 4 }}>AVOID (rotation laggards):</span>
+                            {sectorData.analysis.tickersToAvoid.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: "rgba(255,45,85,0.08)", color: "#ff2d55", marginRight: 3, border: "1px solid rgba(255,45,85,0.2)" }}>{t}</span>)}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
