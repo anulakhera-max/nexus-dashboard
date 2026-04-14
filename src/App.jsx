@@ -262,6 +262,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingPattern, setLoadingPattern] = useState(false);
   const [allianceData, setAllianceData] = useState(null);
   const [loadingAlliance, setLoadingAlliance] = useState(false);
+  const [chartPatterns, setChartPatterns] = useState(null);
+  const [loadingPatterns, setLoadingPatterns] = useState(false);
+  const [patternTicker, setPatternTicker] = useState("");
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -638,6 +641,17 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadChartPatterns = async (tickers, force = false) => {
+    setLoadingPatterns(true);
+    try {
+      const url = nexusUrl + "/api/chart-patterns" + (tickers ? "?tickers=" + encodeURIComponent(tickers) : "") + (force ? (tickers ? "&" : "?") + "force=true" : "");
+      const res = await fetch(url, { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setChartPatterns(data);
+    } catch {}
+    setLoadingPatterns(false);
   };
 
   const loadAlliance = async (force = false) => {
@@ -1156,6 +1170,9 @@ export default function NexusDashboard({ user, onLogout }) {
             </button>
             <button style={{ background: tab === "alliance" ? "rgba(255,100,0,0.15)" : "transparent", color: tab === "alliance" ? "#ff6400" : "#4a6d8c", border: tab === "alliance" ? "1px solid rgba(255,100,0,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("alliance"); if (!allianceData) loadAlliance(); }}>
               🕵 ALLIANCE
+            </button>
+            <button style={{ background: tab === "chart" ? "rgba(100,200,255,0.15)" : "transparent", color: tab === "chart" ? "#64c8ff" : "#4a6d8c", border: tab === "chart" ? "1px solid rgba(100,200,255,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("chart"); if (!chartPatterns) loadChartPatterns(""); }}>
+              📈 CHART
             </button>
           </div>
 
@@ -2335,6 +2352,106 @@ export default function NexusDashboard({ user, onLogout }) {
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 12, fontFamily: "monospace" }}>
                       Scanned: {new Date(unusualFlow.timestamp).toLocaleString()} · Vol/OI threshold: 3x+ · Min premium: $10K · {unusualFlow.qtPowered ? "Powered by Questrade live data" : "Powered by GDELT signals (connect Questrade for live data)"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* CHART PATTERNS TAB */}
+            {tab === "chart" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                <div style={{ background: "linear-gradient(135deg,rgba(100,200,255,0.08),rgba(100,200,255,0.02))", border: "1px solid rgba(100,200,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16 }}>
+                  <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#64c8ff", letterSpacing: 3, marginBottom: 4 }}>📈 CHART PATTERN RECOGNITION</div>
+                  <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 12 }}>RSI · MACD · Double Bottom/Top · Bull/Bear Flag · Volume Spike · Moving Average signals</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input value={patternTicker} onChange={e => setPatternTicker(e.target.value.toUpperCase())} placeholder="Tickers (e.g. NVDA,AAPL,TSLA) or leave blank for auto" style={{ background: "#0d1829", border: "1px solid rgba(100,200,255,0.3)", color: "#e8f4ff", borderRadius: 3, padding: "8px 12px", fontSize: 12, fontFamily: "monospace", flex: 1, outline: "none" }} onKeyDown={e => { if (e.key === "Enter") loadChartPatterns(patternTicker, true); }} />
+                    <button onClick={() => loadChartPatterns(patternTicker, true)} disabled={loadingPatterns} style={{ background: loadingPatterns ? "#1a2d47" : "rgba(100,200,255,0.15)", border: "1px solid rgba(100,200,255,0.4)", color: loadingPatterns ? "#4a6d8c" : "#64c8ff", borderRadius: 3, padding: "8px 18px", fontSize: 11, fontWeight: 700, cursor: loadingPatterns ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                      {loadingPatterns ? "SCANNING..." : "📈 SCAN"}
+                    </button>
+                  </div>
+                </div>
+
+                {!chartPatterns && !loadingPatterns && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>📈</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#64c8ff", letterSpacing: 3, marginBottom: 8 }}>CHART PATTERN SCANNER</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Auto-scans your watchlist + earnings stocks + today's movers for classical technical patterns</div>
+                    <button onClick={() => loadChartPatterns("", true)} style={{ background: "rgba(100,200,255,0.15)", border: "1px solid rgba(100,200,255,0.4)", color: "#64c8ff", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>📈 AUTO-SCAN NOW</button>
+                  </div>
+                )}
+
+                {chartPatterns && (
+                  <div>
+                    {/* Summary */}
+                    <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
+                      <div style={{ background: "#080f1a", border: "1px solid rgba(100,200,255,0.2)", borderRadius: 4, padding: "8px 14px" }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 2 }}>TICKERS SCANNED</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#64c8ff" }}>{chartPatterns.tickersScanned}</div>
+                      </div>
+                      <div style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: "8px 14px" }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 2 }}>BULLISH SETUPS</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#39ff14" }}>{chartPatterns.tickers?.filter(t => t.bullishCount >= 2).length || 0}</div>
+                      </div>
+                      <div style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: "8px 14px" }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 2 }}>BEARISH SETUPS</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#ff2d55" }}>{chartPatterns.tickers?.filter(t => t.bearishCount >= 2).length || 0}</div>
+                      </div>
+                      <div style={{ background: "#080f1a", border: "1px solid rgba(100,200,255,0.2)", borderRadius: 4, padding: "8px 14px" }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 2 }}>PIPELINE SIGNALS</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#64c8ff" }}>{chartPatterns.patternSignals?.length || 0}</div>
+                      </div>
+                    </div>
+
+                    {/* High conviction signals */}
+                    {chartPatterns.patternSignals?.filter(s => s.strength === "HIGH").length > 0 && (
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#64c8ff", letterSpacing: 3, marginBottom: 8 }}>HIGH CONVICTION TECHNICAL SIGNALS → PIPELINE</div>
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          {chartPatterns.patternSignals.filter(s => s.strength === "HIGH").map((s, i) => (
+                            <div key={i} style={{ background: s.direction === "CALL" ? "rgba(57,255,20,0.08)" : "rgba(255,45,85,0.08)", border: `1px solid ${s.direction === "CALL" ? "rgba(57,255,20,0.3)" : "rgba(255,45,85,0.3)"}`, borderRadius: 4, padding: "8px 12px" }}>
+                              <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: s.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{s.ticker}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: s.direction === "CALL" ? "rgba(57,255,20,0.1)" : "rgba(255,45,85,0.1)", color: s.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{s.direction}</span>
+                              </div>
+                              <div style={{ fontSize: 10, color: "#8aabb8" }}>{s.reason}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* All ticker results */}
+                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#64c8ff", letterSpacing: 3, marginBottom: 10 }}>ALL TICKER SCANS</div>
+                    {chartPatterns.tickers?.map((t, i) => (
+                      <div key={i} style={{ background: "#080f1a", border: `1px solid ${t.bullishCount >= 2 ? "rgba(57,255,20,0.2)" : t.bearishCount >= 2 ? "rgba(255,45,85,0.2)" : "rgba(74,109,140,0.15)"}`, borderRadius: 4, padding: 12, marginBottom: 8 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: t.patterns?.length > 0 ? 8 : 0 }}>
+                          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                            <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: t.bullishCount > t.bearishCount ? "#39ff14" : t.bearishCount > t.bullishCount ? "#ff2d55" : "#64c8ff" }}>{t.ticker}</span>
+                            {t.currentPrice && <span style={{ fontFamily: "monospace", fontSize: 11, color: "#e8f4ff" }}>${t.currentPrice}</span>}
+                            {t.dayChange !== null && <span style={{ fontFamily: "monospace", fontSize: 10, color: t.dayChange >= 0 ? "#39ff14" : "#ff2d55" }}>{t.dayChange >= 0 ? "+" : ""}{t.dayChange}%</span>}
+                          </div>
+                          <div style={{ display: "flex", gap: 6 }}>
+                            {t.bullishCount > 0 && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 7px", borderRadius: 2, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>{t.bullishCount} BULL</span>}
+                            {t.bearishCount > 0 && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 7px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>{t.bearishCount} BEAR</span>}
+                          </div>
+                        </div>
+                        {t.patterns?.length > 0 && (
+                          <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                            {t.patterns.map((p, j) => (
+                              <div key={j} style={{ fontSize: 9, fontFamily: "monospace", padding: "2px 7px", borderRadius: 2, background: p.signal === "BULLISH" ? "rgba(57,255,20,0.08)" : p.signal === "BEARISH" ? "rgba(255,45,85,0.08)" : "rgba(74,109,140,0.1)", color: p.signal === "BULLISH" ? "#39ff14" : p.signal === "BEARISH" ? "#ff2d55" : "#64c8ff", border: `1px solid ${p.signal === "BULLISH" ? "rgba(57,255,20,0.2)" : p.signal === "BEARISH" ? "rgba(255,45,85,0.2)" : "rgba(74,109,140,0.2)"}` }} title={p.description}>
+                                {p.pattern} {p.strength === "HIGH" ? "★" : ""}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {t.patterns?.length === 0 && <div style={{ fontSize: 10, color: "#4a6d8c" }}>No significant patterns detected</div>}
+                      </div>
+                    ))}
+
+                    <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginTop: 8 }}>
+                      Scanned: {new Date(chartPatterns.timestamp).toLocaleString()} · Pattern signals injected into pipeline (2x boost for HIGH strength)
+                      <button onClick={() => loadChartPatterns(patternTicker, true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳ refresh</button>
                     </div>
                   </div>
                 )}
