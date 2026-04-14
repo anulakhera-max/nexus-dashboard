@@ -265,6 +265,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [chartPatterns, setChartPatterns] = useState(null);
   const [loadingPatterns, setLoadingPatterns] = useState(false);
   const [patternTicker, setPatternTicker] = useState("");
+  const [paperBook, setPaperBook] = useState(null);
+  const [loadingPaper, setLoadingPaper] = useState(false);
+  const [paperFilter, setPaperFilter] = useState("all");
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -641,6 +644,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadPaperBook = async () => {
+    setLoadingPaper(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/paper-trade/book", { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setPaperBook(data);
+    } catch {}
+    setLoadingPaper(false);
   };
 
   const loadChartPatterns = async (tickers, force = false) => {
@@ -1173,6 +1186,9 @@ export default function NexusDashboard({ user, onLogout }) {
             </button>
             <button style={{ background: tab === "chart" ? "rgba(100,200,255,0.15)" : "transparent", color: tab === "chart" ? "#64c8ff" : "#4a6d8c", border: tab === "chart" ? "1px solid rgba(100,200,255,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("chart"); if (!chartPatterns) loadChartPatterns(""); }}>
               📈 CHART
+            </button>
+            <button style={{ background: tab === "paper" ? "rgba(0,255,200,0.15)" : "transparent", color: tab === "paper" ? "#00ffc8" : "#4a6d8c", border: tab === "paper" ? "1px solid rgba(0,255,200,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace", transition: "all 0.2s" }} onClick={() => { handleTab("paper"); if (!paperBook) loadPaperBook(); }}>
+              📋 PAPER
             </button>
           </div>
 
@@ -2352,6 +2368,137 @@ export default function NexusDashboard({ user, onLogout }) {
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 12, fontFamily: "monospace" }}>
                       Scanned: {new Date(unusualFlow.timestamp).toLocaleString()} · Vol/OI threshold: 3x+ · Min premium: $10K · {unusualFlow.qtPowered ? "Powered by Questrade live data" : "Powered by GDELT signals (connect Questrade for live data)"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* PAPER TRADING TAB */}
+            {tab === "paper" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                <div style={{ background: "linear-gradient(135deg,rgba(0,255,200,0.08),rgba(0,255,200,0.02))", border: "1px solid rgba(0,255,200,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00ffc8", letterSpacing: 3, marginBottom: 4 }}>📋 PAPER TRADING SIMULATION</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>3-tier track record — Tier 1: Final 3 picks · Tier 2: Top 9 · Tier 3: All 27 candidates · Auto-logged every pipeline run</div>
+                  </div>
+                  <button onClick={loadPaperBook} disabled={loadingPaper} style={{ background: loadingPaper ? "#1a2d47" : "rgba(0,255,200,0.15)", border: "1px solid rgba(0,255,200,0.4)", color: loadingPaper ? "#4a6d8c" : "#00ffc8", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingPaper ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                    {loadingPaper ? "LOADING..." : "⟳ REFRESH"}
+                  </button>
+                </div>
+
+                {!paperBook && !loadingPaper && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#00ffc8", letterSpacing: 3, marginBottom: 8 }}>PAPER TRADING BOOK</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 8 }}>Automatically logs all 27 pipeline candidates after every run</div>
+                    <div style={{ fontSize: 11, color: "#4a6d8c", marginBottom: 24 }}>Run the pipeline to start building your verified track record</div>
+                    <button onClick={loadPaperBook} style={{ background: "rgba(0,255,200,0.15)", border: "1px solid rgba(0,255,200,0.4)", color: "#00ffc8", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>📋 LOAD BOOK</button>
+                  </div>
+                )}
+
+                {paperBook && (
+                  <div>
+                    {/* Stats summary */}
+                    {paperBook.stats && (
+                      <div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 12 }}>
+                          {[
+                            ["TOTAL TRADES", paperBook.stats.totalTrades, "#00ffc8"],
+                            ["OPEN", paperBook.stats.openTrades, "#ffb800"],
+                            ["CLOSED", paperBook.stats.closedTrades, "#8aabb8"],
+                            ["OVERALL WIN%", paperBook.stats.overallWinRate !== null ? paperBook.stats.overallWinRate + "%" : "—", paperBook.stats.overallWinRate >= 70 ? "#39ff14" : paperBook.stats.overallWinRate >= 50 ? "#ffb800" : "#ff2d55"],
+                          ].map(([label, val, color]) => (
+                            <div key={label} style={{ background: "#080f1a", border: "1px solid rgba(0,255,200,0.15)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color }}>{val}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Tier win rates */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
+                          {[["TIER 1 WIN% (Final 3)", paperBook.stats.tier1WinRate, "#39ff14"], ["TIER 2 WIN% (Top 9)", paperBook.stats.tier2WinRate, "#00ffc8"], ["TIER 3 WIN% (All 27)", paperBook.stats.tier3WinRate, "#8aabb8"]].map(([label, val, color]) => (
+                            <div key={label} style={{ background: "#080f1a", border: "1px solid rgba(0,255,200,0.1)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: color }}>{val !== null ? val + "%" : "—"}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Trajectory */}
+                        {(paperBook.stats.last10WinRate !== null || paperBook.stats.last20WinRate !== null) && (
+                          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                            {[["LAST 10 WIN%", paperBook.stats.last10WinRate], ["LAST 20 WIN%", paperBook.stats.last20WinRate], ["CALL WIN%", paperBook.stats.byDirection?.call], ["PUT WIN%", paperBook.stats.byDirection?.put]].map(([label, val]) => val !== null && (
+                              <div key={label} style={{ flex: 1, background: "#080f1a", border: "1px solid rgba(0,255,200,0.1)", borderRadius: 4, padding: "6px 10px", textAlign: "center" }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 2 }}>{label}</div>
+                                <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: val >= 70 ? "#39ff14" : val >= 50 ? "#ffb800" : "#ff2d55" }}>{val}%</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Signal performance */}
+                        {paperBook.stats.signalPerformance?.length > 0 && (
+                          <div style={{ background: "#080f1a", border: "1px solid rgba(0,255,200,0.15)", borderRadius: 4, padding: 12, marginBottom: 12 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00ffc8", letterSpacing: 2, marginBottom: 8 }}>SIGNAL WIN RATES — WHAT'S ACTUALLY WORKING</div>
+                            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                              {paperBook.stats.signalPerformance.map(s => (
+                                <div key={s.signal} style={{ background: s.winRate >= 70 ? "rgba(57,255,20,0.08)" : s.winRate >= 50 ? "rgba(255,184,0,0.08)" : "rgba(255,45,85,0.08)", border: `1px solid ${s.winRate >= 70 ? "rgba(57,255,20,0.2)" : s.winRate >= 50 ? "rgba(255,184,0,0.2)" : "rgba(255,45,85,0.2)"}`, borderRadius: 3, padding: "4px 10px", textAlign: "center" }}>
+                                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>{s.signal}</div>
+                                  <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: s.winRate >= 70 ? "#39ff14" : s.winRate >= 50 ? "#ffb800" : "#ff2d55" }}>{s.winRate}%</div>
+                                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>{s.total} trades</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Filter */}
+                    <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+                      {[["all", "ALL"], ["1", "TIER 1"], ["2", "TIER 2"], ["3", "TIER 3"], ["OPEN", "OPEN"], ["WIN", "WINS"], ["LOSS", "LOSSES"]].map(([val, label]) => (
+                        <button key={val} onClick={() => setPaperFilter(val)} style={{ background: paperFilter === val ? "rgba(0,255,200,0.15)" : "transparent", border: `1px solid ${paperFilter === val ? "rgba(0,255,200,0.4)" : "rgba(74,109,140,0.3)"}`, color: paperFilter === val ? "#00ffc8" : "#4a6d8c", borderRadius: 3, padding: "4px 10px", fontSize: 9, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>{label}</button>
+                      ))}
+                    </div>
+
+                    {/* Trade list */}
+                    {(paperBook.trades || [])
+                      .filter(t => paperFilter === "all" ? true : paperFilter === "1" ? t.tier === 1 : paperFilter === "2" ? t.tier === 2 : paperFilter === "3" ? t.tier === 3 : t.outcome === paperFilter || (!t.outcome && paperFilter === "OPEN"))
+                      .slice(0, 50)
+                      .map((t, i) => (
+                      <div key={i} style={{ background: "#080f1a", border: `1px solid ${t.outcome === "WIN" ? "rgba(57,255,20,0.2)" : t.outcome === "LOSS" ? "rgba(255,45,85,0.2)" : t.outcome === "SCRATCH" ? "rgba(74,109,140,0.2)" : "rgba(0,255,200,0.1)"}`, borderRadius: 4, padding: 10, marginBottom: 6 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
+                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                            <span style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: t.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{t.ticker}</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: t.direction === "CALL" ? "rgba(57,255,20,0.1)" : "rgba(255,45,85,0.1)", color: t.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{t.direction}</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: t.tier === 1 ? "rgba(255,215,0,0.15)" : t.tier === 2 ? "rgba(0,255,200,0.08)" : "rgba(74,109,140,0.1)", color: t.tier === 1 ? "#ffd700" : t.tier === 2 ? "#00ffc8" : "#4a6d8c" }}>T{t.tier}</span>
+                            <span style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>{t.sector}</span>
+                          </div>
+                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                            {t.entryStockPrice && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>Entry: ${t.entryStockPrice?.toFixed(2)}</span>}
+                            {t.stockMovePct !== null && t.stockMovePct !== undefined && <span style={{ fontFamily: "monospace", fontSize: 9, color: t.stockMovePct >= 0 ? "#39ff14" : "#ff2d55" }}>Stock: {t.stockMovePct >= 0 ? "+" : ""}{t.stockMovePct}%</span>}
+                            {t.estimatedPnl !== null && t.estimatedPnl !== undefined && <span style={{ fontFamily: "monospace", fontSize: 10, color: t.estimatedPnl >= 0 ? "#39ff14" : "#ff2d55" }}>Est: {t.estimatedPnl >= 0 ? "+" : ""}{t.estimatedPnl}%</span>}
+                            <span style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: t.outcome === "WIN" ? "#39ff14" : t.outcome === "LOSS" ? "#ff2d55" : t.outcome === "SCRATCH" ? "#8aabb8" : "#00ffc8" }}>{t.outcome || "OPEN"}</span>
+                            {t.pnlPct !== null && t.pnlPct !== undefined && <span style={{ fontFamily: "monospace", fontSize: 10, color: t.pnlPct >= 0 ? "#39ff14" : "#ff2d55" }}>{t.pnlPct >= 0 ? "+" : ""}{t.pnlPct}%</span>}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 4, display: "flex", gap: 10 }}>
+                          <span>{new Date(t.entryDate).toLocaleDateString()}</span>
+                          {t.urgency && <span>{t.urgency}</span>}
+                          {t.score && <span>Score: {Math.round(t.score)}</span>}
+                          {t.thesis && <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.thesis.slice(0, 60)}</span>}
+                        </div>
+                      </div>
+                    ))}
+
+                    {paperBook.trades?.length === 0 && (
+                      <div style={{ textAlign: "center", padding: 40, color: "#4a6d8c", fontSize: 11, fontFamily: "monospace" }}>No paper trades yet. Run the pipeline to start building your track record.</div>
+                    )}
+
+                    <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginTop: 8 }}>
+                      {paperBook.trades?.length} total trades in book · Auto-logged every pipeline run · Auto-outcome checked on refresh
                     </div>
                   </div>
                 )}
