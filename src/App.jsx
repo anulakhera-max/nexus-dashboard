@@ -305,6 +305,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingReddit, setLoadingReddit] = useState(false);
   const [oiData, setOiData] = useState(null);
   const [loadingOI, setLoadingOI] = useState(false);
+  const [weightsData, setWeightsData] = useState(null);
+  const [loadingWeights, setLoadingWeights] = useState(false);
+  const [weightsScenario, setWeightsScenario] = useState("STALL");
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -720,12 +723,14 @@ export default function NexusDashboard({ user, onLogout }) {
 
   const loadLearningStats = async () => {
     try {
-      const [lr, sg] = await Promise.all([
+      const [lr, sg, wt] = await Promise.all([
         fetch(nexusUrl + "/api/learning-stats", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
         fetch(nexusUrl + "/api/improvement-suggestions", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
+        fetch(nexusUrl + "/api/learned-weights", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
       ]);
       if (lr.success) setLearningData(lr);
       if (sg.success) setSuggestionsData(sg);
+      if (wt.success) setWeightsData(wt);
     } catch {}
   };
 
@@ -3934,6 +3939,74 @@ export default function NexusDashboard({ user, onLogout }) {
                     </div>
                   )}
                 </div>
+
+                {/* SIGNAL WEIGHT AUTO-ADJUSTER */}
+                {weightsData && (
+                  <div style={{ background: "#080f1a", border: "1px solid rgba(157,127,255,0.25)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#9d7fff", letterSpacing: 2, marginBottom: 6 }}>⚖️ SIGNAL WEIGHT AUTO-ADJUSTER</div>
+                    <div style={{ fontSize: 9, color: "#4a6d8c", marginBottom: 10 }}>Conditional per-scenario · ±20% max drift · 10+ samples minimum · weekly decay · self-improves over time</div>
+
+                    {/* Progress to learning */}
+                    <div style={{ marginBottom: 10 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                        <span style={{ fontFamily: "monospace", fontSize: 9, color: weightsData.readyToLearn ? "#39ff14" : "#ffb800" }}>
+                          {weightsData.readyToLearn ? "✓ LEARNING ACTIVE" : "⏳ BUILDING DATA"}
+                        </span>
+                        <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{weightsData.resolvedPredictions}/30 resolved</span>
+                      </div>
+                      <div style={{ height: 4, background: "rgba(74,109,140,0.2)", borderRadius: 2 }}>
+                        <div style={{ height: "100%", width: weightsData.progressToLearning + "%", background: weightsData.readyToLearn ? "#39ff14" : "#ffb800", borderRadius: 2, transition: "width 0.5s" }}/>
+                      </div>
+                      <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 3 }}>{weightsData.nextMilestone}</div>
+                    </div>
+
+                    {/* Scenario selector */}
+                    <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
+                      {["STALL","ESCALATION","RESOLUTION","BLOCKADE"].map(s => (
+                        <button key={s} onClick={() => setWeightsScenario(s)} style={{ fontFamily: "monospace", fontSize: 8, padding: "2px 8px", borderRadius: 2, border: `1px solid ${weightsScenario === s ? "#9d7fff" : "rgba(74,109,140,0.3)"}`, background: weightsScenario === s ? "rgba(157,127,255,0.1)" : "transparent", color: weightsScenario === s ? "#9d7fff" : "#4a6d8c", cursor: "pointer" }}>{s}</button>
+                      ))}
+                    </div>
+
+                    {/* Weight table for selected scenario */}
+                    {weightsData.effectiveWeights?.[weightsScenario] && (
+                      <div>
+                        <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 6 }}>SIGNAL WEIGHTS — {weightsScenario} SCENARIO</div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 4 }}>
+                          {Object.entries(weightsData.effectiveWeights[weightsScenario]).map(([signal, w]) => (
+                            <div key={signal} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "4px 6px", border: `1px solid ${w.direction === "↑BOOSTED" ? "rgba(57,255,20,0.2)" : w.direction === "↓REDUCED" ? "rgba(255,45,85,0.2)" : "rgba(74,109,140,0.1)"}` }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", marginBottom: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{signal}</div>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 9, fontWeight: 700, color: w.direction === "↑BOOSTED" ? "#39ff14" : w.direction === "↓REDUCED" ? "#ff2d55" : "#8aabb8" }}>{w.effective}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 7, color: w.direction === "↑BOOSTED" ? "#39ff14" : w.direction === "↓REDUCED" ? "#ff2d55" : "#2a3d57" }}>{w.direction.slice(0,2)}</span>
+                              </div>
+                              {w.samples > 0 && <div style={{ fontSize: 6, color: "#2a3d57" }}>n={w.samples} {w.accuracy ? Math.round(w.accuracy*100)+"%" : ""}</div>}
+                              {/* Weight bar */}
+                              <div style={{ height: 2, background: "rgba(74,109,140,0.15)", borderRadius: 1, marginTop: 2 }}>
+                                <div style={{ height: "100%", width: (w.effective * 100) + "%", background: w.direction === "↑BOOSTED" ? "#39ff14" : w.direction === "↓REDUCED" ? "#ff2d55" : "#4a6d8c", borderRadius: 1 }}/>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Top adjustments */}
+                        {weightsData.topAdjustments?.length > 0 && (
+                          <div style={{ marginTop: 10 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 4 }}>LARGEST WEIGHT ADJUSTMENTS (all scenarios)</div>
+                            {weightsData.topAdjustments.slice(0,5).map((a, i) => (
+                              <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 8, color: "#e8f4ff" }}>{a.signal} · {a.scenario}</span>
+                                <div style={{ display: "flex", gap: 8 }}>
+                                  <span style={{ fontFamily: "monospace", fontSize: 8, color: a.adjustment > 0 ? "#39ff14" : "#ff2d55" }}>{a.adjustment > 0 ? "+" : ""}{a.adjustment} ({a.direction})</span>
+                                  <span style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>n={a.samples}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* IMPROVEMENT SUGGESTIONS */}
                 {suggestionsData && (
