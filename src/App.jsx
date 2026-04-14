@@ -285,6 +285,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [aiInfraData, setAiInfraData] = useState(null);
   const [loadingAiInfra, setLoadingAiInfra] = useState(false);
   const [aiInfraPillar, setAiInfraPillar] = useState(null);
+  const [geoData, setGeoData] = useState(null);
+  const [loadingGeo, setLoadingGeo] = useState(false);
+  const [geoScenario, setGeoScenario] = useState(null);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -661,6 +664,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadGeoScenarios = async (force = false) => {
+    setLoadingGeo(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/geopolitical-scenarios" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) { setGeoData(data); setGeoScenario(data.activeScenario); }
+    } catch {}
+    setLoadingGeo(false);
   };
 
   const loadAiInfra = async (force = false) => {
@@ -2433,12 +2446,13 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
                   {[
+                    { label: "🌍 GEO", active: !!geoData, color: geoData?.activeScenario === "ESCALATION" ? "#ff2d55" : geoData?.activeScenario === "RESOLUTION" ? "#39ff14" : geoData?.activeScenario === "BLOCKADE" ? "#9d7fff" : "#ffb800", count: geoData?.activeScenario?.slice(0,4), onClick: () => loadGeoScenarios(true) },
                     { label: "🤖 AI INFRA", active: !!aiInfraData, color: "#00ff9d", count: aiInfraData?.totalStocks, onClick: () => loadAiInfra(true) },
                     { label: "🎯 WHISPER", active: !!whisperData, color: "#ff6eb4", count: whisperData?.tickersAnalyzed, onClick: () => loadWhispers(true) },
                     { label: "🌑 DARK POOL", active: !!darkPoolData, color: darkPoolData?.accumulation?.length > 0 ? "#39ff14" : "#9d7fff", count: darkPoolData?.accumulation?.length, onClick: () => loadDarkPool(true) },
@@ -2457,6 +2471,145 @@ export default function NexusDashboard({ user, onLogout }) {
                       {s.label} {s.active && s.count !== undefined && <span style={{ background: s.color + "20", borderRadius: 10, padding: "0 5px", fontSize: 9 }}>{s.count}</span>}
                     </button>
                   ))}
+                </div>
+
+                {/* GEOPOLITICAL SCENARIO ENGINE */}
+                <div style={{ background: "#080f1a", border: `2px solid ${geoData?.activeScenario === "ESCALATION" ? "rgba(255,45,85,0.5)" : geoData?.activeScenario === "RESOLUTION" ? "rgba(57,255,20,0.5)" : geoData?.activeScenario === "BLOCKADE" ? "rgba(157,127,255,0.5)" : "rgba(255,184,0,0.4)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2 }}>🌍 GEOPOLITICAL SCENARIO ENGINE</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>4 war scenarios × 3 time horizons × options playbook | auto-updates with events | feeds pipeline</div>
+                    </div>
+                    {geoData && <button onClick={() => loadGeoScenarios(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
+                  </div>
+
+                  {!geoData ? (
+                    <button onClick={() => loadGeoScenarios(true)} disabled={loadingGeo} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", color: "#ffb800", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingGeo ? "ANALYZING SCENARIOS..." : "🌍 RUN SCENARIO ANALYSIS"}</button>
+                  ) : (
+                    <div>
+                      {/* Scenario probability bars */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 6, marginBottom: 12 }}>
+                        {[
+                          { id: "ESCALATION", label: "🔴 ESCALATION", color: "#ff2d55" },
+                          { id: "STALL", label: "🟡 STALL", color: "#ffb800" },
+                          { id: "BLOCKADE", label: "🟣 BLOCKADE", color: "#9d7fff" },
+                          { id: "RESOLUTION", label: "🟢 RESOLUTION", color: "#39ff14" },
+                        ].map(s => {
+                          const prob = geoData.probabilities?.[s.id] || 0;
+                          const isActive = geoData.activeScenario === s.id;
+                          return (
+                            <div key={s.id} onClick={() => setGeoScenario(geoScenario === s.id ? null : s.id)} style={{ background: isActive ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.2)", border: `1px solid ${isActive ? s.color : "rgba(74,109,140,0.2)"}`, borderRadius: 4, padding: "8px 8px", cursor: "pointer", textAlign: "center" }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 8, color: isActive ? s.color : "#4a6d8c", marginBottom: 4, whiteSpace: "nowrap" }}>{s.label}</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 700, color: s.color }}>{prob}%</div>
+                              {isActive && <div style={{ fontFamily: "monospace", fontSize: 7, color: s.color, marginTop: 2 }}>ACTIVE</div>}
+                              {/* Probability bar */}
+                              <div style={{ height: 3, background: "rgba(74,109,140,0.2)", borderRadius: 2, marginTop: 4 }}>
+                                <div style={{ height: "100%", width: prob + "%", background: s.color, borderRadius: 2 }}/>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Active scenario or selected scenario detail */}
+                      {(geoScenario || geoData.activeScenario) && geoData.scenarios?.[geoScenario || geoData.activeScenario] && (() => {
+                        const scen = geoData.scenarios[geoScenario || geoData.activeScenario];
+                        const color = geoScenario === "ESCALATION" ? "#ff2d55" : geoScenario === "RESOLUTION" ? "#39ff14" : geoScenario === "BLOCKADE" ? "#9d7fff" : "#ffb800";
+                        return (
+                          <div style={{ marginBottom: 10 }}>
+                            <div style={{ fontSize: 10, color: "#c8dce8", marginBottom: 8, lineHeight: 1.5 }}>{scen.description}</div>
+
+                            {/* Time horizons */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 8 }}>
+                              {["week1", "month1", "quarter1"].map(tf => {
+                                const t = scen.timeframes?.[tf];
+                                if (!t) return null;
+                                return (
+                                  <div key={tf} style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(74,109,140,0.2)", borderRadius: 4, padding: "6px 8px" }}>
+                                    <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 4 }}>{tf === "week1" ? "WEEK 1" : tf === "month1" ? "MONTH 1" : "QUARTER 1"}</div>
+                                    <div style={{ fontSize: 9, color: "#8aabb8", lineHeight: 1.4, marginBottom: 4 }}>{t.narrative?.slice(0, 80)}...</div>
+                                    {t.oil && <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800" }}>OIL: {t.oil}</div>}
+                                    {t.sectorWinners && <div style={{ fontSize: 8, color: "#39ff14", marginTop: 2 }}>▲ {t.sectorWinners.slice(0,4).join(" ")}</div>}
+                                    {t.sectorLosers && <div style={{ fontSize: 8, color: "#ff2d55" }}>▼ {t.sectorLosers.slice(0,3).join(" ")}</div>}
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {/* Top options for this scenario */}
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: color, marginBottom: 6 }}>OPTIONS PLAYBOOK — {(geoScenario || geoData.activeScenario)} SCENARIO</div>
+                            <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                              {geoData.weeklyOptionsPlaybook?.filter(o => o.scenario === (geoScenario || geoData.activeScenario)).slice(0, 6).map((opt, i) => (
+                                <div key={i} style={{ background: opt.play.includes("PUT") ? "rgba(255,45,85,0.08)" : "rgba(57,255,20,0.08)", border: `1px solid ${opt.play.includes("PUT") ? "rgba(255,45,85,0.2)" : "rgba(57,255,20,0.2)"}`, borderRadius: 3, padding: "4px 8px" }}>
+                                  <div style={{ fontFamily: "monospace", fontSize: 9, fontWeight: 700, color: opt.play.includes("PUT") ? "#ff2d55" : "#39ff14" }}>{opt.play}</div>
+                                  <div style={{ fontSize: 8, color: "#4a6d8c" }}>{opt.period?.replace("week1","W1").replace("month1","M1").replace("quarter1","Q1")} · {opt.confidence}%</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Best trade callout */}
+                      {geoData.analysis?.bestTrade && (
+                        <div style={{ background: "rgba(255,184,0,0.06)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 4, padding: "8px 12px", marginBottom: 8, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800" }}>BEST GEO TRADE</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffd700" }}>{geoData.analysis.bestTrade}</span>
+                          {geoData.analysis.confidence && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>confidence: {geoData.analysis.confidence}</span>}
+                        </div>
+                      )}
+
+                      {/* Week/Month predictions */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
+                        {geoData.analysis?.week1Prediction && (
+                          <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "6px 8px" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>WEEK 1 PREDICTION</div>
+                            <div style={{ fontSize: 10, color: "#c8dce8" }}>{geoData.analysis.week1Prediction}</div>
+                          </div>
+                        )}
+                        {geoData.analysis?.month1Prediction && (
+                          <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "6px 8px" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>MONTH 1 PREDICTION</div>
+                            <div style={{ fontSize: 10, color: "#c8dce8" }}>{geoData.analysis.month1Prediction}</div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Historical analog */}
+                      {geoData.historicalAnalog && (
+                        <div style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 3, padding: "8px 10px", marginBottom: 8 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff", marginBottom: 3 }}>CLOSEST HISTORICAL ANALOG: {geoData.historicalAnalog.event}</div>
+                          <div style={{ fontSize: 10, color: "#8aabb8" }}>{geoData.historicalAnalog.lesson}</div>
+                          <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                            <span style={{ fontSize: 9, color: "#39ff14", fontFamily: "monospace" }}>Winners: {geoData.historicalAnalog.key_winners?.join(" ")}</span>
+                            <span style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>Oil: {geoData.historicalAnalog.oil_spike}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Upcoming summits */}
+                      {geoData.upcomingSummits?.length > 0 && (
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#9d7fff", marginBottom: 6 }}>📅 UPCOMING SUMMITS (next 90 days)</div>
+                          {geoData.upcomingSummits.slice(0, 3).map((s, i) => (
+                            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 5, paddingBottom: 5, borderBottom: i < 2 ? "1px solid rgba(74,109,140,0.1)" : "none" }}>
+                              <div>
+                                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#9d7fff", fontWeight: 700 }}>{s.event}</div>
+                                <div style={{ fontSize: 9, color: "#4a6d8c" }}>{s.location} · {s.date}</div>
+                                <div style={{ fontSize: 9, color: "#8aabb8", marginTop: 2 }}>{s.watchFor?.slice(0, 60)}</div>
+                              </div>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 10, background: "rgba(157,127,255,0.1)", color: "#9d7fff", flexShrink: 0, marginLeft: 8 }}>{s.daysOut}d</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Change trigger */}
+                      {geoData.analysis?.changeTrigger && (
+                        <div style={{ marginTop: 8, fontSize: 9, color: "#ffb800", fontFamily: "monospace" }}>⚡ SCENARIO FLIP TRIGGER: {geoData.analysis.changeTrigger}</div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* FED CALENDAR section */}
