@@ -2924,7 +2924,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {allianceData.avoidCompletely?.length > 0 && (
                         <div style={{ background: "rgba(255,45,85,0.04)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: 10 }}>
                           <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 4 }}>AVOID COMPLETELY</div>
-                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>{allianceData.avoidCompletely.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>{t}</span>)}</div>
+                          <div style={{ display: "flex", gap: 4, flexWrap: "nowrap", overflowX: "auto", paddingBottom: 4, scrollbarWidth: "thin", scrollbarColor: "#1a2d47 transparent" }}>{allianceData.avoidCompletely.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>{t}</span>)}</div>
                         </div>
                       )}
                     </div>
@@ -3038,7 +3038,7 @@ export default function NexusDashboard({ user, onLogout }) {
                                 </div>
                                 <div style={{ fontSize: 11, color: "#c8dce8", lineHeight: 1.6, marginBottom: 6 }}>{setup.description}</div>
                                 {setup.tickers?.length > 0 && (
-                                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                                  <div style={{ display: "flex", gap: 4, flexWrap: "nowrap", overflowX: "auto", paddingBottom: 4, scrollbarWidth: "thin", scrollbarColor: "#1a2d47 transparent" }}>
                                     <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>NOW:</span>
                                     {setup.tickers.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>{t}</span>)}
                                   </div>
@@ -3569,7 +3569,7 @@ export default function NexusDashboard({ user, onLogout }) {
                               {layer.stocksUp?.length > 0 && (
                                 <div>
                                   <div style={{ fontSize: 9, fontFamily: "monospace", color: "#39ff14", marginBottom: 3 }}>CALLS →</div>
-                                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                                  <div style={{ display: "flex", gap: 4, flexWrap: "nowrap", overflowX: "auto", paddingBottom: 4, scrollbarWidth: "thin", scrollbarColor: "#1a2d47 transparent" }}>
                                     {layer.stocksUp.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>{t}</span>)}
                                   </div>
                                 </div>
@@ -3577,7 +3577,7 @@ export default function NexusDashboard({ user, onLogout }) {
                               {layer.stocksDown?.length > 0 && (
                                 <div>
                                   <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ff2d55", marginBottom: 3 }}>PUTS →</div>
-                                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                                  <div style={{ display: "flex", gap: 4, flexWrap: "nowrap", overflowX: "auto", paddingBottom: 4, scrollbarWidth: "thin", scrollbarColor: "#1a2d47 transparent" }}>
                                     {layer.stocksDown.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>{t}</span>)}
                                   </div>
                                 </div>
