@@ -108,7 +108,7 @@ const S = {
   card: (cat, sel) => ({ background: sel ? "#0d1829" : "#080f1a", border: `1px solid ${sel ? "#00d4ff" : "#1a2d47"}`, borderLeft: `3px solid ${catColors[cat] || "#4a6d8c"}`, borderRadius: 4, padding: 14, cursor: "pointer", marginBottom: 10 }),
   badge: (sev) => ({ fontSize: 9, padding: "2px 7px", borderRadius: 2, fontFamily: "monospace", fontWeight: 700, background: `${sevColors[sev]}22`, color: sevColors[sev], border: `1px solid ${sevColors[sev]}55` }),
   tag: (hot) => ({ fontSize: 10, padding: "2px 8px", background: "#0d1829", border: `1px solid ${hot ? "#ff2d5544" : "#1a2d47"}`, borderRadius: 2, color: hot ? "#ff2d55" : "#4a6d8c", fontFamily: "monospace" }),
-  panel: { width: 320, background: "#080f1a", borderLeft: "1px solid #1a2d47", display: "flex", flexDirection: "column", overflow: "hidden", flexShrink: 0 },
+  panel: { display: "none" }, /* AI Brief moved to slide-over drawer */
   panelHeader: { padding: "12px 16px", background: "#0d1829", borderBottom: "1px solid #1a2d47", fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#00d4ff", fontFamily: "monospace", flexShrink: 0 },
   panelBody: { flex: 1, overflowY: "auto", padding: 14 },
   loading: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40, gap: 10 },
@@ -1453,6 +1453,7 @@ export default function NexusDashboard({ user, onLogout }) {
             <input style={S.input} value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === "Enter" && runQuery()} placeholder="e.g. 'Commodity impact of Red Sea tensions' or 'Which countries face grain shortages?'" />
             <button style={S.btnSecondary} onClick={scanEvents} disabled={scanning}>{scanning ? "SCANNING..." : "⟳ SCAN"}</button>
             <button style={S.btnPrimary(loading)} onClick={runQuery} disabled={loading}>{loading ? "ANALYZING..." : "ANALYZE ▶"}</button>
+            {analysisHtml && <button onClick={() => setAnalysisHtml(null)} style={{ ...S.btnSecondary, fontSize: 10, padding: "6px 10px", color: "#4a6d8c" }}>✕ CLEAR</button>}
           </div>
 
           <div style={S.tabs}>
@@ -5654,25 +5655,26 @@ export default function NexusDashboard({ user, onLogout }) {
               </div>
             )}
 
-        <div style={S.panel}>
-          <div style={S.panelHeader}>⬡ AI INTELLIGENCE BRIEF</div>
-          <div style={S.panelBody}>
-            {apiError && (
-              <div style={{ padding: 12, background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#ff2d55", marginBottom: 12 }}>
-                ⚠ {apiError}
-                {!API_KEY && <div style={{ marginTop: 8, color: "#ffb800" }}>Set VITE_ANTHROPIC_API_KEY in Vercel environment variables.</div>}
-              </div>
-            )}
-            {!analysisHtml && !loading && !apiError && (
-              <div style={{ textAlign: "center", color: "#4a6d8c", padding: 20 }}>
-                <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", marginBottom: 10 }}>NEXUS READY</div>
-                <div style={{ fontSize: 11, lineHeight: 1.8 }}>Select an event or run a query to generate a live AI intelligence briefing with commodity predictions.</div>
-              </div>
-            )}
-            {loading && <Spinner />}
-            {analysisHtml && !loading && <div style={{ fontSize: 11, lineHeight: 1.7 }}>{renderAnalysis(analysisHtml)}</div>}
+        {/* AI INTELLIGENCE BRIEF — slide-over drawer (replaces permanent right column) */}
+        {(analysisHtml || loading || apiError) && (
+          <div style={{ position: "fixed", top: 0, right: 0, width: "520px", height: "100vh", background: "#080f1a", borderLeft: "2px solid rgba(0,212,255,0.4)", zIndex: 200, display: "flex", flexDirection: "column", boxShadow: "-8px 0 32px rgba(0,0,0,0.6)", animation: "slideInRight 0.25s ease-out" }}>
+            <style>{`@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }`}</style>
+            <div style={{ padding: "12px 16px", background: "#0a1628", borderBottom: "1px solid rgba(0,212,255,0.2)", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+              <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 3 }}>⬡ AI INTELLIGENCE BRIEF</div>
+              <button onClick={() => setAnalysisHtml(null)} style={{ background: "none", border: "1px solid rgba(74,109,140,0.3)", color: "#4a6d8c", borderRadius: 2, padding: "2px 8px", cursor: "pointer", fontFamily: "monospace", fontSize: 10 }}>✕ CLOSE</button>
+            </div>
+            <div style={{ flex: 1, overflowY: "auto", padding: "14px 16px" }}>
+              {apiError && (
+                <div style={{ padding: 12, background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#ff2d55", marginBottom: 12 }}>
+                  ⚠ {apiError}
+                  {!API_KEY && <div style={{ marginTop: 8, color: "#ffb800" }}>Set VITE_ANTHROPIC_API_KEY in Vercel environment variables.</div>}
+                </div>
+              )}
+              {loading && <Spinner />}
+              {analysisHtml && !loading && <div style={{ fontSize: 11, lineHeight: 1.8 }}>{renderAnalysis(analysisHtml)}</div>}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* TICKER */}
