@@ -299,6 +299,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [learningData, setLearningData] = useState(null);
   const [suggestionsData, setSuggestionsData] = useState(null);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [resolverData, setResolverData] = useState(null);
+  const [loadingResolver, setLoadingResolver] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -474,7 +476,7 @@ export default function NexusDashboard({ user, onLogout }) {
         }
         meta = { sourcesMonitored: ["CNBC","WSJ","Reddit WSB","r/investing","r/options","SEC 13F","Earnings"], whalesTracked: ["Michael Burry","Michael Saylor","Cathie Wood","Warren Buffett","Ryan Cohen"], headlinesAnalyzed: "AI synthesized" };
       }
-      if (picks && picks.length > 0) { setIntelPicks(picks); setIntelMeta(meta); trackCall(1200, 1400); enrichPicksWithLiveData(picks); }
+      if (picks && picks.length > 0) { setIntelPicks(picks); setIntelMeta(meta); trackCall(1200, 1400); enrichPicksWithLiveData(picks); if (picks?.length > 0) runSignalResolver(picks.map(p => p.ticker)); }
       else throw new Error("No picks generated. Please try again.");
     } catch (err) { setIntelError(err.message); }
     setLoadingIntel(false);
@@ -675,6 +677,21 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const runSignalResolver = async (tickers) => {
+    if (!tickers?.length) return;
+    setLoadingResolver(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/signal-resolver/batch", {
+        method: "POST",
+        headers: { "x-nexus-key": nexusKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ tickers })
+      });
+      const data = await res.json();
+      if (data.success) setResolverData(data);
+    } catch {}
+    setLoadingResolver(false);
   };
 
   const loadLearningStats = async () => {
@@ -1635,6 +1652,27 @@ export default function NexusDashboard({ user, onLogout }) {
 
                 {intelPicks && !loadingIntel && (
                   <div>
+                    {/* SIGNAL CONFLICT RESOLVER — auto-runs on picks */}
+                    {resolverData?.ranked?.length > 0 && (
+                      <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.3)", borderRadius: 4, padding: "10px 12px", marginBottom: 12 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", marginBottom: 6, letterSpacing: 1 }}>⚖️ SIGNAL CONFLICT RESOLVER — scenario-weighted arbitration</div>
+                        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                          {resolverData.ranked.slice(0,8).map((r, i) => (
+                            <div key={i} style={{ background: r.verdict === "BUY" ? "rgba(57,255,20,0.08)" : r.verdict === "SELL" ? "rgba(255,45,85,0.08)" : "rgba(74,109,140,0.06)", border: `1px solid ${r.verdict === "BUY" ? "rgba(57,255,20,0.25)" : r.verdict === "SELL" ? "rgba(255,45,85,0.25)" : "rgba(74,109,140,0.15)"}`, borderRadius: 3, padding: "4px 8px", textAlign: "center" }}>
+                              <div style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: r.isConflicted ? "#ffb800" : r.verdict.includes("BUY") ? "#39ff14" : r.verdict.includes("SELL") ? "#ff2d55" : "#4a6d8c" }}>{r.ticker}</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 8, color: r.verdict.includes("BUY") ? "#39ff14" : r.verdict.includes("SELL") ? "#ff2d55" : "#4a6d8c" }}>{r.verdict.replace("_"," ")}</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 9, color: "#e8f4ff" }}>{r.confidence}%</div>
+                              {r.isConflicted && <div style={{ fontSize: 7, color: "#ffb800" }}>⚠ CONFLICT</div>}
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 8, color: "#4a6d8c" }}>
+                          <span>Scenario: <span style={{ color: "#ffb800" }}>{resolverData.ranked[0]?.scenarioTrust}</span></span>
+                          <span>VIX regime: <span style={{ color: "#00d4ff" }}>{resolverData.ranked[0]?.vixRegime}</span></span>
+                          <span style={{ color: "#4a6d8c" }}>⚠ = conflicted signals — use smaller size</span>
+                        </div>
+                      </div>
+                    )}
                     {intelPicks.map((pick, i) => (
                       <IntelPickCard key={i} pick={pick} i={i} qtConnected={qtConnected} qtQuotes={qtQuotes} qtChains={qtChains} loadingChain={loadingChain} fetchChain={fetchChain} />
                     ))}
