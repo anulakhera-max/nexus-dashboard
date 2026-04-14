@@ -278,6 +278,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingPcr, setLoadingPcr] = useState(false);
   const [sectorData, setSectorData] = useState(null);
   const [loadingSector, setLoadingSector] = useState(false);
+  const [darkPoolData, setDarkPoolData] = useState(null);
+  const [loadingDarkPool, setLoadingDarkPool] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -654,6 +656,16 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadDarkPool = async (force = false) => {
+    setLoadingDarkPool(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/dark-pool" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setDarkPoolData(data);
+    } catch {}
+    setLoadingDarkPool(false);
   };
 
   const loadSectorRotation = async (force = false) => {
@@ -2336,12 +2348,13 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
+                  <button onClick={() => { loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
                   {[
+                    { label: "🌑 DARK POOL", active: !!darkPoolData, color: darkPoolData?.accumulation?.length > 0 ? "#39ff14" : "#9d7fff", count: darkPoolData?.accumulation?.length, onClick: () => loadDarkPool(true) },
                     { label: "🔄 SECTOR", active: !!sectorData, color: sectorData?.riskRegime === "RISK_ON" ? "#39ff14" : sectorData?.riskRegime === "RISK_OFF" ? "#ff2d55" : "#ffb800", count: null, onClick: () => loadSectorRotation(true) },
                     { label: "📉 P/C", active: !!pcrData, color: pcrData?.ratio >= 1.2 ? "#39ff14" : pcrData?.ratio <= 0.6 ? "#ff2d55" : "#00d4ff", count: pcrData?.ratio, onClick: () => loadPCR(true) },
                     { label: "🏛 FED", active: !!fedData, color: "#9d7fff", count: fedData?.nextMeeting?.daysOut, onClick: () => loadFedCalendar(true) },
@@ -2682,6 +2695,88 @@ export default function NexusDashboard({ user, onLogout }) {
                         {allianceData.avoidCompletely?.length>0 && <span style={{ fontFamily:"monospace",fontSize:10,color:"#ff2d55" }}>AVOID: {allianceData.avoidCompletely.join(",")}</span>}
                       </div>
                     </div>}
+                </div>
+
+                {/* DARK POOL section */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(157,127,255,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#9d7fff", letterSpacing: 2 }}>🌑 DARK POOL PRINTS</div>
+                    {darkPoolData && <div style={{ display: "flex", gap: 6 }}>
+                      <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 7px", borderRadius: 10, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>{darkPoolData.accumulation?.length} ACCUM</span>
+                      <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 7px", borderRadius: 10, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>{darkPoolData.distribution?.length} DIST</span>
+                      <button onClick={() => loadDarkPool(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>
+                    </div>}
+                  </div>
+
+                  {!darkPoolData ? (
+                    <button onClick={() => loadDarkPool(true)} disabled={loadingDarkPool} style={{ background: "rgba(157,127,255,0.1)", border: "1px solid rgba(157,127,255,0.3)", color: "#9d7fff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingDarkPool ? "SCANNING FINRA + VOLUME..." : "🌑 DETECT DARK POOL"}</button>
+                  ) : (
+                    <div>
+                      {/* Claude insight */}
+                      {darkPoolData.analysis?.keyInsight && (
+                        <div style={{ fontSize: 11, color: "#c8dce8", marginBottom: 10, lineHeight: 1.5, paddingLeft: 8, borderLeft: "2px solid rgba(157,127,255,0.4)" }}>{darkPoolData.analysis.keyInsight}</div>
+                      )}
+
+                      {/* Best trade */}
+                      {darkPoolData.analysis?.bestTrade && (
+                        <div style={{ background: "rgba(57,255,20,0.06)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: "8px 12px", marginBottom: 10, display: "flex", gap: 10, alignItems: "center" }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14" }}>BEST DARK POOL TRADE</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffd700" }}>{darkPoolData.analysis.bestTrade}</span>
+                        </div>
+                      )}
+
+                      {/* Stealth pattern */}
+                      {darkPoolData.analysis?.stealthPattern && (
+                        <div style={{ fontSize: 10, color: "#8aabb8", marginBottom: 10, fontFamily: "monospace" }}>PATTERN: {darkPoolData.analysis.stealthPattern}</div>
+                      )}
+
+                      {/* Prints grid */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
+                        {/* Accumulation */}
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 4 }}>ACCUMULATION → CALL</div>
+                          {darkPoolData.accumulation?.slice(0, 5).map(p => (
+                            <div key={p.ticker} style={{ background: "rgba(57,255,20,0.04)", border: "1px solid rgba(57,255,20,0.15)", borderRadius: 3, padding: "5px 8px", marginBottom: 4 }}>
+                              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#39ff14" }}>{p.ticker}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{p.signal?.replace("_"," ")}</span>
+                              </div>
+                              <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
+                                {p.shortRatio !== undefined && <span style={{ fontSize: 9, color: "#8aabb8", fontFamily: "monospace" }}>Short: {p.shortRatio}%</span>}
+                                {p.todayVolRatio && <span style={{ fontSize: 9, color: p.todayVolRatio >= 2 ? "#ffb800" : "#4a6d8c", fontFamily: "monospace" }}>Vol: {p.todayVolRatio}x</span>}
+                                {p.todayPriceChg !== undefined && <span style={{ fontSize: 9, color: p.todayPriceChg >= 0 ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{p.todayPriceChg >= 0 ? "+" : ""}{p.todayPriceChg}%</span>}
+                              </div>
+                              {p.signals?.[0] && <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 2 }}>{p.signals[0].slice(0, 55)}</div>}
+                            </div>
+                          ))}
+                          {!darkPoolData.accumulation?.length && <div style={{ fontSize: 9, color: "#2a3d57", fontFamily: "monospace" }}>No clear accumulation detected</div>}
+                        </div>
+
+                        {/* Distribution */}
+                        <div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 4 }}>DISTRIBUTION → PUT/AVOID</div>
+                          {darkPoolData.distribution?.slice(0, 5).map(p => (
+                            <div key={p.ticker} style={{ background: "rgba(255,45,85,0.04)", border: "1px solid rgba(255,45,85,0.15)", borderRadius: 3, padding: "5px 8px", marginBottom: 4 }}>
+                              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ff2d55" }}>{p.ticker}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{p.signal?.replace("_"," ")}</span>
+                              </div>
+                              <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
+                                {p.shortRatio !== undefined && <span style={{ fontSize: 9, color: "#8aabb8", fontFamily: "monospace" }}>Short: {p.shortRatio}%</span>}
+                                {p.todayVolRatio && <span style={{ fontSize: 9, color: "#ffb800", fontFamily: "monospace" }}>Vol: {p.todayVolRatio}x</span>}
+                                {p.todayPriceChg !== undefined && <span style={{ fontSize: 9, color: p.todayPriceChg >= 0 ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{p.todayPriceChg >= 0 ? "+" : ""}{p.todayPriceChg}%</span>}
+                              </div>
+                            </div>
+                          ))}
+                          {!darkPoolData.distribution?.length && <div style={{ fontSize: 9, color: "#2a3d57", fontFamily: "monospace" }}>No distribution detected</div>}
+                        </div>
+                      </div>
+
+                      <div style={{ fontSize: 8, color: "#2a3d57", fontFamily: "monospace" }}>
+                        Sources: FINRA Reg SHO short volume + Yahoo Finance volume anomaly detection · {darkPoolData.tickersScanned} tickers scanned
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ fontSize: 9, color: "#2a3d57", fontFamily: "monospace", textAlign: "center" }}>All signals auto-inject into pipeline scoring every run</div>
