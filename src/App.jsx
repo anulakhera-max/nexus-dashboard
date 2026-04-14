@@ -296,6 +296,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [spikeData, setSpikeData] = useState(null);
   const [loadingSpike, setLoadingSpike] = useState(false);
   const [spikeView, setSpikeView] = useState("alerts");
+  const [learningData, setLearningData] = useState(null);
+  const [suggestionsData, setSuggestionsData] = useState(null);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -672,6 +675,17 @@ export default function NexusDashboard({ user, onLogout }) {
     });
     setTrackedPicks(updated);
     saveTrackedPicks(updated);
+  };
+
+  const loadLearningStats = async () => {
+    try {
+      const [lr, sg] = await Promise.all([
+        fetch(nexusUrl + "/api/learning-stats", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
+        fetch(nexusUrl + "/api/improvement-suggestions", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
+      ]);
+      if (lr.success) setLearningData(lr);
+      if (sg.success) setSuggestionsData(sg);
+    } catch {}
   };
 
   const loadSpikeDetector = async (force = false) => {
@@ -3605,6 +3619,100 @@ export default function NexusDashboard({ user, onLogout }) {
             {/* RESEARCH TAB — Earnings + Ripple + Pattern + Paper */}
             {tab === "research" && (
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                {/* ACCURACY TRACKER + IMPROVEMENT SUGGESTIONS */}
+                <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.25)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                    <div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>📊 NEXUS LEARNING ENGINE — CONTINUOUS ACCURACY IMPROVEMENT</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Logs every pick → checks outcomes after 24h → ranks signals by accuracy → self-improves</div>
+                    </div>
+                    <button onClick={loadLearningStats} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "4px 10px", fontSize: 9, cursor: "pointer", fontFamily: "monospace" }}>📊 LOAD</button>
+                  </div>
+                  {!learningData ? (
+                    <div style={{ fontSize: 10, color: "#4a6d8c" }}>Click LOAD to see accuracy tracking and improvement suggestions</div>
+                  ) : (
+                    <div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6, marginBottom: 10 }}>
+                        {[
+                          { label: "ACCURACY", value: (learningData.stats?.accuracy || "—") + "%", color: learningData.stats?.accuracy >= 80 ? "#39ff14" : "#ffb800", sub: "TARGET: 80%+" },
+                          { label: "PREDICTIONS", value: learningData.totalPredictions || 0, color: "#e8f4ff", sub: "total logged" },
+                          { label: "RESOLVED", value: learningData.stats?.total || 0, color: "#e8f4ff", sub: "24h+ checked" },
+                          { label: "CORRECT", value: learningData.stats?.correct || 0, color: "#39ff14", sub: "winning" },
+                        ].map((s, i) => (
+                          <div key={i} style={{ textAlign: "center", background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "8px 6px" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", marginBottom: 3 }}>{s.label}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 700, color: s.color }}>{s.value}</div>
+                            <div style={{ fontSize: 7, color: "#2a3d57" }}>{s.sub}</div>
+                          </div>
+                        ))}
+                      </div>
+                      {learningData.signalRanking?.length > 0 && (
+                        <div style={{ marginBottom: 10 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 5 }}>SIGNAL ACCURACY RANKING</div>
+                          {learningData.signalRanking.slice(0,6).map((s, i) => (
+                            <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", width: 16 }}>#{i+1}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 8, color: "#e8f4ff", width: 100 }}>{s.signal}</span>
+                              <div style={{ flex: 1, height: 3, background: "rgba(74,109,140,0.2)", borderRadius: 2 }}>
+                                <div style={{ height: "100%", width: s.accuracy + "%", background: s.accuracy >= 80 ? "#39ff14" : "#ffb800", borderRadius: 2 }}/>
+                              </div>
+                              <span style={{ fontFamily: "monospace", fontSize: 8, color: s.accuracy >= 80 ? "#39ff14" : "#ffb800", width: 30 }}>{s.accuracy}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {learningData.recent?.slice(0,4).map((e, i) => (
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "3px 8px", marginBottom: 2, background: "rgba(0,0,0,0.2)", borderRadius: 3 }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 8, color: "#8aabb8" }}>{e.date} {e.picks}</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 8, color: e.correct === true ? "#39ff14" : e.correct === false ? "#ff2d55" : "#4a6d8c" }}>
+                            {e.correct === true ? "✓ " + e.outcome?.winRate + "%" : e.correct === false ? "✗" : "⏳"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* IMPROVEMENT SUGGESTIONS */}
+                {suggestionsData && (
+                  <div style={{ background: "#080f1a", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2, marginBottom: 8 }}>🧠 AI SELF-IMPROVEMENT SUGGESTIONS</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>
+                      {[
+                        { label: "BEST FREE ADDITION", value: suggestionsData.aiSuggestions?.highestImpactFree, color: "#39ff14" },
+                        { label: "BEST PAID TOOL", value: suggestionsData.aiSuggestions?.highestImpactPaid, color: "#ffb800" },
+                        { label: "MISSING SIGNAL", value: suggestionsData.aiSuggestions?.missingSignal, color: "#ff2d55" },
+                        { label: "ACCURACY CEILING", value: suggestionsData.aiSuggestions?.accuracyCeiling, color: "#00d4ff" },
+                      ].filter(s => s.value).map((s, i) => (
+                        <div key={i} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "6px 8px" }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>{s.label}</div>
+                          <div style={{ fontSize: 9, color: s.color, lineHeight: 1.4 }}>{s.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                    {suggestionsData.aiSuggestions?.nextBuild && (
+                      <div style={{ background: "rgba(255,184,0,0.04)", border: "1px solid rgba(255,184,0,0.15)", borderRadius: 4, padding: "6px 10px", marginBottom: 10 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 7, color: "#ffb800", marginBottom: 2 }}>NEXT BUILD PRIORITY</div>
+                        <div style={{ fontSize: 10, color: "#c8dce8" }}>{suggestionsData.aiSuggestions.nextBuild}</div>
+                      </div>
+                    )}
+                    {Object.entries(suggestionsData.tabImprovements || {}).slice(0,2).map(([tab, items]) => (
+                      <div key={tab} style={{ marginBottom: 8 }}>
+                        <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 3 }}>{tab} — IMPROVEMENTS</div>
+                        {items.filter(i => i.priority === "HIGH").map((item, i) => (
+                          <div key={i} style={{ display: "flex", gap: 6, marginBottom: 3, padding: "3px 6px", background: "rgba(255,45,85,0.04)", borderRadius: 3, border: "1px solid rgba(255,45,85,0.1)" }}>
+                            <span style={{ fontFamily: "monospace", fontSize: 7, color: "#ff2d55", flexShrink: 0 }}>HIGH</span>
+                            <div>
+                              <div style={{ fontSize: 9, color: "#c8dce8" }}>{item.suggestion}</div>
+                              <div style={{ fontSize: 8, color: "#39ff14" }}>{item.cost}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 <div style={{ background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 4, padding: "12px 16px", marginBottom: 14 }}>
                   <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00d4ff", letterSpacing: 3, marginBottom: 2 }}>🔬 RESEARCH TOOLS</div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
