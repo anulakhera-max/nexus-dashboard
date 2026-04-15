@@ -1625,59 +1625,58 @@ export default function NexusDashboard({ user, onLogout }) {
                         </div>
                       </div>
 
-                      {/* Expanded panel */}
+                      {/* Expanded panel — clean pipeline data only */}
                       {isExpanded && (
-                        <div style={{ background: "rgba(0,212,255,0.03)", border: "1px solid rgba(0,212,255,0.2)", borderTop: "none", borderRadius: "0 0 4px 4px", padding: "10px 12px", marginTop: -1 }}>
+                        <div className="slide-up" style={{ background:"rgba(0,212,255,0.03)", border:"1px solid rgba(0,212,255,0.25)", borderTop:"none", borderRadius:"0 0 6px 6px", padding:"12px 14px", marginTop:-1 }}>
                           {/* WHY THIS PICK */}
                           {reasoning && (
-                            <div style={{ marginBottom: 8 }}>
-                              <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 3 }}>WHY THIS PICK</div>
-                              <div style={{ fontSize: 10, color: "#c8dff0", lineHeight: 1.6 }}>{reasoning}</div>
+                            <div style={{ marginBottom:10 }}>
+                              <div style={{ fontFamily:"monospace", fontSize:9, color:"#9d7fff", marginBottom:4, letterSpacing:1 }}>WHY THIS PICK</div>
+                              <div style={{ fontSize:11, color:"#c8dff0", lineHeight:1.7 }}>{reasoning}</div>
                             </div>
                           )}
-                          {/* Signal source */}
                           {signalSource && (
-                            <div style={{ marginBottom: 8, fontSize: 9, color: "#4a6d8c" }}>
-                              <span style={{ color: "#00d4ff" }}>Signal: </span>{signalSource}
+                            <div style={{ marginBottom:10, fontSize:10, color:"#4a6d8c", borderLeft:"2px solid rgba(0,212,255,0.3)", paddingLeft:8 }}>
+                              <span style={{ color:"#00d4ff" }}>Source: </span>{signalSource}
                             </div>
                           )}
-
-                          {/* Action plan */}
-                          <div style={{ background: "rgba(0,0,0,0.4)", borderRadius: 3, padding: "8px 10px", marginBottom: 6 }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 6 }}>⚡ ACTION PLAN</div>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 6 }}>
-                              <div>
-                                <div style={{ fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>DIRECTION</div>
-                                <div style={{ fontFamily: "monospace", fontSize: 11, color: typeColor, fontWeight: 700 }}>{direction}</div>
-                              </div>
-                              <div>
-                                <div style={{ fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>TARGET</div>
-                                <div style={{ fontFamily: "monospace", fontSize: 11, color: "#39ff14", fontWeight: 700 }}>{targetMove.split(" ")[0]}</div>
-                              </div>
-                              <div>
-                                <div style={{ fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>EXPIRY</div>
-                                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffd700" }}>{pick.expiry || "—"}</div>
-                              </div>
+                          {/* Action plan — pipeline data only, no Questrade enrichment */}
+                          <div style={{ background:"rgba(0,0,0,0.4)", borderRadius:4, padding:"10px 12px", marginBottom:8 }}>
+                            <div style={{ fontFamily:"monospace", fontSize:9, color:"#39ff14", marginBottom:8, letterSpacing:1 }}>⚡ ACTION PLAN</div>
+                            <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8, marginBottom:6 }}>
+                              {[
+                                { label:"DIRECTION", value:direction, color:typeColor },
+                                { label:"TARGET MOVE", value:pick.targetReturn||targetMove?.split("–")?.[0]||"—", color:"#39ff14" },
+                                { label:"STOP LOSS", value:pick.stopPct||"—", color:"#ff2d55" },
+                                { label:"EXPIRY", value:pick.expiry?.slice(0,12)||"—", color:"#ffd700" },
+                              ].map((f,j) => (
+                                <div key={j}>
+                                  <div style={{ fontSize:8, color:"#4a6d8c", marginBottom:3 }}>{f.label}</div>
+                                  <div style={{ fontFamily:"monospace", fontSize:13, color:f.color, fontWeight:700 }}>{f.value}</div>
+                                </div>
+                              ))}
                             </div>
-                            <div style={{ fontSize: 9, color: "#8aabb8" }}>
-                              📍 Buy {direction} options at market open · Size: 1-3% of portfolio max · Set alert at target
+                            {pick.strike && <div style={{ fontSize:9, color:"#8aabb8", marginBottom:3 }}>Strike: <span style={{ fontFamily:"monospace", color:"#ffd700" }}>${pick.strike}</span></div>}
+                            {pick.hedge && <div style={{ fontSize:9, color:"#8aabb8", marginBottom:3 }}>Hedge: <span style={{ fontFamily:"monospace", color:"#9d7fff" }}>{pick.hedge}</span></div>}
+                            <div style={{ fontSize:10, color:"#8aabb8", borderTop:"1px solid rgba(74,109,140,0.2)", paddingTop:6, marginTop:4 }}>
+                              Buy {direction} at market open · Max 2-3% of portfolio · Set price alert at target
                             </div>
                           </div>
-
-                          {/* Prediction rate detail */}
-                          <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "6px 10px", marginBottom: 6 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>PREDICTION RATE</span>
-                              <span style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: confColor }}>{predRate}</span>
+                          {/* Prediction rate */}
+                          <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px", marginBottom:8 }}>
+                            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:5 }}>
+                              <span style={{ fontFamily:"monospace", fontSize:9, color:"#4a6d8c", letterSpacing:1 }}>NEXUS PREDICTION RATE</span>
+                              <span style={{ fontFamily:"monospace", fontSize:14, fontWeight:700, color:confColor }}>{predRate}</span>
                             </div>
-                            <div style={{ height: 4, background: "rgba(74,109,140,0.15)", borderRadius: 2, marginTop: 4, marginBottom: 4 }}>
-                              <div style={{ height: "100%", width: confScore + "%", background: `linear-gradient(90deg,${confColor},${confColor}88)`, borderRadius: 2 }}/>
+                            <div style={{ height:5, background:"rgba(74,109,140,0.12)", borderRadius:3, marginBottom:5 }}>
+                              <div className="bar-fill" style={{ height:"100%", width:confScore+"%", background:`linear-gradient(90deg,${confColor},${confColor}aa)`, borderRadius:3 }}/>
                             </div>
-                            <div style={{ fontSize: 8, color: "#2a3d57" }}>NEXUS score {confScore}/100 · {pick.confidence || "MEDIUM"} confidence · Target: 90% accuracy</div>
+                            <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#2a3d57" }}>
+                              <span>Score: {confScore}/100</span><span>{pick.confidence||"MEDIUM"} confidence</span><span>Target: 90%</span>
+                            </div>
                           </div>
-
-                          <div style={{ padding: "5px 8px", background: "rgba(255,184,0,0.05)", borderRadius: 3, border: "1px solid rgba(255,184,0,0.15)", fontSize: 8, color: "#ffb800" }}>
-                            ⚠ Educational only · Verify on Questrade · Options carry substantial risk of total loss
+                          <div style={{ padding:"6px 10px", background:"rgba(255,184,0,0.04)", borderRadius:3, border:"1px solid rgba(255,184,0,0.15)", fontSize:9, color:"#ffb800" }}>
+                            ⚠ Educational only · Verify on Questrade before trading · Options carry substantial risk of total loss
                           </div>
                         </div>
                       )}
