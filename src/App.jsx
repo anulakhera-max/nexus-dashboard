@@ -1784,11 +1784,12 @@ export default function NexusDashboard({ user, onLogout }) {
                     NEXUS LIVE
                   </div>
                   {[
-                    { label:"VIX", value: vixData?.vix?.current?.toFixed(1)||"19.1", color:vixData?.vix?.current>25?"#ff2d55":"#39ff14" },
-                    { label:"FEAR/GREED", value: vixData?.fearGreed||"41", color:(vixData?.fearGreed||41)<30?"#ff2d55":(vixData?.fearGreed||41)>60?"#39ff14":"#ffb800" },
-                    { label:"P/C RATIO", value: pcData?.ratio||"0.85", color:"#9d7fff" },
-                    { label:"SCENARIO", value: geoSignal?.activeScenario||"STALL", color:"#ffb800" },
-                    { label:"SECTOR", value: sectorData?.bias||"RISK_ON", color:(sectorData?.bias||"").includes("ON")?"#39ff14":"#ff2d55" },
+                    { label:"VIX", value: vixData?.vix?.current?.toFixed(1)||"—", color:(vixData?.vix?.current||20)>25?"#ff2d55":"#39ff14" },
+                    { label:"FEAR/GREED", value: String(vixData?.fearGreed||"—"), color:(vixData?.fearGreed||50)<30?"#ff2d55":(vixData?.fearGreed||50)>60?"#39ff14":"#ffb800" },
+                    { label:"SCENARIO", value: geoData?.activeScenario||"STALL", color:"#ffb800" },
+                    { label:"SECTOR", value: sectorData?.bias||"NEUTRAL", color:(sectorData?.bias||"").includes("ON")?"#39ff14":"#ff2d55" },
+                    { label:"OI SIGNAL", value: oiData?.totalSignals>0?oiData.totalSignals+" signals":"NONE", color:oiData?.totalSignals>0?"#00ff9d":"#2a3d57" },
+                    { label:"DARK POOL", value: darkPoolData?.signals?.length>0?"ACTIVE":"—", color:darkPoolData?.signals?.length>0?"#9d7fff":"#2a3d57" },
                   ].map((s,i) => (
                     <div key={i} style={{ flexShrink:0, textAlign:"center", minWidth:60 }}>
                       <div style={{ fontFamily:"monospace", fontSize:8, color:"#2a3d57", marginBottom:3, letterSpacing:1 }}>{s.label}</div>
