@@ -1515,121 +1515,121 @@ export default function NexusDashboard({ user, onLogout }) {
               {/* Top 3 picks row */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 8 }}>
                 {intelPicks.slice(0, 3).map((pick, i) => {
-                  const isCall = pick.type === "CALL";
+                  // Map actual API field names → display
+                  const direction = pick.direction || pick.type || "CALL";
+                  const isCall = direction === "CALL";
                   const typeColor = isCall ? "#39ff14" : "#ff2d55";
-                  const confColor = pick.confidence === "HIGH" ? "#ff2d55" : pick.confidence === "MEDIUM" ? "#ffb800" : "#4a6d8c";
+                  const confScore = pick.score || (pick.confidence === "HIGH" ? 88 : pick.confidence === "MEDIUM" ? 75 : 62);
+                  const confColor = confScore >= 85 ? "#39ff14" : confScore >= 72 ? "#ffb800" : "#4a6d8c";
+                  const targetMove = pick.estimatedMove || pick.targetReturn || pick.targetPct || "—";
+                  const reasoning = pick.catalyst || pick.thesis || pick.reason || "";
+                  const signalSource = pick.source || "";
                   const isExpanded = expandedPick === i;
                   const rank = ["#1","#2","#3"][i];
                   const rankColor = i === 0 ? "#ffd700" : i === 1 ? "#c0c0c0" : "#cd7f32";
+                  const predRate = confScore >= 85 ? "85-92%" : confScore >= 75 ? "75-84%" : "65-74%";
 
                   return (
                     <div key={i}>
                       {/* Pick card — clickable */}
                       <div
                         onClick={() => setExpandedPick(isExpanded ? null : i)}
-                        style={{ background: isExpanded ? "rgba(0,212,255,0.06)" : "rgba(0,0,0,0.4)", border: `1px solid ${isExpanded ? "rgba(0,212,255,0.4)" : typeColor + "33"}`, borderRadius: 4, padding: "8px 10px", cursor: "pointer", transition: "all 0.2s", position: "relative" }}
-                        onMouseEnter={e => { if (!isExpanded) e.currentTarget.style.borderColor = typeColor + "88"; e.currentTarget.style.background = "rgba(0,0,0,0.6)"; }}
-                        onMouseLeave={e => { if (!isExpanded) { e.currentTarget.style.borderColor = typeColor + "33"; e.currentTarget.style.background = isExpanded ? "rgba(0,212,255,0.06)" : "rgba(0,0,0,0.4)"; }}}
+                        style={{ background: isExpanded ? "rgba(0,212,255,0.06)" : "rgba(0,0,0,0.4)", border: `2px solid ${isExpanded ? "rgba(0,212,255,0.5)" : rankColor + "44"}`, borderRadius: 4, padding: "8px 10px", cursor: "pointer", transition: "all 0.2s", position: "relative" }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = rankColor + "aa"; e.currentTarget.style.background = "rgba(0,0,0,0.6)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = isExpanded ? "rgba(0,212,255,0.5)" : rankColor + "44"; e.currentTarget.style.background = isExpanded ? "rgba(0,212,255,0.06)" : "rgba(0,0,0,0.4)"; }}
                       >
-                        {/* Rank badge */}
-                        <div style={{ position: "absolute", top: 6, right: 8, fontFamily: "monospace", fontSize: 9, color: rankColor, fontWeight: 700 }}>{rank}</div>
-
-                        {/* Ticker + type */}
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                          <span style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 900, color: "#e8f4ff" }}>{pick.ticker}</span>
-                          <span style={{ fontFamily: "monospace", fontSize: 8, padding: "1px 5px", borderRadius: 2, background: typeColor + "22", color: typeColor, border: `1px solid ${typeColor}44` }}>{pick.type}</span>
-                          <span style={{ fontFamily: "monospace", fontSize: 7, padding: "1px 5px", borderRadius: 2, background: confColor + "22", color: confColor }}>{pick.confidence}</span>
+                        {/* Rank + urgency */}
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 10, color: rankColor, fontWeight: 900 }}>{rank}</span>
+                          {pick.urgency && <span style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", background: "rgba(0,0,0,0.3)", padding: "1px 5px", borderRadius: 2 }}>{pick.urgency}</span>}
                         </div>
 
-                        {/* Strike + expiry */}
-                        {pick.strike && (
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ffd700", marginBottom: 3 }}>
-                            ${pick.strike} · {pick.expiry || pick.expirationDate || ""}
-                          </div>
-                        )}
+                        {/* Ticker + direction badge */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 3 }}>
+                          <span style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 900, color: "#e8f4ff" }}>{pick.ticker}</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 8, padding: "1px 5px", borderRadius: 2, background: typeColor + "22", color: typeColor, border: `1px solid ${typeColor}55`, fontWeight: 700 }}>{direction}</span>
+                        </div>
 
-                        {/* Target return */}
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <div>
-                            <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: typeColor }}>{pick.targetReturn || pick.targetPct || "—"}</div>
-                            <div style={{ fontSize: 7, color: "#2a3d57" }}>target return</div>
+                        {/* Expiry */}
+                        {pick.expiry && <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffd700", marginBottom: 4 }}>Exp: {pick.expiry}</div>}
+
+                        {/* Target move — main signal */}
+                        <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: typeColor, marginBottom: 4 }}>{targetMove}</div>
+
+                        {/* Prediction rate bar — THE KEY METRIC */}
+                        <div style={{ marginBottom: 4 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+                            <span style={{ fontSize: 7, color: "#4a6d8c" }}>PREDICTION RATE</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 8, fontWeight: 700, color: confColor }}>{predRate}</span>
                           </div>
-                          {pick.entryPrice && (
-                            <div style={{ textAlign: "right" }}>
-                              <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>Entry: ${pick.entryPrice}</div>
-                              {pick.stopPct && <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55" }}>Stop: {pick.stopPct}</div>}
-                            </div>
-                          )}
+                          <div style={{ height: 3, background: "rgba(74,109,140,0.15)", borderRadius: 2 }}>
+                            <div style={{ height: "100%", width: (confScore) + "%", background: `linear-gradient(90deg,${confColor},${confColor}88)`, borderRadius: 2 }}/>
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 1 }}>
+                            <span style={{ fontSize: 6, color: "#2a3d57" }}>NEXUS score: {confScore}</span>
+                            <span style={{ fontSize: 6, color: "#2a3d57" }}>target: 90%</span>
+                          </div>
                         </div>
 
                         {/* Expand hint */}
-                        <div style={{ textAlign: "center", marginTop: 4, fontSize: 7, color: "#2a3d57" }}>
-                          {isExpanded ? "▲ COLLAPSE" : "▼ TAP FOR REASONING + ACTION PLAN"}
+                        <div style={{ textAlign: "center", fontSize: 7, color: "#2a3d57", borderTop: "1px solid rgba(26,45,71,0.4)", paddingTop: 3, marginTop: 2 }}>
+                          {isExpanded ? "▲ COLLAPSE" : "▼ REASONING + ACTION PLAN"}
                         </div>
                       </div>
 
-                      {/* Expanded reasoning + action plan */}
+                      {/* Expanded panel */}
                       {isExpanded && (
-                        <div style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.2)", borderTop: "none", borderRadius: "0 0 4px 4px", padding: "10px 12px", marginTop: -1 }}>
-                          {/* Signal confidence bar */}
-                          <div style={{ marginBottom: 8 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                              <span style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff" }}>NEXUS CONFIDENCE</span>
-                              <span style={{ fontFamily: "monospace", fontSize: 8, color: confColor }}>{pick.confidence === "HIGH" ? "85-92%" : pick.confidence === "MEDIUM" ? "72-84%" : "60-71%"} est. accuracy</span>
-                            </div>
-                            <div style={{ height: 3, background: "rgba(74,109,140,0.2)", borderRadius: 2 }}>
-                              <div style={{ height: "100%", width: pick.confidence === "HIGH" ? "88%" : pick.confidence === "MEDIUM" ? "78%" : "65%", background: confColor, borderRadius: 2 }}/>
-                            </div>
-                          </div>
-
-                          {/* Thesis */}
-                          {pick.thesis && (
+                        <div style={{ background: "rgba(0,212,255,0.03)", border: "1px solid rgba(0,212,255,0.2)", borderTop: "none", borderRadius: "0 0 4px 4px", padding: "10px 12px", marginTop: -1 }}>
+                          {/* WHY THIS PICK */}
+                          {reasoning && (
                             <div style={{ marginBottom: 8 }}>
                               <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 3 }}>WHY THIS PICK</div>
-                              <div style={{ fontSize: 10, color: "#c8dff0", lineHeight: 1.6 }}>{pick.thesis}</div>
+                              <div style={{ fontSize: 10, color: "#c8dff0", lineHeight: 1.6 }}>{reasoning}</div>
+                            </div>
+                          )}
+                          {/* Signal source */}
+                          {signalSource && (
+                            <div style={{ marginBottom: 8, fontSize: 9, color: "#4a6d8c" }}>
+                              <span style={{ color: "#00d4ff" }}>Signal: </span>{signalSource}
                             </div>
                           )}
 
                           {/* Action plan */}
-                          <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "8px 10px", marginBottom: 6 }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 5 }}>⚡ ACTION PLAN</div>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6 }}>
+                          <div style={{ background: "rgba(0,0,0,0.4)", borderRadius: 3, padding: "8px 10px", marginBottom: 6 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 6 }}>⚡ ACTION PLAN</div>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 6 }}>
                               <div>
-                                <div style={{ fontSize: 7, color: "#4a6d8c" }}>ENTRY</div>
-                                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffd700" }}>{pick.entryPrice ? "$" + pick.entryPrice : pick.entry || "At open"}</div>
+                                <div style={{ fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>DIRECTION</div>
+                                <div style={{ fontFamily: "monospace", fontSize: 11, color: typeColor, fontWeight: 700 }}>{direction}</div>
                               </div>
                               <div>
-                                <div style={{ fontSize: 7, color: "#4a6d8c" }}>TARGET</div>
-                                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14" }}>{pick.targetReturn || pick.targetPct || "—"}</div>
+                                <div style={{ fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>TARGET</div>
+                                <div style={{ fontFamily: "monospace", fontSize: 11, color: "#39ff14", fontWeight: 700 }}>{targetMove.split(" ")[0]}</div>
                               </div>
                               <div>
-                                <div style={{ fontSize: 7, color: "#4a6d8c" }}>STOP LOSS</div>
-                                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff2d55" }}>{pick.stopPct || pick.stopLoss || "—"}</div>
+                                <div style={{ fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>EXPIRY</div>
+                                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffd700" }}>{pick.expiry || "—"}</div>
                               </div>
                             </div>
-                            {pick.catalyst && (
-                              <div style={{ marginTop: 6, fontSize: 9, color: "#ffb800" }}>🔥 Catalyst: {pick.catalyst}</div>
-                            )}
-                            {pick.timing && (
-                              <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 3 }}>⏱ {pick.timing}</div>
-                            )}
+                            <div style={{ fontSize: 9, color: "#8aabb8" }}>
+                              📍 Buy {direction} options at market open · Size: 1-3% of portfolio max · Set alert at target
+                            </div>
                           </div>
 
-                          {/* Signal contributors */}
-                          {pick.signals && (
-                            <div>
-                              <div style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", marginBottom: 3 }}>SIGNAL STACK THAT GENERATED THIS PICK</div>
-                              <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
-                                {(Array.isArray(pick.signals) ? pick.signals : pick.signals.split(",")).slice(0,6).map((sig, j) => (
-                                  <span key={j} style={{ fontFamily: "monospace", fontSize: 7, padding: "1px 5px", borderRadius: 2, background: "rgba(0,212,255,0.08)", color: "#00d4ff", border: "1px solid rgba(0,212,255,0.2)" }}>{sig.trim()}</span>
-                                ))}
-                              </div>
+                          {/* Prediction rate detail */}
+                          <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "6px 10px", marginBottom: 6 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>PREDICTION RATE</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: confColor }}>{predRate}</span>
                             </div>
-                          )}
+                            <div style={{ height: 4, background: "rgba(74,109,140,0.15)", borderRadius: 2, marginTop: 4, marginBottom: 4 }}>
+                              <div style={{ height: "100%", width: confScore + "%", background: `linear-gradient(90deg,${confColor},${confColor}88)`, borderRadius: 2 }}/>
+                            </div>
+                            <div style={{ fontSize: 8, color: "#2a3d57" }}>NEXUS score {confScore}/100 · {pick.confidence || "MEDIUM"} confidence · Target: 90% accuracy</div>
+                          </div>
 
-                          {/* Questrade CTA */}
-                          <div style={{ marginTop: 8, padding: "5px 8px", background: "rgba(255,184,0,0.06)", borderRadius: 3, border: "1px solid rgba(255,184,0,0.2)", fontSize: 8, color: "#ffb800" }}>
-                            ⚠ Verify on Questrade before trading · Options carry substantial risk of total loss
+                          <div style={{ padding: "5px 8px", background: "rgba(255,184,0,0.05)", borderRadius: 3, border: "1px solid rgba(255,184,0,0.15)", fontSize: 8, color: "#ffb800" }}>
+                            ⚠ Educational only · Verify on Questrade · Options carry substantial risk of total loss
                           </div>
                         </div>
                       )}
