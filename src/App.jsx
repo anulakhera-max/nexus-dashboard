@@ -4312,12 +4312,75 @@ export default function NexusDashboard({ user, onLogout }) {
                                   </div>
                                 )}
 
+                                {/* ANALYST INTEL */}
+                                {analysis.analystIntel && (
+                                  <div style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 3, padding: "6px 10px", marginBottom: 8 }}>
+                                    <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff", marginBottom: 4 }}>📊 ANALYST CONSENSUS</div>
+                                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 4 }}>
+                                      <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffd700" }}>Target: ${analysis.analystIntel.targetMean?.toFixed(0)} (high: ${analysis.analystIntel.targetHigh?.toFixed(0)})</span>
+                                      <span style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14" }}>{analysis.analystIntel.recommendation?.toUpperCase()}</span>
+                                      <span style={{ fontSize: 8, color: "#4a6d8c" }}>{analysis.analystIntel.numAnalysts} analysts</span>
+                                    </div>
+                                    <div style={{ display: "flex", gap: 8, marginBottom: 4 }}>
+                                      {analysis.analystIntel.strongBuys > 0 && <span style={{ fontSize: 7, color: "#39ff14" }}>Strong Buy: {analysis.analystIntel.strongBuys}</span>}
+                                      {analysis.analystIntel.buys > 0 && <span style={{ fontSize: 7, color: "#39ff14" }}>Buy: {analysis.analystIntel.buys}</span>}
+                                      {analysis.analystIntel.holds > 0 && <span style={{ fontSize: 7, color: "#ffb800" }}>Hold: {analysis.analystIntel.holds}</span>}
+                                    </div>
+                                    {analysis.analystIntel.recentUpgrades?.slice(0,2).map((u, j) => (
+                                      <div key={j} style={{ fontSize: 8, color: "#9d7fff" }}>↑ {u.firm}: {u.toGrade} · {u.date}</div>
+                                    ))}
+                                    {analysis.analystIntel.shortPct && <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 2 }}>Short float: {analysis.analystIntel.shortPct} · Beta: {analysis.analystIntel.beta?.toFixed(2)}</div>}
+                                  </div>
+                                )}
+
+                                {/* EARNINGS SETUP */}
+                                {analysis.earningsIntel?.daysToEarnings > 0 && analysis.earningsIntel?.daysToEarnings <= 30 && (
+                                  <div style={{ background: "rgba(255,184,0,0.06)", border: "1px solid rgba(255,184,0,0.25)", borderRadius: 3, padding: "6px 10px", marginBottom: 8 }}>
+                                    <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 4 }}>⚡ EARNINGS CATALYST — {analysis.earningsIntel.daysToEarnings} DAYS</div>
+                                    <div style={{ fontSize: 9, color: "#ffd700", marginBottom: 3 }}>Earnings: {analysis.earningsIntel.earningsDate} · Beat rate: {analysis.earningsIntel.beatRate}% (last 4 quarters)</div>
+                                    {analysis.earningsIntel.recentSurprises?.slice(0,3).map((q, j) => (
+                                      <div key={j} style={{ fontSize: 7, color: "#4a6d8c" }}>{q.quarter}: est ${q.estimate?.toFixed(2)} → actual ${q.actual?.toFixed(2)} <span style={{ color: parseFloat(q.surprise) > 0 ? "#39ff14" : "#ff2d55" }}>{q.surprise}</span></div>
+                                    ))}
+                                    {analysis.earningsIntel.ivCrushRisk && <div style={{ fontSize: 8, color: "#ff6b35", marginTop: 4 }}>⚠ {analysis.earningsIntel.ivCrushRisk}</div>}
+                                  </div>
+                                )}
+
+                                {/* NEWS SENTIMENT */}
+                                {analysis.recentNews?.length > 0 && (
+                                  <div style={{ background: "rgba(0,0,0,0.2)", borderRadius: 3, padding: "6px 10px", marginBottom: 8 }}>
+                                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                                      <span style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff" }}>📰 RECENT NEWS SENTIMENT</span>
+                                      <span style={{ fontSize: 8, color: analysis.newsSentiment?.overall === "BULLISH" ? "#39ff14" : analysis.newsSentiment?.overall === "BEARISH" ? "#ff2d55" : "#ffb800" }}>
+                                        {analysis.newsSentiment?.bullish}🟢 {analysis.newsSentiment?.bearish}🔴 {analysis.newsSentiment?.neutral}⚪
+                                      </span>
+                                    </div>
+                                    {analysis.recentNews.slice(0,4).map((n, j) => (
+                                      <div key={j} style={{ marginBottom: 2 }}>
+                                        <span style={{ fontSize: 7, color: n.sentiment === "BULLISH" ? "#39ff14" : n.sentiment === "BEARISH" ? "#ff2d55" : "#4a6d8c" }}>
+                                          {n.sentiment === "BULLISH" ? "↑" : n.sentiment === "BEARISH" ? "↓" : "·"}
+                                        </span>
+                                        <span style={{ fontSize: 7, color: "#8aabb8", marginLeft: 4 }}>{n.title?.slice(0,65)}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {/* SOURCES USED */}
+                                {analysis.sourcesCoverage && (
+                                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 8 }}>
+                                    {Object.entries(analysis.sourcesCoverage).map(([src, active]) => (
+                                      <span key={src} style={{ fontFamily: "monospace", fontSize: 6, padding: "1px 4px", borderRadius: 2, background: active ? "rgba(57,255,20,0.08)" : "rgba(74,109,140,0.08)", color: active ? "#39ff14" : "#2a3d57", border: `1px solid ${active ? "rgba(57,255,20,0.2)" : "rgba(74,109,140,0.1)"}` }}>{src}</span>
+                                    ))}
+                                  </div>
+                                )}
+
                                 {/* Action plan */}
                                 <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "6px 10px", marginBottom: 8 }}>
                                   <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 4 }}>⚡ ACTION PLAN</div>
                                   <div style={{ fontSize: 8, color: "#8aabb8", marginBottom: 2 }}>✓ {analysis.actionPlan?.hold}</div>
                                   <div style={{ fontSize: 8, color: "#ffb800", marginBottom: 2 }}>⚠ {analysis.actionPlan?.defend}</div>
-                                  <div style={{ fontSize: 8, color: "#ff2d55" }}>✗ {analysis.actionPlan?.exit}</div>
+                                  <div style={{ fontSize: 8, color: "#ff2d55", marginBottom: analysis.actionPlan?.earningsNote ? 4 : 0 }}>✗ {analysis.actionPlan?.exit}</div>
+                                  {analysis.actionPlan?.earningsNote && <div style={{ fontSize: 8, color: "#ff6b35", borderTop: "1px solid rgba(74,109,140,0.2)", paddingTop: 4, marginTop: 4 }}>⚡ {analysis.actionPlan.earningsNote}</div>}
                                 </div>
 
                                 {/* Overall outlook */}
