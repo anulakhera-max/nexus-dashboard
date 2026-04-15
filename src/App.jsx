@@ -356,7 +356,15 @@ export default function NexusDashboard({ user, onLogout }) {
   const fridays = getUpcomingFridays();
 
   useEffect(() => {
-    const tick = () => setClock(new Date().toUTCString().split(" ")[4] + " UTC");
+    const tick = () => {
+      const now = new Date();
+      const est = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+      const hh = String(est.getHours()).padStart(2, "0");
+      const mm = String(est.getMinutes()).padStart(2, "0");
+      const ss = String(est.getSeconds()).padStart(2, "0");
+      const tz = now.toLocaleString("en-US", { timeZone: "America/New_York", timeZoneName: "short" }).split(" ").pop();
+      setClock(hh + ":" + mm + ":" + ss + " " + tz);
+    };
     tick(); const iv = setInterval(tick, 1000); return () => clearInterval(iv);
   }, []);
 
@@ -1363,9 +1371,9 @@ export default function NexusDashboard({ user, onLogout }) {
           <div style={{ fontSize: 11, color: "#4a6d8c", letterSpacing: 4, fontFamily: "monospace" }}>GLOBAL INTELLIGENCE</div>
         </div>
         <div style={{ display: "flex", gap: 20, alignItems: "center", fontFamily: "monospace", fontSize: 10, color: "#4a6d8c" }}>
-          <span><span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: liveSource ? "#39ff14" : "#ffb800", marginRight: 4, animation: "pulseDot 2s infinite" }} />{liveSource ? "GDELT LIVE" : "SEED DATA"}</span>
+          <span><span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: liveSource ? "#39ff14" : "#ffb800", marginRight: 4, animation: "pulseDot 2s infinite" }} />{liveSource ? "● GDELT LIVE" : "○ SEED DATA"}</span>
           <span style={{ fontFamily: "monospace", fontSize: 10, color: sessionCost > 0.05 ? "#ff2d55" : "#4a6d8c", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: `1px solid ${sessionCost > 0.05 ? "#ff2d5544" : "#1a3a5c"}` }}>
-            ⚡ {sessionCalls} calls · ~${sessionCost.toFixed(4)} used
+            ⚡ {sessionCalls} {sessionCalls === 1 ? "call" : "calls"} · ~${sessionCost.toFixed(4)} used
           </span>
           {qtConnected && qtBalance && (
             <span style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: "1px solid #39ff1444" }}>
