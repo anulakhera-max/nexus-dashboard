@@ -1785,7 +1785,7 @@ export default function NexusDashboard({ user, onLogout }) {
                   </div>
                   {[
                     { label:"VIX", value: vixData?.vix?.current?.toFixed(1)||"—", color:(vixData?.vix?.current||20)>25?"#ff2d55":"#39ff14" },
-                    { label:"FEAR/GREED", value: String(vixData?.fearGreed||"—"), color:(vixData?.fearGreed||50)<30?"#ff2d55":(vixData?.fearGreed||50)>60?"#39ff14":"#ffb800" },
+                    { label:"FEAR/GREED", value: String(vixData?.fearGreed?.score||vixData?.fearGreed||"—"), color:((vixData?.fearGreed?.score||vixData?.fearGreed)||50)<30?"#ff2d55":((vixData?.fearGreed?.score||vixData?.fearGreed)||50)>60?"#39ff14":"#ffb800" },
                     { label:"SCENARIO", value: geoData?.activeScenario||"STALL", color:"#ffb800" },
                     { label:"SECTOR", value: sectorData?.bias||"NEUTRAL", color:(sectorData?.bias||"").includes("ON")?"#39ff14":"#ff2d55" },
                     { label:"OI SIGNAL", value: oiData?.totalSignals>0?oiData.totalSignals+" signals":"NONE", color:oiData?.totalSignals>0?"#00ff9d":"#2a3d57" },
