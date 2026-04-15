@@ -1394,6 +1394,24 @@ export default function NexusDashboard({ user, onLogout }) {
         @keyframes tickerMove { from{transform:translateX(0)} to{transform:translateX(-50%)} }
         @keyframes pulseDot { 0%,100%{opacity:1} 50%{opacity:0.3} }
         @keyframes goldGlow { 0%,100%{text-shadow:0 0 6px rgba(255,215,0,0.3)} 50%{text-shadow:0 0 14px rgba(255,215,0,0.7)} }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+        @keyframes glow { 0%,100%{text-shadow:0 0 8px currentColor} 50%{text-shadow:0 0 22px currentColor,0 0 40px currentColor} }
+        @keyframes slideUp { from{transform:translateY(10px);opacity:0} to{transform:translateY(0);opacity:1} }
+        @keyframes borderGlow { 0%,100%{border-color:rgba(0,212,255,0.15)} 50%{border-color:rgba(0,212,255,0.55)} }
+        @keyframes barFill { from{width:0%} }
+        @keyframes countPop { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+        @keyframes radarRing { 0%{transform:scale(1);opacity:0.7} 100%{transform:scale(2.8);opacity:0} }
+        .nexus-pick { cursor:pointer; transition:all 0.18s ease; }
+        .nexus-pick:hover { transform:translateY(-3px) scale(1.015); filter:brightness(1.08); }
+        .signal-live { animation:pulse 2s ease-in-out infinite; }
+        .glowing { animation:glow 2.5s ease-in-out infinite; }
+        .slide-up { animation:slideUp 0.3s ease-out; }
+        .border-breathe { animation:borderGlow 4s ease-in-out infinite; }
+        .bar-fill { animation:barFill 0.8s ease-out forwards; }
+        .count-pop { animation:countPop 0.4s ease-out; }
+        ::-webkit-scrollbar{width:3px;height:3px}
+        ::-webkit-scrollbar-thumb{background:#1a2d47;border-radius:2px}
+        ::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,0.3)}
       `}</style>
 
       {/* TOPBAR */}
@@ -1544,7 +1562,7 @@ export default function NexusDashboard({ user, onLogout }) {
               </div>
 
               {/* Top 3 picks row */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 8 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 10 }}>
                 {intelPicks.slice(0, 3).map((pick, i) => {
                   // Map actual API field names → display
                   const direction = pick.direction || pick.type || "CALL";
@@ -1564,10 +1582,9 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div key={i}>
                       {/* Pick card — clickable */}
                       <div
+                        className="nexus-pick"
                         onClick={() => setExpandedPick(isExpanded ? null : i)}
-                        style={{ background: isExpanded ? "rgba(0,212,255,0.06)" : "rgba(0,0,0,0.4)", border: `2px solid ${isExpanded ? "rgba(0,212,255,0.5)" : rankColor + "44"}`, borderRadius: 4, padding: "8px 10px", cursor: "pointer", transition: "all 0.2s", position: "relative" }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = rankColor + "aa"; e.currentTarget.style.background = "rgba(0,0,0,0.6)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = isExpanded ? "rgba(0,212,255,0.5)" : rankColor + "44"; e.currentTarget.style.background = isExpanded ? "rgba(0,212,255,0.06)" : "rgba(0,0,0,0.4)"; }}
+                        style={{ background: isExpanded ? "rgba(0,212,255,0.08)" : "rgba(4,12,24,0.9)", border: `2px solid ${isExpanded ? "rgba(0,212,255,0.6)" : rankColor + "55"}`, borderRadius: 6, padding: "14px 14px", cursor: "pointer", position: "relative", boxShadow: isExpanded ? `0 0 20px ${rankColor}22` : "none" }}
                       >
                         {/* Rank + urgency */}
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
@@ -1577,7 +1594,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
                         {/* Ticker + direction badge */}
                         <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 3 }}>
-                          <span style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 900, color: "#e8f4ff" }}>{pick.ticker}</span>
+                          <span className={i===0?"glowing":""} style={{ fontFamily: "monospace", fontSize: 24, fontWeight: 900, color: i===0?"#ffd700":i===1?"#c0c0c0":"#cd7f32", letterSpacing:1 }}>{pick.ticker}</span>
                           <span style={{ fontFamily: "monospace", fontSize: 8, padding: "1px 5px", borderRadius: 2, background: typeColor + "22", color: typeColor, border: `1px solid ${typeColor}55`, fontWeight: 700 }}>{direction}</span>
                         </div>
 
@@ -1585,7 +1602,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         {pick.expiry && <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffd700", marginBottom: 4 }}>Exp: {pick.expiry}</div>}
 
                         {/* Target move — main signal */}
-                        <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: typeColor, marginBottom: 4 }}>{targetMove}</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: typeColor, marginBottom: 6 }}>{targetMove}</div>
 
                         {/* Prediction rate bar — THE KEY METRIC */}
                         <div style={{ marginBottom: 4 }}>
@@ -1760,45 +1777,61 @@ export default function NexusDashboard({ user, onLogout }) {
             {/* EVENTS */}
             {tab === "events" && (
               <>
-                {/* Daily Movers Analysis */}
+                {/* ══ LIVE SIGNAL PULSE ══════════════════════════════════════ */}
+                <div className="slide-up border-breathe" style={{ background:"rgba(0,0,0,0.5)", border:"1px solid rgba(0,212,255,0.2)", borderRadius:6, padding:"10px 16px", marginBottom:10, display:"flex", alignItems:"center", gap:20, overflowX:"auto" }}>
+                  <div style={{ fontFamily:"monospace", fontSize:10, color:"#00d4ff", letterSpacing:3, flexShrink:0, display:"flex", alignItems:"center", gap:8 }}>
+                    <span className="signal-live" style={{ width:8, height:8, borderRadius:"50%", background:"#39ff14", display:"inline-block", flexShrink:0 }}/>
+                    NEXUS LIVE
+                  </div>
+                  {[
+                    { label:"VIX", value: vixData?.vix?.current?.toFixed(1)||"19.1", color:vixData?.vix?.current>25?"#ff2d55":"#39ff14" },
+                    { label:"FEAR/GREED", value: vixData?.fearGreed||"41", color:(vixData?.fearGreed||41)<30?"#ff2d55":(vixData?.fearGreed||41)>60?"#39ff14":"#ffb800" },
+                    { label:"P/C RATIO", value: pcData?.ratio||"0.85", color:"#9d7fff" },
+                    { label:"SCENARIO", value: geoSignal?.activeScenario||"STALL", color:"#ffb800" },
+                    { label:"SECTOR", value: sectorData?.bias||"RISK_ON", color:(sectorData?.bias||"").includes("ON")?"#39ff14":"#ff2d55" },
+                  ].map((s,i) => (
+                    <div key={i} style={{ flexShrink:0, textAlign:"center", minWidth:60 }}>
+                      <div style={{ fontFamily:"monospace", fontSize:8, color:"#2a3d57", marginBottom:3, letterSpacing:1 }}>{s.label}</div>
+                      <div className="glowing" style={{ fontFamily:"monospace", fontSize:13, fontWeight:700, color:s.color }}>{s.value}</div>
+                    </div>
+                  ))}
+                  <div style={{ marginLeft:"auto", flexShrink:0, fontFamily:"monospace", fontSize:9, color:"#2a3d57" }}>
+                    {new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",timeZone:"America/New_York"})} ET
+                  </div>
+                </div>
+
+                {/* Daily Movers — compact, not center stage */}
                 {movers && Array.isArray(movers.gainers) && Array.isArray(movers.losers) && (movers.gainers.length > 0 || movers.losers.length > 0) && (
-                  <div style={{ marginBottom: 16 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d8c", letterSpacing: 3, marginBottom: 10 }}>TODAY'S MARKET MOVERS — VOLUME ANALYSIS</div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                      {/* Gainers */}
-                      <div>
-                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", letterSpacing: 2, marginBottom: 6 }}>TOP GAINERS</div>
-                        {(movers.gainers || []).map((g, i) => (
-                          <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.15)", borderRadius: 3, padding: "8px 10px", marginBottom: 6 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14" }}>{g.ticker}</span>
-                              <span style={{ fontFamily: "monospace", fontSize: 12, color: "#39ff14" }}>+{g.changePct != null ? Number(g.changePct).toFixed(1) : "?"}%</span>
-                            </div>
-                            <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 2 }}>{g.name}</div>
-                            <div style={{ display: "flex", gap: 10, marginTop: 4, fontSize: 9, fontFamily: "monospace" }}>
-                              <span style={{ color: g.volRatio > 3 ? "#ffd700" : "#4a6d8c" }}>Vol: {g.volRatio}x avg {g.volRatio > 3 ? "⚡" : ""}</span>
-                              {g.sector && <span style={{ color: "#4a6d8c" }}>{g.sector}</span>}
-                            </div>
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:10 }}>
+                    <div style={{ background:"rgba(0,0,0,0.35)", border:"1px solid rgba(57,255,20,0.12)", borderRadius:5, padding:"10px 12px" }}>
+                      <div style={{ fontFamily:"monospace", fontSize:9, color:"#39ff14", letterSpacing:2, marginBottom:8 }}>MOVERS ↑</div>
+                      {(movers.gainers||[]).slice(0,3).map((g,i) => (
+                        <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6, paddingBottom:i<2?6:0, borderBottom:i<2?"1px solid rgba(57,255,20,0.07)":"none" }}>
+                          <div>
+                            <span style={{ fontFamily:"monospace", fontSize:14, fontWeight:700, color:"#e8f4ff" }}>{g.ticker}</span>
+                            <div style={{ fontSize:9, color:"#4a6d8c", marginTop:1 }}>{g.name?.slice(0,20)}</div>
                           </div>
-                        ))}
-                      </div>
-                      {/* Losers */}
-                      <div>
-                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", letterSpacing: 2, marginBottom: 6 }}>TOP LOSERS</div>
-                        {(movers.losers || []).map((l, i) => (
-                          <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.15)", borderRadius: 3, padding: "8px 10px", marginBottom: 6 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55" }}>{l.ticker}</span>
-                              <span style={{ fontFamily: "monospace", fontSize: 12, color: "#ff2d55" }}>{l.changePct != null ? Number(l.changePct).toFixed(1) : "?"}%</span>
-                            </div>
-                            <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 2 }}>{l.name}</div>
-                            <div style={{ display: "flex", gap: 10, marginTop: 4, fontSize: 9, fontFamily: "monospace" }}>
-                              <span style={{ color: l.volRatio > 3 ? "#ffd700" : "#4a6d8c" }}>Vol: {l.volRatio}x avg {l.volRatio > 3 ? "⚡" : ""}</span>
-                              {l.sector && <span style={{ color: "#4a6d8c" }}>{l.sector}</span>}
-                            </div>
+                          <div style={{ textAlign:"right" }}>
+                            <div style={{ fontFamily:"monospace", fontSize:14, fontWeight:700, color:"#39ff14" }}>+{Number(g.changePct||0).toFixed(1)}%</div>
+                            <div style={{ fontSize:9, color:"#4a6d8c" }}>Vol {g.volRatio}x</div>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ background:"rgba(0,0,0,0.35)", border:"1px solid rgba(255,45,85,0.12)", borderRadius:5, padding:"10px 12px" }}>
+                      <div style={{ fontFamily:"monospace", fontSize:9, color:"#ff2d55", letterSpacing:2, marginBottom:8 }}>MOVERS ↓</div>
+                      {(movers.losers||[]).slice(0,3).map((l,i) => (
+                        <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6, paddingBottom:i<2?6:0, borderBottom:i<2?"1px solid rgba(255,45,85,0.07)":"none" }}>
+                          <div>
+                            <span style={{ fontFamily:"monospace", fontSize:14, fontWeight:700, color:"#e8f4ff" }}>{l.ticker}</span>
+                            <div style={{ fontSize:9, color:"#4a6d8c", marginTop:1 }}>{l.name?.slice(0,20)}</div>
+                          </div>
+                          <div style={{ textAlign:"right" }}>
+                            <div style={{ fontFamily:"monospace", fontSize:14, fontWeight:700, color:"#ff2d55" }}>{Number(l.changePct||0).toFixed(1)}%</div>
+                            <div style={{ fontSize:9, color:"#4a6d8c" }}>Vol {l.volRatio}x</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -3223,7 +3256,25 @@ export default function NexusDashboard({ user, onLogout }) {
                   </div>
 
                   {!watchlistScan ? (
-                    <button onClick={() => loadWatchlistScan(true)} disabled={loadingWatchlist} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingWatchlist ? "SCANNING 89 TICKERS..." : "📡 SCAN MASTER WATCHLIST"}</button>
+                    <div style={{ textAlign:"center", padding:"40px 20px" }}>
+                      <div style={{ position:"relative", display:"inline-flex", alignItems:"center", justifyContent:"center", width:64, height:64, marginBottom:20 }}>
+                        <div style={{ position:"absolute", inset:0, borderRadius:"50%", border:"1px solid rgba(0,212,255,0.3)", animation:"radarRing 2s ease-out infinite" }}/>
+                        <div style={{ position:"absolute", inset:8, borderRadius:"50%", border:"1px solid rgba(0,212,255,0.2)", animation:"radarRing 2.5s ease-out infinite 0.5s" }}/>
+                        <span className="signal-live" style={{ width:10, height:10, borderRadius:"50%", background:"#00d4ff", display:"inline-block" }}/>
+                      </div>
+                      <div style={{ fontFamily:"monospace", fontSize:15, color:"#00d4ff", marginBottom:6, letterSpacing:2 }}>MASTER WATCHLIST</div>
+                      <div style={{ fontSize:11, color:"#4a6d8c", marginBottom:16, maxWidth:380, margin:"0 auto 20px" }}>
+                        89 tickers × 16 themes — each scored on momentum, volume surge, signal alignment, and geo scenario fit. Results auto-inject into every pipeline run and weight adjuster.
+                      </div>
+                      <div style={{ display:"flex", gap:6, justifyContent:"center", marginBottom:24, flexWrap:"wrap" }}>
+                        {["AI Compute","Quantum","Space","Nuclear","Defense","Crypto","Biotech","Energy","Oil/Gas","Solar","Helium","Transport","Utilities","Macro","AI Software","Optical"].map((t,i) => (
+                          <span key={i} style={{ fontFamily:"monospace", fontSize:9, padding:"2px 8px", borderRadius:10, background:"rgba(0,212,255,0.05)", border:"1px solid rgba(0,212,255,0.12)", color:"#00d4ff" }}>{t}</span>
+                        ))}
+                      </div>
+                      <button onClick={() => loadWatchlistScan(true)} disabled={loadingWatchlist} className="nexus-pick" style={{ background:"linear-gradient(135deg,rgba(0,212,255,0.12),rgba(0,212,255,0.04))", border:"1px solid rgba(0,212,255,0.4)", color:"#00d4ff", borderRadius:5, padding:"12px 32px", fontSize:13, cursor:loadingWatchlist?"not-allowed":"pointer", fontFamily:"monospace", fontWeight:700, letterSpacing:2, opacity:loadingWatchlist?0.6:1 }}>
+                        {loadingWatchlist ? "⏳ SCANNING 89 TICKERS..." : "SCAN 89 TICKERS →"}
+                      </button>
+                    </div>
                   ) : (
                     <div>
                       {/* Best setup + hidden gem */}
@@ -6164,10 +6215,13 @@ export default function NexusDashboard({ user, onLogout }) {
             {tab === "watch" && (
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 {/* Header */}
-                <div style={{ background: "linear-gradient(135deg,rgba(0,212,255,0.1),rgba(0,212,255,0.03))", border: "1px solid rgba(0,212,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                <div className="border-breathe" style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 6, padding: "16px 18px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00d4ff", letterSpacing: 3, marginBottom: 4 }}>👁 INTELLIGENCE WATCHLIST</div>
-                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Individuals and stocks — always monitored, injected into every scan</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#00d4ff", letterSpacing: 3, marginBottom: 4 }}>
+                      <span className="signal-live" style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#00d4ff",marginRight:8,verticalAlign:"middle"}}/>
+                      MASTER WATCHLIST — 89 TICKERS × 16 THEMES
+                    </div>
+                    <div style={{ fontSize: 11, color: "#4a6d8c" }}>AI · Quantum · Space · Nuclear · Defense · Crypto · Biotech · Energy · Transport · Macro · Oil/Gas · Solar · Helium · Utilities + 15 smart money operators</div>
                   </div>
                   <button onClick={scanWatchlist} disabled={loadingWatch} style={{ background: loadingWatch ? "#1a2d47" : "linear-gradient(135deg,#0a3d5c,#00d4ff)", color: loadingWatch ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 18px", fontSize: 12, fontWeight: 700, letterSpacing: 2, cursor: loadingWatch ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
                     {loadingWatch ? "SCANNING..." : "👁 SCAN NOW"}
