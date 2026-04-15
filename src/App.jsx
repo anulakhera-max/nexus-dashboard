@@ -314,6 +314,11 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingBacktest, setLoadingBacktest] = useState(false);
   const [backtestDays, setBacktestDays] = useState(30);
   const [expandedPick, setExpandedPick] = useState(null);
+  const [myPositions, setMyPositions] = useState(null);
+  const [loadingPositions, setLoadingPositions] = useState(false);
+  const [positionAnalyses, setPositionAnalyses] = useState({});
+  const [analyzingPosition, setAnalyzingPosition] = useState(null);
+  const [expandedPosition, setExpandedPosition] = useState(null);
   const [loadingFlow, setLoadingFlow] = useState(false);
   const [flowError, setFlowError] = useState(null);
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -733,6 +738,31 @@ export default function NexusDashboard({ user, onLogout }) {
       if (data.success) setResolverData(data);
     } catch {}
     setLoadingResolver(false);
+  };
+
+  const loadMyPositions = async () => {
+    setLoadingPositions(true);
+    try {
+      const res = await fetch(nexusUrl + "/api/my-positions", { headers: { "x-nexus-key": nexusKey } });
+      const data = await res.json();
+      if (data.success) setMyPositions(data);
+    } catch(e) {}
+    setLoadingPositions(false);
+  };
+
+  const analyzePosition = async (pos) => {
+    setAnalyzingPosition(pos.symbol);
+    try {
+      const res = await fetch(nexusUrl + "/api/analyze-position", {
+        method: "POST",
+        headers: { "x-nexus-key": nexusKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ ticker: pos.ticker, strike: pos.strike, expiry: pos.expiry, direction: pos.direction, quantity: pos.quantity, avgCost: pos.avgCost, currentValue: pos.currentValue })
+      });
+      const data = await res.json();
+      if (data.success) setPositionAnalyses(prev => ({ ...prev, [pos.symbol]: data }));
+    } catch(e) {}
+    setAnalyzingPosition(null);
+    setExpandedPosition(pos.symbol);
   };
 
   const runBacktest = async (days = 30) => {
@@ -1267,6 +1297,7 @@ export default function NexusDashboard({ user, onLogout }) {
     // Hard cache — only load once per session, never reload automatically
     if (t === "predictions" && !predictionsLoaded) loadPredictions();
     if (t === "intel" && !intelPicks) generateIntelPicks();
+    if (t === "positions" && !myPositions) loadMyPositions();
     if (t === "power" && !powerIntel) generatePowerIntel();
     if (t === "supply" && !supplyLoaded) loadSupply();
     if (t === "sources" && !sourcesLoaded) loadSources();
@@ -1654,7 +1685,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
           <div style={S.tabs}>
             {/* CORE tabs */}
-            {[["events","📡 EVENTS"],["intel","⬡ PICKS"],["power","◈ POWER"],["trades","TRADES"],["watch","WATCHLIST"]].map(([t,l]) => (
+            {[["events","📡 EVENTS"],["intel","⬡ PICKS"],["power","◈ POWER"],["trades","TRADES"],["positions","📋 POSITIONS"],["watch","WATCHLIST"]].map(([t,l]) => (
               <button key={t} style={{ ...S.tab(tab === t, t==="intel"||t==="power"), color: tab === "intel" ? "#b24fff" : tab === "power" ? "#ff6b35" : tab === t ? "#00d4ff" : "#a8cce0" }} onClick={() => handleTab(t)}>{l}</button>
             ))}
             <span style={{ width: 1, background: "#1a2d47", margin: "4px 4px", flexShrink: 0 }}/>
@@ -4118,6 +4149,191 @@ export default function NexusDashboard({ user, onLogout }) {
                 </div>
 
                 <div style={{ fontSize: 9, color: "#2a3d57", fontFamily: "monospace", textAlign: "center" }}>All signals auto-inject into pipeline scoring every run</div>
+              </div>
+            )}
+
+            {/* POSITIONS TAB — My Open Questrade Options */}
+            {tab === "positions" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                {/* Header */}
+                <div style={{ background: "linear-gradient(135deg,rgba(0,212,255,0.06),rgba(57,255,20,0.03))", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>📋 MY OPEN QUESTRADE POSITIONS</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Deep analysis · 7 / 14 / 21 day prediction · Black-Scholes probability + NEXUS 20-signal stack</div>
+                    </div>
+                    <button onClick={loadMyPositions} disabled={loadingPositions} style={{ background: loadingPositions ? "#1a2d47" : "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: loadingPositions ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                      {loadingPositions ? "⏳ LOADING..." : "⟳ REFRESH"}
+                    </button>
+                  </div>
+                </div>
+
+                {!myPositions ? (
+                  <div style={{ textAlign: "center", padding: 40 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#2a3d57", marginBottom: 10 }}>Connecting to Questrade...</div>
+                    {loadingPositions && <div style={{ fontSize: 9, color: "#4a6d8c" }}>Fetching open positions via Questrade API</div>}
+                  </div>
+                ) : myPositions.optionPositions?.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: 40 }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#4a6d8c" }}>No open option positions found</div>
+                    <div style={{ fontSize: 9, color: "#2a3d57", marginTop: 6 }}>Total positions: {myPositions.totalPositions} · All positions may be equity/stock</div>
+                  </div>
+                ) : (
+                  <div>
+                    {/* Summary bar */}
+                    <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                      <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "6px 12px", fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>
+                        {myPositions.optionPositions?.length} option position{myPositions.optionPositions?.length !== 1 ? "s" : ""}
+                      </div>
+                      <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "6px 12px", fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>
+                        Total: {myPositions.totalPositions} positions
+                      </div>
+                    </div>
+
+                    {/* Option positions */}
+                    {myPositions.optionPositions?.map((pos, i) => {
+                      const analysis = positionAnalyses[pos.symbol];
+                      const isExpanded = expandedPosition === pos.symbol;
+                      const isAnalyzing = analyzingPosition === pos.symbol;
+                      const pnlColor = (pos.pnl || 0) >= 0 ? "#39ff14" : "#ff2d55";
+                      const isCall = pos.direction === "CALL";
+                      const dirColor = isCall ? "#39ff14" : "#ff2d55";
+
+                      return (
+                        <div key={i} style={{ marginBottom: 10 }}>
+                          {/* Position card */}
+                          <div style={{ background: "#080f1a", border: `1px solid ${dirColor}33`, borderRadius: 6, padding: 14 }}>
+                            {/* Header row */}
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <span style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 900, color: "#e8f4ff" }}>{pos.ticker}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 6px", borderRadius: 2, background: dirColor + "22", color: dirColor, fontWeight: 700 }}>{pos.direction}</span>
+                                {pos.strike > 0 && <span style={{ fontFamily: "monospace", fontSize: 10, color: "#ffd700" }}>${pos.strike}</span>}
+                                {pos.expiry && <span style={{ fontSize: 9, color: "#4a6d8c" }}>exp {pos.expiry}</span>}
+                              </div>
+                              <div style={{ textAlign: "right" }}>
+                                <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: pnlColor }}>
+                                  {(pos.pnl || 0) >= 0 ? "+" : ""}${(pos.pnl || 0).toFixed(2)}
+                                </div>
+                                <div style={{ fontSize: 8, color: "#4a6d8c" }}>{pos.pnlPct}% P&L</div>
+                              </div>
+                            </div>
+
+                            {/* Position details */}
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 10 }}>
+                              {[
+                                { label: "QTY", value: pos.quantity + " contracts" },
+                                { label: "AVG COST", value: pos.avgCost ? "$" + pos.avgCost.toFixed(2) : "—" },
+                                { label: "CURRENT", value: pos.currentPrice ? "$" + pos.currentPrice.toFixed(2) : "—" },
+                                { label: "MARKET VALUE", value: pos.currentValue ? "$" + pos.currentValue.toFixed(2) : "—" },
+                              ].map((f, j) => (
+                                <div key={j} style={{ background: "rgba(0,0,0,0.2)", borderRadius: 3, padding: "5px 8px" }}>
+                                  <div style={{ fontSize: 7, color: "#4a6d8c" }}>{f.label}</div>
+                                  <div style={{ fontFamily: "monospace", fontSize: 10, color: "#e8f4ff" }}>{f.value}</div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Analyze button */}
+                            {!analysis && (
+                              <button onClick={() => analyzePosition(pos)} disabled={isAnalyzing} style={{ width: "100%", background: isAnalyzing ? "#1a2d47" : "linear-gradient(135deg,rgba(0,212,255,0.15),rgba(57,255,20,0.08))", border: "1px solid rgba(0,212,255,0.3)", color: isAnalyzing ? "#4a6d8c" : "#00d4ff", borderRadius: 3, padding: "8px 0", fontSize: 10, fontWeight: 700, cursor: isAnalyzing ? "not-allowed" : "pointer", fontFamily: "monospace", letterSpacing: 2 }}>
+                                {isAnalyzing ? "⏳ RUNNING DEEP ANALYSIS..." : "🔬 DEEP ANALYSIS — 7 / 14 / 21 DAY PREDICTION"}
+                              </button>
+                            )}
+
+                            {/* Analysis results */}
+                            {analysis && (
+                              <div>
+                                {/* Live data row */}
+                                {analysis.liveData?.currentPrice && (
+                                  <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
+                                    <span style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff" }}>Live: ${analysis.liveData.currentPrice}</span>
+                                    <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>IV: {analysis.liveData.iv}</span>
+                                    {analysis.liveData.delta && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#9d7fff" }}>Δ {analysis.liveData.delta?.toFixed(2)}</span>}
+                                    {analysis.liveData.theta && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55" }}>θ {analysis.liveData.theta?.toFixed(3)}/day</span>}
+                                    {analysis.liveData.openInterest && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>OI: {analysis.liveData.openInterest?.toLocaleString()}</span>}
+                                  </div>
+                                )}
+
+                                {/* NEXUS signal bias */}
+                                <div style={{ background: "rgba(0,0,0,0.2)", borderRadius: 3, padding: "6px 10px", marginBottom: 10 }}>
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                                    <span style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff" }}>NEXUS SIGNAL BIAS</span>
+                                    <span style={{ fontFamily: "monospace", fontSize: 9, fontWeight: 700, color: analysis.nexusSignals?.signalBias === "BULLISH" ? "#39ff14" : analysis.nexusSignals?.signalBias === "BEARISH" ? "#ff2d55" : "#ffb800" }}>
+                                      {analysis.nexusSignals?.signalBias}
+                                    </span>
+                                  </div>
+                                  {analysis.nexusSignals?.signalFactors?.map((f, j) => (
+                                    <div key={j} style={{ fontSize: 8, color: "#8aabb8", marginBottom: 1 }}>• {f}</div>
+                                  ))}
+                                </div>
+
+                                {/* 7 / 14 / 21 day horizons */}
+                                <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff", marginBottom: 6 }}>PREDICTION HORIZONS — PROBABILITY OF PROFIT</div>
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 10 }}>
+                                  {analysis.horizons?.map((h, j) => (
+                                    <div key={j} style={{ background: h.probProfit >= 60 ? "rgba(57,255,20,0.05)" : h.probProfit >= 40 ? "rgba(255,184,0,0.05)" : "rgba(255,45,85,0.05)", border: `1px solid ${h.probProfit >= 60 ? "rgba(57,255,20,0.2)" : h.probProfit >= 40 ? "rgba(255,184,0,0.2)" : "rgba(255,45,85,0.2)"}`, borderRadius: 4, padding: "8px 10px" }}>
+                                      <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 4 }}>+{h.days} DAYS</div>
+                                      {h.status === "EXPIRED" ? (
+                                        <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff2d55" }}>EXPIRED</div>
+                                      ) : (
+                                        <>
+                                          {/* Prob of profit */}
+                                          <div style={{ marginBottom: 4 }}>
+                                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                              <span style={{ fontSize: 7, color: "#4a6d8c" }}>PROB PROFIT</span>
+                                              <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: h.probProfit >= 60 ? "#39ff14" : h.probProfit >= 40 ? "#ffb800" : "#ff2d55" }}>{h.probProfit}%</span>
+                                            </div>
+                                            <div style={{ height: 3, background: "rgba(74,109,140,0.15)", borderRadius: 2, marginTop: 2 }}>
+                                              <div style={{ height: "100%", width: h.probProfit + "%", background: h.probProfit >= 60 ? "#39ff14" : h.probProfit >= 40 ? "#ffb800" : "#ff2d55", borderRadius: 2 }}/>
+                                            </div>
+                                          </div>
+                                          {/* Prob ITM */}
+                                          <div style={{ fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>ITM: <span style={{ color: "#e8f4ff" }}>{h.probITM}%</span></div>
+                                          {/* Price scenarios */}
+                                          <div style={{ fontSize: 7, color: "#2a3d57", marginBottom: 3 }}>
+                                            Bear ${h.priceScenarios?.bear} · Base ${h.priceScenarios?.base} · Bull ${h.priceScenarios?.bull}
+                                          </div>
+                                          {/* Theta decay */}
+                                          <div style={{ fontSize: 7, color: "#ff2d55" }}>θ decay: -${h.thetaLoss}</div>
+                                          {/* Recommendation */}
+                                          <div style={{ fontFamily: "monospace", fontSize: 7, color: h.recColor || "#ffb800", marginTop: 4, borderTop: "1px solid rgba(74,109,140,0.2)", paddingTop: 3 }}>{h.recommendation}</div>
+                                        </>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+
+                                {/* Key risks */}
+                                {analysis.keyRisks?.length > 0 && (
+                                  <div style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.15)", borderRadius: 3, padding: "6px 10px", marginBottom: 8 }}>
+                                    <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 3 }}>KEY RISKS</div>
+                                    {analysis.keyRisks.map((r, j) => <div key={j} style={{ fontSize: 8, color: "#ff6b35" }}>{r}</div>)}
+                                  </div>
+                                )}
+
+                                {/* Action plan */}
+                                <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "6px 10px", marginBottom: 8 }}>
+                                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 4 }}>⚡ ACTION PLAN</div>
+                                  <div style={{ fontSize: 8, color: "#8aabb8", marginBottom: 2 }}>✓ {analysis.actionPlan?.hold}</div>
+                                  <div style={{ fontSize: 8, color: "#ffb800", marginBottom: 2 }}>⚠ {analysis.actionPlan?.defend}</div>
+                                  <div style={{ fontSize: 8, color: "#ff2d55" }}>✗ {analysis.actionPlan?.exit}</div>
+                                </div>
+
+                                {/* Overall outlook */}
+                                <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>
+                                  Overall: <span style={{ color: analysis.overallOutlook?.includes("FAVORABLE") && !analysis.overallOutlook?.includes("UN") ? "#39ff14" : analysis.overallOutlook?.includes("UNFAVORABLE") ? "#ff2d55" : "#ffb800" }}>{analysis.overallOutlook}</span>
+                                </div>
+
+                                <button onClick={() => analyzePosition(pos)} disabled={isAnalyzing} style={{ marginTop: 8, background: "none", border: "1px solid rgba(74,109,140,0.3)", color: "#4a6d8c", borderRadius: 2, padding: "3px 10px", fontSize: 8, cursor: "pointer", fontFamily: "monospace" }}>⟳ RE-ANALYZE</button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 
