@@ -2834,9 +2834,9 @@ export default function NexusDashboard({ user, onLogout }) {
 
                         {/* Expiry + timing */}
                         <div style={{ display: "flex", gap: 16, marginBottom: 12, fontSize: 11, fontFamily: "monospace" }}>
-                          <span style={{ color: "#8aabb8" }}>EXPIRY: <span style={{ color: "#e8f4ff" }}>{trade.expiry || "—"}</span></span>
-                          <span style={{ color: "#8aabb8" }}>TIMING: <span style={{ color: "#e8f4ff" }}>{trade.timing || trade.urgency}</span></span>
-                          {trade.iv ? <span style={{ color: "#8aabb8" }}>IV: <span style={{ color: "#ffb800" }}>{(trade.iv * 100).toFixed(0)}%</span></span> : null}
+                          <span style={{ color: "#8aabb8" }}>EXPIRY: <span style={{ color: "#e8f4ff" }}>{trade.expiry && !trade.expiry.includes("00:00:00") ? trade.expiry : trade.expiry?.slice(0,10) || "—"}</span></span>
+                          <span style={{ color: "#8aabb8" }}>TIMING: <span style={{ color: "#e8f4ff" }}>{trade.urgency || (trade.timing && !trade.timing.includes("*") ? trade.timing : "—")}</span></span>
+                          {trade.iv && trade.iv < 5 ? <span style={{ color: "#8aabb8" }}>IV: <span style={{ color: "#ffb800" }}>{(trade.iv * 100).toFixed(0)}%</span></span> : null}
                           {trade.delta ? <span style={{ color: "#8aabb8" }}>DELTA: <span style={{ color: "#e8f4ff" }}>{trade.delta?.toFixed(2)}</span></span> : null}
                         </div>
 
@@ -2847,13 +2847,13 @@ export default function NexusDashboard({ user, onLogout }) {
                         <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
                           <div style={{ flex: 1, background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 3, padding: "8px 12px" }}>
                             <div style={{ fontSize: 9, fontFamily: "monospace", color: "#39ff14", marginBottom: 3 }}>TARGET</div>
-                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#39ff14", fontWeight: 700 }}>{trade.targetPct || "+65%"}</div>
+                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#39ff14", fontWeight: 700 }}>{trade.targetReturn || (trade.targetPct && !trade.targetPct.includes("*") ? trade.targetPct : null) || trade.estimatedMove?.split(" ")[0] || "—"}</div>
                           </div>
                           <div style={{ flex: 1, background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 3, padding: "8px 12px" }}>
                             <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ff2d55", marginBottom: 3 }}>STOP</div>
-                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#ff2d55", fontWeight: 700 }}>{trade.stopPct || "-35%"}</div>
+                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#ff2d55", fontWeight: 700 }}>{trade.stopPct && !trade.stopPct.includes("*") ? trade.stopPct : "—"}</div>
                           </div>
-                          {trade.hedge?.ticker && (
+                          {trade.hedge?.ticker && !trade.hedge.ticker.includes("*") && (
                             <div style={{ flex: 2, background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 3, padding: "8px 12px" }}>
                               <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ffb800", marginBottom: 3 }}>HEDGE</div>
                               <div style={{ fontSize: 13, fontFamily: "monospace", color: "#ffb800", fontWeight: 700 }}>{trade.hedge.ticker} {trade.hedge.direction}</div>
