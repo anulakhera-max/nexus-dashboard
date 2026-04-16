@@ -156,39 +156,7 @@ function AnalysisSection({ title, children }) {
   );
 }
 
-function IntelPickCard({pick,rank}){
-  const isCall=pick.direction==="CALL"||pick.type==="CALL";
-  const tc=isCall?"#39ff14":"#ff2d55";
-  const cc=pick.confidence==="HIGH"?"#ff2d55":pick.confidence==="MEDIUM"?"#ffb800":"#4a6d8c";
-  const uc=pick.urgency==="THIS WEEK"?"#ff2d55":pick.urgency==="NEXT WEEK"?"#ffb800":"#00d4ff";
-  return(<div style={{background:"#080f1a",border:"1px solid "+tc+"33",borderLeft:"4px solid "+tc,borderRadius:4,padding:16,marginBottom:14,position:"relative"}}>
-    <div style={{position:"absolute",top:12,right:12,width:28,height:28,borderRadius:"50%",background:tc+"22",border:"1px solid "+tc+"55",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",fontSize:13,fontWeight:700,color:tc}}>{"#"+rank}</div>
-    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8,paddingRight:40}}>
-      <span style={{fontFamily:"monospace",fontSize:22,fontWeight:900,color:"#e8f4ff"}}>{pick.ticker}</span>
-      <span style={{fontSize:10,padding:"2px 8px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:tc+"22",color:tc,border:"1px solid "+tc+"55"}}>{pick.direction||pick.type}</span>
-      <span style={{fontSize:9,padding:"2px 7px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:cc+"22",color:cc,border:"1px solid "+cc+"55"}}>{pick.confidence} CONF</span>
-      {pick.urgency&&<span style={{fontSize:9,padding:"2px 7px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:uc+"22",color:uc,border:"1px solid "+uc+"55"}}>{pick.urgency}</span>}
-    </div>
-    <div style={{fontSize:12,color:"#8aabb8",marginBottom:4}}>{pick.name||pick.companyName||""}</div>
-    <div style={{fontSize:10,color:"#4a6d8c",fontFamily:"monospace",marginBottom:10}}>{pick.exchange||""}{pick.sector||pick.source?(" · "+(pick.sector||pick.source)):""}</div>
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}>
-      <div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}>
-        <div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>EST. MOVE</div>
-        <div style={{fontSize:18,fontWeight:900,color:tc,fontFamily:"monospace"}}>{pick.estimatedMove||pick.targetReturn||"—"}</div>
-      </div>
-      <div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}>
-        <div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>EXPIRY</div>
-        <div style={{fontSize:12,fontWeight:700,color:"#ffb800",fontFamily:"monospace"}}>{pick.expiry||"—"}</div>
-      </div>
-      <div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}>
-        <div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>SOURCE</div>
-        <div style={{fontSize:11,fontWeight:700,color:"#00d4ff",fontFamily:"monospace"}}>{pick.source||"AI"}</div>
-      </div>
-    </div>
-    {pick.catalyst&&<div style={{marginBottom:8}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",letterSpacing:2,marginBottom:4}}>CATALYST</div><div style={{fontSize:11,lineHeight:1.6,color:"#c8dff0"}}>{pick.catalyst}</div></div>}
-    {(pick.thesis||pick.eventTrigger)&&<div style={{background:tc+"0d",border:"1px solid "+tc+"22",borderRadius:3,padding:"8px 10px"}}><div style={{fontSize:9,color:tc,fontFamily:"monospace",letterSpacing:2,marginBottom:4}}>THESIS</div><div style={{fontSize:11,color:"#c8dff0",lineHeight:1.5}}>{pick.thesis||pick.eventTrigger}</div></div>}
-  </div>);}
-
+function IntelPickCard({pick,rank}){const isCall=pick.direction==="CALL"||pick.type==="CALL";const tc=isCall?"#39ff14":"#ff2d55";const cc=pick.confidence==="HIGH"?"#ff2d55":pick.confidence==="MEDIUM"?"#ffb800":"#4a6d8c";const uc=pick.urgency==="THIS WEEK"?"#ff2d55":pick.urgency==="NEXT WEEK"?"#ffb800":"#00d4ff";return(<div style={{background:"#080f1a",border:"1px solid "+tc+"33",borderLeft:"4px solid "+tc,borderRadius:4,padding:16,marginBottom:14,position:"relative"}}><div style={{position:"absolute",top:12,right:12,width:28,height:28,borderRadius:"50%",background:tc+"22",border:"1px solid "+tc+"55",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",fontSize:13,fontWeight:700,color:tc}}>{"#"+rank}</div><div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8,paddingRight:40}}><span style={{fontFamily:"monospace",fontSize:22,fontWeight:900,color:"#e8f4ff"}}>{pick.ticker}</span><span style={{fontSize:10,padding:"2px 8px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:tc+"22",color:tc,border:"1px solid "+tc+"55"}}>{pick.direction||pick.type||"CALL"}</span><span style={{fontSize:9,padding:"2px 7px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:cc+"22",color:cc,border:"1px solid "+cc+"55"}}>{pick.confidence||"MED"} CONF</span>{pick.urgency&&<span style={{fontSize:9,padding:"2px 7px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:uc+"22",color:uc,border:"1px solid "+uc+"55"}}>{pick.urgency}</span>}</div><div style={{fontSize:12,color:"#8aabb8",marginBottom:4}}>{pick.name||pick.companyName||""}</div><div style={{fontSize:10,color:"#4a6d8c",fontFamily:"monospace",marginBottom:10}}>{[pick.exchange,pick.sector||pick.source].filter(Boolean).join(" · ")}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}><div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>EST. MOVE</div><div style={{fontSize:18,fontWeight:900,color:tc,fontFamily:"monospace"}}>{pick.estimatedMove||pick.targetReturn||"—"}</div></div><div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>EXPIRY</div><div style={{fontSize:12,fontWeight:700,color:"#ffb800",fontFamily:"monospace"}}>{pick.expiry||"—"}</div></div><div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>SOURCE</div><div style={{fontSize:11,fontWeight:700,color:"#00d4ff",fontFamily:"monospace"}}>{pick.source||"AI"}</div></div></div>{pick.catalyst&&<div style={{marginBottom:8}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",letterSpacing:2,marginBottom:4}}>CATALYST</div><div style={{fontSize:11,lineHeight:1.6,color:"#c8dff0"}}>{pick.catalyst}</div></div>}{(pick.thesis||pick.eventTrigger)&&<div style={{background:tc+"0d",border:"1px solid "+tc+"22",borderRadius:3,padding:"8px 10px"}}><div style={{fontSize:9,color:tc,fontFamily:"monospace",letterSpacing:2,marginBottom:4}}>THESIS</div><div style={{fontSize:11,color:"#c8dff0",lineHeight:1.5}}>{pick.thesis||pick.eventTrigger}</div></div>}</div>);}
 function OptionsPickCard({ pick, rank }) {
   const isCall = pick.type === "CALL";
   const typeColor = isCall ? "#39ff14" : "#ff2d55";
@@ -362,7 +330,7 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingWatch, setLoadingWatch] = useState(false);
   const [watchInput, setWatchInput] = useState({ name: "", ticker: "", type: "individual" });
   const [loadingTab, setLoadingTab] = useState(false);
-  const [clock, setClock] = useState("");
+  const [oracleQuery,setOracleQuery]=useState(""); const [oracleDate,setOracleDate]=useState(""); const [oracleResult,setOracleResult]=useState(null); const [oracleLoading,setOracleLoading]=useState(false); const [oracleError,setOracleError]=useState(null); const [legendaryIntel,setLegendaryIntel]=useState(null); const [legendaryLoading,setLegendaryLoading]=useState(false); const [googleFinance,setGoogleFinance]=useState({}); const [clock, setClock] = useState("");
   const [tickerItems, setTickerItems] = useState([]);
   const [apiError, setApiError] = useState(null);
   const [optionsPicks, setOptionsPicks] = useState(null);
@@ -775,7 +743,7 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingResolver(false);
   };
 
-  const fetchSimPrice = async (ticker) => {
+  const runOracle=async()=>{if(!oracleQuery.trim())return;setOracleLoading(true);setOracleError(null);setOracleResult(null);try{const res=await fetch(nexusUrl+"/api/oracle",{method:"POST",headers:{"x-nexus-key":nexusKey,"Content-Type":"application/json"},body:JSON.stringify({query:oracleQuery,targetDate:oracleDate||null})});const data=await res.json();if(data.success)setOracleResult(data);else setOracleError(data.error||"Oracle failed");}catch(e){setOracleError(e.message);}setOracleLoading(false);}; const fetchSimPrice = async (ticker) => {
     if (simPrices[ticker]) return simPrices[ticker];
     try {
       const res = await fetch(nexusUrl + "/api/questrade?action=quote&symbol=" + ticker, { headers: { "x-nexus-key": nexusKey } });
@@ -1845,7 +1813,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
           <div style={S.tabs}>
             {/* CORE tabs */}
-            {[["events","📡 EVENTS"],["intel","⬡ PICKS"],["power","◈ POWER"],["trades","TRADES"],["positions","📋 POSITIONS"],["watch","WATCHLIST"]].map(([t,l]) => (
+            {[["oracle","🔮 ORACLE"],["events","📡 EVENTS"],["intel","⬡ PICKS"],["power","◈ POWER"],["trades","TRADES"],["positions","📋 POSITIONS"],["watch","WATCHLIST"]].map(([t,l]) => (
               <button key={t} style={{ ...S.tab(tab === t, t==="intel"||t==="power"), color: tab === "intel" ? "#b24fff" : tab === "power" ? "#ff6b35" : tab === t ? "#00d4ff" : "#a8cce0" }} onClick={() => handleTab(t)}>{l}</button>
             ))}
             <span style={{ width: 1, background: "#1a2d47", margin: "4px 4px", flexShrink: 0 }}/>
@@ -3011,7 +2979,7 @@ export default function NexusDashboard({ user, onLogout }) {
             )}
 
             {/* SIGNALS TAB — All intelligence layers in one view */}
-            {tab === "signals" && (
+            {tab==="oracle"&&(<div style={{flex:1,overflowY:"auto",padding:20,minHeight:0}}><div style={{fontFamily:"monospace",fontSize:10,letterSpacing:4,color:"#ffd700",marginBottom:20,borderBottom:"1px solid #1a2d47",paddingBottom:10}}>🔮 ORACLE — AI PRICE PREDICTION ENGINE</div><div style={{display:"flex",gap:10,marginBottom:16}}><input value={oracleQuery} onChange={e=>setOracleQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runOracle()} placeholder="e.g. NVDA May 30 2026 · AAPL earnings · BTC year end" style={{flex:1,background:"#0d1829",border:"1px solid #ffd70055",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><input value={oracleDate} onChange={e=>setOracleDate(e.target.value)} placeholder="Target date (opt)" style={{width:170,background:"#0d1829",border:"1px solid #1a2d47",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><button onClick={runOracle} disabled={oracleLoading||!oracleQuery.trim()} style={{background:oracleLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleLoading?"#4a6d8c":"#030609",border:"none",borderRadius:3,padding:"9px 20px",fontSize:12,fontWeight:700,letterSpacing:2,cursor:oracleLoading?"not-allowed":"pointer",fontFamily:"monospace",whiteSpace:"nowrap"}}>{oracleLoading?"COMPUTING...":"🔮 PREDICT"}</button></div>{oracleError&&<div style={{color:"#ff2d55",fontFamily:"monospace",fontSize:11,marginBottom:12}}>❌ {oracleError}</div>}{oracleResult&&<div style={{background:"#080f1a",border:"1px solid #ffd70033",borderLeft:"4px solid #ffd700",borderRadius:4,padding:16}}><div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:3,marginBottom:10}}>ORACLE PREDICTION — {oracleQuery.toUpperCase()}</div><div style={{fontSize:12,lineHeight:1.8,color:"#c8dff0",whiteSpace:"pre-wrap"}}>{typeof oracleResult.prediction==="string"?oracleResult.prediction:JSON.stringify(oracleResult,null,2)}</div></div>}{!oracleResult&&!oracleLoading&&<div style={{textAlign:"center",padding:60,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>Enter a ticker + optional target date<br/>Examples: "AAPL Jun 30 2026" · "NVDA next earnings" · "Bitcoin year end"</div>}</div>)} {tab === "signals" && (
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
 
                 {/* Header */}
