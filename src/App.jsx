@@ -4,25 +4,25 @@ const API_URL = "https://api.anthropic.com/v1/messages";
 const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
 
 const seedEvents = [
-  { id: 1, category: "conflict", severity: "critical", title: "Russia-Ukraine War Ã¢ÂÂ Ongoing Offensive Operations", location: "Eastern Ukraine / Black Sea Region", summary: "Continued missile strikes on energy infrastructure. Black Sea grain corridor under pressure. European energy markets on edge.", commodities: ["Natural Gas", "Wheat", "Sunflower Oil", "Steel"], region: "europe" },
-  { id: 2, category: "conflict", severity: "critical", title: "Middle East Ã¢ÂÂ Multi-Front Tensions Escalate", location: "Israel / Gaza / Red Sea", summary: "Houthi attacks disrupting Red Sea shipping. Suez Canal traffic at 5-year low. Insurance premiums spiking 200%+.", commodities: ["Crude Oil", "LNG", "Container Shipping", "Aluminum"], region: "middleeast" },
-  { id: 3, category: "weather", severity: "high", title: "El NiÃÂ±o Ã¢ÂÂ Severe Drought Across Southern Asia", location: "India, Thailand, Vietnam, Philippines", summary: "Rice paddy yields projected down 18%. Water reservoirs critically low. Power generation from hydro dropping sharply.", commodities: ["Rice", "Palm Oil", "Rubber", "Electricity"], region: "asia" },
-  { id: 4, category: "diplomatic", severity: "high", title: "US-China Tech War Ã¢ÂÂ Semiconductor Export Controls", location: "Global / Taiwan Strait", summary: "CHIPS Act restrictions on advanced node chips. China retaliation via rare earth export limits. Taiwan remains flashpoint.", commodities: ["Semiconductors", "Gallium", "Germanium", "Cobalt"], region: "asia" },
-  { id: 5, category: "weather", severity: "critical", title: "Amazon Basin Ã¢ÂÂ Record Drought & Wildfires", location: "Brazil, Bolivia, Peru", summary: "Amazon River at historic lows. Soybean and coffee harvest forecasts reduced 22%. Wildfire smoke impacting air quality.", commodities: ["Soybeans", "Coffee", "Beef", "Timber"], region: "latam" },
-  { id: 6, category: "economic", severity: "high", title: "Panama Canal Ã¢ÂÂ Drought Reduces Capacity 36%", location: "Panama / Pacific Routes", summary: "Canal capacity down 36%. LNG tankers rerouting via Cape Horn adding 20+ days. Freight costs surging.", commodities: ["LNG", "Grain", "Coal", "Auto Parts"], region: "latam" },
-  { id: 7, category: "diplomatic", severity: "medium", title: "BRICS Expansion Ã¢ÂÂ De-Dollarization Push", location: "Global / Emerging Markets", summary: "Saudi Arabia, UAE, Ethiopia joining BRICS. New currency settlement frameworks challenge USD dominance in commodity trade.", commodities: ["Gold", "Oil", "Grain Futures", "USD"], region: "global" },
-  { id: 8, category: "tech", severity: "medium", title: "AI Data Center Boom Ã¢ÂÂ Power Grid Strain", location: "USA, Europe, Southeast Asia", summary: "Hyperscaler capex reaching $200B+. Power grid constraints in key markets. Copper demand projections revised upward 40%.", commodities: ["Copper", "Electricity", "Natural Gas", "Water"], region: "northamerica" },
-  { id: 9, category: "weather", severity: "high", title: "European Winter Ã¢ÂÂ Gas Storage Below Average", location: "Germany, France, UK, Netherlands", summary: "Cold snap incoming with storage 8% below 5-year average. LNG spot prices rising. Industrial curtailments possible.", commodities: ["Natural Gas", "LNG", "Coal", "Electricity"], region: "europe" },
-  { id: 10, category: "economic", severity: "high", title: "China Property Crisis Ã¢ÂÂ Steel Demand Collapse", location: "China / Global Commodities", summary: "Steel demand projections cut 12%. Iron ore futures tumbling. Construction slowdown rippling through global supply chains.", commodities: ["Iron Ore", "Steel", "Copper", "Nickel"], region: "asia" },
-  { id: 11, category: "health", severity: "medium", title: "Avian Flu H5N1 Ã¢ÂÂ Global Poultry Disruption", location: "USA, Europe, Asia", summary: "Over 90M birds culled globally. Egg prices up 65% YoY. Dairy cattle infections expanding in North America.", commodities: ["Poultry", "Eggs", "Feed Grain", "Milk"], region: "global" },
-  { id: 12, category: "conflict", severity: "high", title: "Sudan Civil War Ã¢ÂÂ Grain Belt Devastation", location: "Sudan, South Sudan", summary: "Agricultural regions destroyed. 18M facing famine. Nile River access disputed. Aid convoys blocked.", commodities: ["Wheat", "Sorghum", "Aid Logistics", "Humanitarian Supply"], region: "africa" },
+  { id: 1, category: "conflict", severity: "critical", title: "Russia-Ukraine War — Ongoing Offensive Operations", location: "Eastern Ukraine / Black Sea Region", summary: "Continued missile strikes on energy infrastructure. Black Sea grain corridor under pressure. European energy markets on edge.", commodities: ["Natural Gas", "Wheat", "Sunflower Oil", "Steel"], region: "europe" },
+  { id: 2, category: "conflict", severity: "critical", title: "Middle East — Multi-Front Tensions Escalate", location: "Israel / Gaza / Red Sea", summary: "Houthi attacks disrupting Red Sea shipping. Suez Canal traffic at 5-year low. Insurance premiums spiking 200%+.", commodities: ["Crude Oil", "LNG", "Container Shipping", "Aluminum"], region: "middleeast" },
+  { id: 3, category: "weather", severity: "high", title: "El Niño — Severe Drought Across Southern Asia", location: "India, Thailand, Vietnam, Philippines", summary: "Rice paddy yields projected down 18%. Water reservoirs critically low. Power generation from hydro dropping sharply.", commodities: ["Rice", "Palm Oil", "Rubber", "Electricity"], region: "asia" },
+  { id: 4, category: "diplomatic", severity: "high", title: "US-China Tech War — Semiconductor Export Controls", location: "Global / Taiwan Strait", summary: "CHIPS Act restrictions on advanced node chips. China retaliation via rare earth export limits. Taiwan remains flashpoint.", commodities: ["Semiconductors", "Gallium", "Germanium", "Cobalt"], region: "asia" },
+  { id: 5, category: "weather", severity: "critical", title: "Amazon Basin — Record Drought & Wildfires", location: "Brazil, Bolivia, Peru", summary: "Amazon River at historic lows. Soybean and coffee harvest forecasts reduced 22%. Wildfire smoke impacting air quality.", commodities: ["Soybeans", "Coffee", "Beef", "Timber"], region: "latam" },
+  { id: 6, category: "economic", severity: "high", title: "Panama Canal — Drought Reduces Capacity 36%", location: "Panama / Pacific Routes", summary: "Canal capacity down 36%. LNG tankers rerouting via Cape Horn adding 20+ days. Freight costs surging.", commodities: ["LNG", "Grain", "Coal", "Auto Parts"], region: "latam" },
+  { id: 7, category: "diplomatic", severity: "medium", title: "BRICS Expansion — De-Dollarization Push", location: "Global / Emerging Markets", summary: "Saudi Arabia, UAE, Ethiopia joining BRICS. New currency settlement frameworks challenge USD dominance in commodity trade.", commodities: ["Gold", "Oil", "Grain Futures", "USD"], region: "global" },
+  { id: 8, category: "tech", severity: "medium", title: "AI Data Center Boom — Power Grid Strain", location: "USA, Europe, Southeast Asia", summary: "Hyperscaler capex reaching $200B+. Power grid constraints in key markets. Copper demand projections revised upward 40%.", commodities: ["Copper", "Electricity", "Natural Gas", "Water"], region: "northamerica" },
+  { id: 9, category: "weather", severity: "high", title: "European Winter — Gas Storage Below Average", location: "Germany, France, UK, Netherlands", summary: "Cold snap incoming with storage 8% below 5-year average. LNG spot prices rising. Industrial curtailments possible.", commodities: ["Natural Gas", "LNG", "Coal", "Electricity"], region: "europe" },
+  { id: 10, category: "economic", severity: "high", title: "China Property Crisis — Steel Demand Collapse", location: "China / Global Commodities", summary: "Steel demand projections cut 12%. Iron ore futures tumbling. Construction slowdown rippling through global supply chains.", commodities: ["Iron Ore", "Steel", "Copper", "Nickel"], region: "asia" },
+  { id: 11, category: "health", severity: "medium", title: "Avian Flu H5N1 — Global Poultry Disruption", location: "USA, Europe, Asia", summary: "Over 90M birds culled globally. Egg prices up 65% YoY. Dairy cattle infections expanding in North America.", commodities: ["Poultry", "Eggs", "Feed Grain", "Milk"], region: "global" },
+  { id: 12, category: "conflict", severity: "high", title: "Sudan Civil War — Grain Belt Devastation", location: "Sudan, South Sudan", summary: "Agricultural regions destroyed. 18M facing famine. Nile River access disputed. Aid convoys blocked.", commodities: ["Wheat", "Sorghum", "Aid Logistics", "Humanitarian Supply"], region: "africa" },
 ];
 
 const catColors = { weather: "#00d4ff", conflict: "#ff2d55", diplomatic: "#ffb800", tech: "#b24fff", economic: "#39ff14", health: "#ff6b35" };
-const catLabels = { weather: "Ã°ÂÂÂ WEATHER", conflict: "Ã¢ÂÂ CONFLICT", diplomatic: "Ã°ÂÂÂ DIPLOMATIC", economic: "Ã°ÂÂÂ¹ ECONOMIC", tech: "Ã¢ÂÂ¡ TECH", health: "Ã°ÂÂ§Â¬ HEALTH" };
+const catLabels = { weather: "🌊 WEATHER", conflict: "⚔ CONFLICT", diplomatic: "🏛 DIPLOMATIC", economic: "💹 ECONOMIC", tech: "⚡ TECH", health: "🧬 HEALTH" };
 const sevColors = { critical: "#ff2d55", high: "#ffb800", medium: "#00d4ff", low: "#39ff14" };
 
-// NEXUS v3.1 Ã¢ÂÂ Earnings Calendar // Estimate cost: ~$3 per 1M input tokens, ~$15 per 1M output tokens (Sonnet)
+// NEXUS v3.1 — Earnings Calendar // Estimate cost: ~$3 per 1M input tokens, ~$15 per 1M output tokens (Sonnet)
 function estimateCost(promptLen, maxTokens) {
   const inputTokens = Math.ceil(promptLen / 4);
   const outputTokens = maxTokens;
@@ -138,7 +138,7 @@ function EventCard({ event, selected, onClick }) {
         </div>
         <span style={S.badge(event.severity)}>{event.severity.toUpperCase()}</span>
       </div>
-      <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 6 }}>Ã°ÂÂÂ {event.location}</div>
+      <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 6 }}>📍 {event.location}</div>
       <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.5, marginBottom: 8 }}>{event.summary}</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
         {event.commodities.map((c, i) => <span key={c} style={S.tag(i < 2)}>{c}</span>)}
@@ -172,7 +172,7 @@ function OptionsPickCard({ pick, rank }) {
             <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 2, fontFamily: "monospace", fontWeight: 700, background: `${confColor}22`, color: confColor, border: `1px solid ${confColor}55` }}>{pick.confidence} CONF</span>
           </div>
           <div style={{ fontSize: 12, color: "#8aabb8", marginBottom: 2 }}>{pick.companyName}</div>
-          <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{pick.exchange} ÃÂ· {pick.sector}</div>
+          <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{pick.exchange} · {pick.sector}</div>
         </div>
       </div>
 
@@ -216,7 +216,7 @@ function OptionsPickCard({ pick, rank }) {
       </div>
 
       <div style={{ fontSize: 10, color: "#4a6d8c", fontStyle: "italic", lineHeight: 1.5 }}>
-        Ã¢ÂÂ  Risk: {pick.riskNote} ÃÂ· Max loss = premium paid.
+        ⚠ Risk: {pick.riskNote} · Max loss = premium paid.
       </div>
     </div>
   );
@@ -315,10 +315,7 @@ export default function NexusDashboard({ user, onLogout }) {
   const [backtestDays, setBacktestDays] = useState(30);
   const [expandedPick, setExpandedPick] = useState(null);
   const [myPositions, setMyPositions] = useState(null);
-  const [activeSim, setActiveSim] = useState(0);
-  const [legendaryIntel, setLegendaryIntel] = useState({});
-  const [legendaryLoading, setLegendaryLoading] = useState(false);
-  const [googleFinance, setGoogleFinance] = useState({}); // which pick is being simulated (0,1,2)
+  const [activeSim, setActiveSim] = useState(0); // which pick is being simulated (0,1,2)
   const [simPrices, setSimPrices] = useState({}); // live prices for picks
   const [loadingPositions, setLoadingPositions] = useState(false);
   const [positionAnalyses, setPositionAnalyses] = useState({});
@@ -359,7 +356,7 @@ export default function NexusDashboard({ user, onLogout }) {
   // Credit usage counter
   const [sessionCalls, setSessionCalls] = useState(0);
   const [sessionCost, setSessionCost] = useState(0);
-  // Hard cache flags Ã¢ÂÂ tabs never reload unless manually refreshed
+  // Hard cache flags — tabs never reload unless manually refreshed
   const [predictionsLoaded, setPredictionsLoaded] = useState(false);
   const [supplyLoaded, setSupplyLoaded] = useState(false);
   const [sourcesLoaded, setSourcesLoaded] = useState(false);
@@ -412,13 +409,13 @@ export default function NexusDashboard({ user, onLogout }) {
       .map(e => `${e.title} (${e.location}): affects ${e.commodities.slice(0,2).join(", ")}`).join("\n");
     const today = new Date().toLocaleDateString("en-CA", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
-    // Ask Claude to fill in a strict template Ã¢ÂÂ no JSON parsing needed
+    // Ask Claude to fill in a strict template — no JSON parsing needed
     const prompt = "You are an aggressive options trading AI. Today is " + today + ".\nCurrent global events: " + evCtx + "\n\nFill in this EXACT template for 5 options picks. Replace every VALUE in caps. Do not add any other text before or after.\n\nPICK1_TICKER=VALUE\nPICK1_COMPANY=VALUE\nPICK1_EXCHANGE=VALUE\nPICK1_SECTOR=VALUE\nPICK1_TYPE=CALL or PUT\nPICK1_STRIKE=$VALUE\nPICK1_EXPIRY=" + fridays.first + "\nPICK1_PREMIUM=$VALUE-$VALUE\nPICK1_RETURN=+VALUE%\nPICK1_CONFIDENCE=HIGH or MEDIUM or LOW\nPICK1_CATALYST=VALUE\nPICK1_THESIS=VALUE\nPICK1_TRIGGER=VALUE\nPICK1_RISK=VALUE\n\nPICK2_TICKER=VALUE\nPICK2_COMPANY=VALUE\nPICK2_EXCHANGE=VALUE\nPICK2_SECTOR=VALUE\nPICK2_TYPE=CALL or PUT\nPICK2_STRIKE=$VALUE\nPICK2_EXPIRY=" + fridays.first + "\nPICK2_PREMIUM=$VALUE-$VALUE\nPICK2_RETURN=+VALUE%\nPICK2_CONFIDENCE=HIGH or MEDIUM or LOW\nPICK2_CATALYST=VALUE\nPICK2_THESIS=VALUE\nPICK2_TRIGGER=VALUE\nPICK2_RISK=VALUE\n\nPICK3_TICKER=VALUE\nPICK3_COMPANY=VALUE\nPICK3_EXCHANGE=VALUE\nPICK3_SECTOR=VALUE\nPICK3_TYPE=CALL or PUT\nPICK3_STRIKE=$VALUE\nPICK3_EXPIRY=" + fridays.second + "\nPICK3_PREMIUM=$VALUE-$VALUE\nPICK3_RETURN=+VALUE%\nPICK3_CONFIDENCE=HIGH or MEDIUM or LOW\nPICK3_CATALYST=VALUE\nPICK3_THESIS=VALUE\nPICK3_TRIGGER=VALUE\nPICK3_RISK=VALUE\n\nPICK4_TICKER=VALUE\nPICK4_COMPANY=VALUE\nPICK4_EXCHANGE=VALUE\nPICK4_SECTOR=VALUE\nPICK4_TYPE=CALL or PUT\nPICK4_STRIKE=$VALUE\nPICK4_EXPIRY=" + fridays.second + "\nPICK4_PREMIUM=$VALUE-$VALUE\nPICK4_RETURN=+VALUE%\nPICK4_CONFIDENCE=HIGH or MEDIUM or LOW\nPICK4_CATALYST=VALUE\nPICK4_THESIS=VALUE\nPICK4_TRIGGER=VALUE\nPICK4_RISK=VALUE\n\nPICK5_TICKER=VALUE\nPICK5_COMPANY=VALUE\nPICK5_EXCHANGE=VALUE\nPICK5_SECTOR=VALUE\nPICK5_TYPE=CALL or PUT\nPICK5_STRIKE=$VALUE\nPICK5_EXPIRY=" + fridays.second + "\nPICK5_PREMIUM=$VALUE-$VALUE\nPICK5_RETURN=+VALUE%\nPICK5_CONFIDENCE=HIGH or MEDIUM or LOW\nPICK5_CATALYST=VALUE\nPICK5_THESIS=VALUE\nPICK5_TRIGGER=VALUE\nPICK5_RISK=VALUE"
 
     try {
       const text = await callClaude(prompt, 1400);
 
-      // Parse the template format Ã¢ÂÂ extremely reliable
+      // Parse the template format — extremely reliable
       const picks = [];
       for (let i = 1; i <= 5; i++) {
         const get = (key) => {
@@ -472,14 +469,14 @@ export default function NexusDashboard({ user, onLogout }) {
             headers: { "x-nexus-key": nexusKey }, signal: controller.signal
           });
         } catch (fe) {
-          if (fe.name === "AbortError") throw new Error("Timed out Ã¢ÂÂ try again in a moment");
+          if (fe.name === "AbortError") throw new Error("Timed out — try again in a moment");
           throw fe;
         } finally { clearTimeout(tmo); }
         const rawText = await res2.text();
-        if (!rawText || rawText.startsWith("<")) throw new Error("Server timed out Ã¢ÂÂ try again");
+        if (!rawText || rawText.startsWith("<")) throw new Error("Server timed out — try again");
         const data = JSON.parse(rawText);
         if (data.success && data.picks?.length > 0) { picks = data.picks; meta = data; }
-        else throw new Error(data.error || "No picks returned Ã¢ÂÂ try again");
+        else throw new Error(data.error || "No picks returned — try again");
       } else {
         // Fallback: call Claude directly from browser
         const evCtx = events.filter(e => ["critical","high"].includes(e.severity)).slice(0, 5)
@@ -515,20 +512,20 @@ export default function NexusDashboard({ user, onLogout }) {
 
   const analyzeEvent = useCallback(async (ev) => {
     setSelected(ev); setLoading(true); setAnalysisHtml(null); setApiError(null);
-    const prompt = `You are NEXUS, a global intelligence AI. Analyze this world event:\n\nEvent: ${ev.title}\nLocation: ${ev.location}\nCategory: ${ev.category} | Severity: ${ev.severity}\nSummary: ${ev.summary}\nAffected Commodities: ${ev.commodities.join(", ")}\n\nUse ### headers for each section:\n\n### INTEL BRIEF\n2-3 sentences with specific figures.\n\n### CRITICAL SHORTAGES\n3-4 items running short with % estimates.\n\n### SOURCE ANALYSIS\nItem Ã¢ÂÂ Primary Countries (share%) Ã¢ÂÂ Alternatives Ã¢ÂÂ Key Companies\n\n### PRICE PREDICTIONS (30-90 days)\nCommodityName | UP/DOWN | +X% or -X% | High/Med/Low confidence\n\n### SUPPLY CHAIN RISK\nKey sectors disrupted, 2-3 sentences.\n\n### INVESTMENT IMPLICATIONS\nSpecific sectors/ETFs rising or falling.`;
+    const prompt = `You are NEXUS, a global intelligence AI. Analyze this world event:\n\nEvent: ${ev.title}\nLocation: ${ev.location}\nCategory: ${ev.category} | Severity: ${ev.severity}\nSummary: ${ev.summary}\nAffected Commodities: ${ev.commodities.join(", ")}\n\nUse ### headers for each section:\n\n### INTEL BRIEF\n2-3 sentences with specific figures.\n\n### CRITICAL SHORTAGES\n3-4 items running short with % estimates.\n\n### SOURCE ANALYSIS\nItem → Primary Countries (share%) → Alternatives → Key Companies\n\n### PRICE PREDICTIONS (30-90 days)\nCommodityName | UP/DOWN | +X% or -X% | High/Med/Low confidence\n\n### SUPPLY CHAIN RISK\nKey sectors disrupted, 2-3 sentences.\n\n### INVESTMENT IMPLICATIONS\nSpecific sectors/ETFs rising or falling.`;
     try { const text = await callClaude(prompt, 850); setAnalysisHtml(text); trackCall(600, 850); }
     catch (err) { setApiError(err.message); }
     setLoading(false);
   }, []);
 
-  // Don't auto-load analysis on mount Ã¢ÂÂ wait for user to click an event
+  // Don't auto-load analysis on mount — wait for user to click an event
   // useEffect(() => { analyzeEvent(events[0]); }, []);
 
   const runQuery = async () => {
     if (!query.trim() || loading) return;
     setLoading(true); setAnalysisHtml(null); setApiError(null);
     const ctx = events.map(e => `[${e.category.toUpperCase()}] ${e.title} (${e.location}): ${e.commodities.join(", ")}`).join("\n");
-    const prompt = `NEXUS global intelligence query: "${query}"\n\nActive events:\n${ctx}\n\nAnalyze with ### headers. Include percentages, named countries/companies, price predictions (Commodity | UP/DOWN | ÃÂ±X% | Confidence), and actionable insights.`;
+    const prompt = `NEXUS global intelligence query: "${query}"\n\nActive events:\n${ctx}\n\nAnalyze with ### headers. Include percentages, named countries/companies, price predictions (Commodity | UP/DOWN | ±X% | Confidence), and actionable insights.`;
     try { const text = await callClaude(prompt, 900); setAnalysisHtml(text); }
     catch (err) { setApiError(err.message); }
     setLoading(false);
@@ -607,30 +604,30 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingTab(false);
   };
 
-  // Ã¢ÂÂÃ¢ÂÂ Pipeline functions Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ── Pipeline functions ───────────────────────────────────────
   const runFullPipeline = async () => {
     if (pipelineRunning) return;
     setPipelineRunning(true); setPipelineStage("Gathering data..."); setTradesError(null);
     try {
       // Stage 1: Data gather
-      setPipelineStage("Stage 1/4 Ã¢ÂÂ Gathering all data sources...");
+      setPipelineStage("Stage 1/4 — Gathering all data sources...");
       await fetch(nexusUrl + "/api/data-gather?force=true", { headers: { "x-nexus-key": nexusKey } });
 
       // Stage 2: Power Intel A + B in parallel
-      setPipelineStage("Stage 2/4 Ã¢ÂÂ Running Power Intel analysis...");
+      setPipelineStage("Stage 2/4 — Running Power Intel analysis...");
       await Promise.all([
         fetch(nexusUrl + "/api/power-intel-a?force=true", { headers: { "x-nexus-key": nexusKey } }),
         fetch(nexusUrl + "/api/power-intel-b?force=true", { headers: { "x-nexus-key": nexusKey } }),
       ]);
 
-      // Stage 3: Intel Picks (27Ã¢ÂÂ9Ã¢ÂÂ3)
-      setPipelineStage("Stage 3/4 Ã¢ÂÂ Scoring 27 candidates Ã¢ÂÂ narrowing to 9...");
+      // Stage 3: Intel Picks (27→9→3)
+      setPipelineStage("Stage 3/4 — Scoring 27 candidates → narrowing to 9...");
       const intelRes = await fetch(nexusUrl + "/api/intelligence?force=true", { headers: { "x-nexus-key": nexusKey } });
       const intelData = await intelRes.json();
       if (intelData.success) setIntelPicks(intelData.picks || []);
 
       // Stage 4: Final 3 trades with live QT validation
-      setPipelineStage("Stage 4/4 Ã¢ÂÂ Generating top 3 trades with live Questrade data...");
+      setPipelineStage("Stage 4/4 — Generating top 3 trades with live Questrade data...");
       const tradesRes = await fetch(nexusUrl + "/api/trades?force=true", { headers: { "x-nexus-key": nexusKey } });
       const tradesData = await tradesRes.json();
       if (tradesData.success) {
@@ -657,7 +654,7 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingTrades(false);
   };
 
-  // Ã¢ÂÂÃ¢ÂÂ Pick Tracker functions Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ── Pick Tracker functions ───────────────────────────────────
   const loadTrackerData = async () => {
     setLoadingTracker(true);
     try {
@@ -745,18 +742,6 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingResolver(false);
   };
 
-  const fetchLegendaryIntel = async (ticker) => {
-    setLegendaryLoading(true);
-    try {
-      const [legRes, gfRes] = await Promise.all([
-        fetch(nexusUrl + "/api/legendary-intel" + (ticker ? "?ticker=" + ticker : ""), { headers: {"x-nexus-key": nexusKey} }),
-        ticker ? fetch(nexusUrl + "/api/google-finance?ticker=" + ticker, { headers: {"x-nexus-key": nexusKey} }) : Promise.resolve(null)
-      ]);
-      if (legRes.ok) { const d = await legRes.json(); if (d.success) setLegendaryIntel(prev => ({...prev, all: d, ...(ticker?{[ticker]:d}:{})})); }
-      if (gfRes?.ok) { const d = await gfRes.json(); if (d.success) setGoogleFinance(prev => ({...prev, [ticker]: d})); }
-    } catch(e) { console.error("Legendary error:", e); }
-    setLegendaryLoading(false);
-  };
   const fetchSimPrice = async (ticker) => {
     if (simPrices[ticker]) return simPrices[ticker];
     try {
@@ -900,7 +885,7 @@ export default function NexusDashboard({ user, onLogout }) {
     const olderSurprise = last4.slice(2).reduce((s, q) => s + q.surprisePct, 0) / Math.max(1, last4.slice(2).length);
     const surpriseTrend = recentSurprise > olderSurprise + 1 ? "IMPROVING" : recentSurprise < olderSurprise - 1 ? "DETERIORATING" : "STABLE";
     const barAssessment = beatRate >= 75 && avgSurprisePct >= 8 ? "HIGH_BAR" : beatRate >= 75 ? "MODERATE_BAR" : beatRate <= 50 ? "LOW_BAR" : "NEUTRAL_BAR";
-    const tradeSetup = barAssessment === "MODERATE_BAR" ? "Consistent beater Ã¢ÂÂ buy CALL 2 weeks out" : barAssessment === "HIGH_BAR" ? "Bar is high Ã¢ÂÂ sell premium or use spread" : barAssessment === "LOW_BAR" ? "Erratic history Ã¢ÂÂ use strangle for vol play" : "Mixed Ã¢ÂÂ wait for pre-earnings momentum";
+    const tradeSetup = barAssessment === "MODERATE_BAR" ? "Consistent beater — buy CALL 2 weeks out" : barAssessment === "HIGH_BAR" ? "Bar is high — sell premium or use spread" : barAssessment === "LOW_BAR" ? "Erratic history — use strangle for vol play" : "Mixed — wait for pre-earnings momentum";
     return { ticker, name, earningsDate, daysOut, last4Quarters: last4, beatRate, avgSurprisePct, surpriseTrend, barAssessment, tradeSetup, mostRecentSurprise: last4[0]?.surprisePct || 0, biggestBeat: Math.max(...last4.map(q => q.surprisePct)), biggestMiss: Math.min(...last4.map(q => q.surprisePct)) };
   };
 
@@ -1131,7 +1116,7 @@ export default function NexusDashboard({ user, onLogout }) {
     } catch {}
   };
 
-  // Ã¢ÂÂÃ¢ÂÂ Watchlist functions Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ── Watchlist functions ──────────────────────────────────────
   const loadWatchlist = async () => {
     try {
       const res = await fetch(nexusUrl + "/api/watchlist", { headers: { "x-nexus-key": nexusKey } });
@@ -1180,7 +1165,7 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingWatch(false);
   };
 
-  // Ã¢ÂÂÃ¢ÂÂ Questrade API helpers Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+  // ── Questrade API helpers ──────────────────────────────────
   const nexusUrl = import.meta.env.VITE_NEXUS_URL || "https://nexus-dashboard-blue.vercel.app";
   const nexusKey = import.meta.env.VITE_NEXUS_API_KEY || "nexus-axl-agent-key";
 
@@ -1221,7 +1206,7 @@ export default function NexusDashboard({ user, onLogout }) {
     }
     try {
       const authData = await qtFetch("auth");
-      if (!authData) { setQtError("qtFetch returned null Ã¢ÂÂ env vars missing"); setQtLoading(false); return; }
+      if (!authData) { setQtError("qtFetch returned null — env vars missing"); setQtLoading(false); return; }
       const balData = await qtFetch("balance");
       if (balData?.balance) {
         setQtBalance(balData.balance);
@@ -1237,7 +1222,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
   const enrichPicksWithLiveData = async (picks) => {
     if (!picks?.length) return;
-    // Use Yahoo Finance directly Ã¢ÂÂ no Questrade dependency
+    // Use Yahoo Finance directly — no Questrade dependency
     try {
       // Step 1: Get live stock prices via Yahoo
       const tickers = picks.slice(0,3).map(p => p.ticker).join(",");
@@ -1277,16 +1262,9 @@ export default function NexusDashboard({ user, onLogout }) {
         } catch (err) { console.error("Yahoo chain error:", pick.ticker, err.message); }
         finally { setLoadingChain(prev => ({ ...prev, [pick.ticker]: false })); }
       }
-    } catch (err) { console.error("Enrich error:", err.message); 
-  // Also fetch legendary scores after enrichment
-  for (const pick of picks.slice(0, 3)) {
-    if (!pick?.ticker) continue;
-    try {
-      const r = await fetch(nexusUrl + "/api/legendary-score", { method:"POST", headers:{"x-nexus-key":nexusKey,"Content-Type":"application/json"}, body:JSON.stringify({ticker:pick.ticker}) });
-      if (r.ok) { const d = await r.json(); if(d.success) { setLegendaryIntel(p=>({...p,[pick.ticker]:d})); setGoogleFinance(p=>({...p,[pick.ticker]:d.googleFinance})); } }
-    } catch {}
-  }
-};
+    } catch (err) { console.error("Enrich error:", err.message); }
+  };
+
   // Fetch chain for a single ticker on demand
   const fetchChain = async (ticker, direction) => {
     if (!qtConnected || !ticker) return;
@@ -1312,15 +1290,15 @@ export default function NexusDashboard({ user, onLogout }) {
     try {
       if (nexusUrl && nexusKey) {
         const qs = force ? "?force=true" : "";
-        // Call both endpoints in parallel Ã¢ÂÂ each under 10s
+        // Call both endpoints in parallel — each under 10s
         const [resA, resB] = await Promise.all([
           fetch(`${nexusUrl}/api/power-intel-a${qs}`, { headers: { "x-nexus-key": nexusKey } }),
           fetch(`${nexusUrl}/api/power-intel-b${qs}`, { headers: { "x-nexus-key": nexusKey } }),
         ]);
         const [textA, textB] = await Promise.all([resA.text(), resB.text()]);
         let dataA, dataB;
-        try { dataA = JSON.parse(textA); } catch { throw new Error("Power Intel A error Ã¢ÂÂ check Vercel logs"); }
-        try { dataB = JSON.parse(textB); } catch { throw new Error("Power Intel B error Ã¢ÂÂ check Vercel logs"); }
+        try { dataA = JSON.parse(textA); } catch { throw new Error("Power Intel A error — check Vercel logs"); }
+        try { dataB = JSON.parse(textB); } catch { throw new Error("Power Intel B error — check Vercel logs"); }
         if (!dataA.success) throw new Error(dataA.error || "Power Intel A failed");
         if (!dataB.success) throw new Error(dataB.error || "Power Intel B failed");
         // Merge both results
@@ -1341,7 +1319,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
   const handleTab = (t) => {
     setTab(t);
-    // Hard cache Ã¢ÂÂ only load once per session, never reload automatically
+    // Hard cache — only load once per session, never reload automatically
     if (t === "predictions" && !predictionsLoaded) loadPredictions();
     if (t === "intel" && !intelPicks) generateIntelPicks();
     if (t === "positions" && !myPositions) loadMyPositions();
@@ -1382,13 +1360,13 @@ export default function NexusDashboard({ user, onLogout }) {
         return (
           <AnalysisSection key={si} title={title}>
             {body.split("\n").filter(l => l.trim()).map((item, ii) => {
-              const clean = item.replace(/^[-*Ã¢ÂÂ¢]\s*/, "");
-              if (clean.includes("Ã¢ÂÂ") || clean.includes("->")) {
-                const parts = clean.split(/Ã¢ÂÂ|->/).map(p => p.trim());
+              const clean = item.replace(/^[-*•]\s*/, "");
+              if (clean.includes("→") || clean.includes("->")) {
+                const parts = clean.split(/→|->/).map(p => p.trim());
                 return (
                   <div key={ii} style={{ borderBottom: "1px solid #1a2d4733", paddingBottom: 6, marginBottom: 6 }}>
                     <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff" }}>{parts[0]}</div>
-                    {parts.slice(1).map((p, pi) => <div key={pi} style={{ fontSize: 11, color: "#4a6d8c", paddingLeft: 10 }}>Ã¢ÂÂ¸ {p}</div>)}
+                    {parts.slice(1).map((p, pi) => <div key={pi} style={{ fontSize: 11, color: "#4a6d8c", paddingLeft: 10 }}>▸ {p}</div>)}
                   </div>
                 );
               }
@@ -1400,9 +1378,9 @@ export default function NexusDashboard({ user, onLogout }) {
       return (
         <AnalysisSection key={si} title={title}>
           {body.split("\n").map((line, li) => {
-            const clean = line.replace(/^[-*Ã¢ÂÂ¢]\s*/, "");
+            const clean = line.replace(/^[-*•]\s*/, "");
             if (!clean) return null;
-            if (line.match(/^[-*Ã¢ÂÂ¢]/)) return <div key={li} style={{ fontSize: 11, lineHeight: 1.7, paddingLeft: 10, borderLeft: "2px solid #1a2d47", marginBottom: 3 }}>{clean}</div>;
+            if (line.match(/^[-*•]/)) return <div key={li} style={{ fontSize: 11, lineHeight: 1.7, paddingLeft: 10, borderLeft: "2px solid #1a2d47", marginBottom: 3 }}>{clean}</div>;
             return <p key={li} style={{ fontSize: 11, lineHeight: 1.7, marginBottom: 4 }}>{clean}</p>;
           })}
         </AnalysisSection>
@@ -1418,16 +1396,16 @@ export default function NexusDashboard({ user, onLogout }) {
 
   const suggestions = ["Commodities rising next 30 days", "Critical global shortages", "Red Sea shipping price impact", "Rare earth supply chain risk", "Food security by region", "Oil price predictions 90 days", "Tech supply chain vulnerabilities", "Stocks that benefit from conflicts"];
 
-  // NEXUS ACTION SHORTCUTS Ã¢ÂÂ replaces generic quick queries
+  // NEXUS ACTION SHORTCUTS — replaces generic quick queries
   const NEXUS_ACTIONS = [
-    { label: "Ã¢ÂÂ¡ MORNING SCAN", color: "#39ff14", desc: "Seed + Pipeline + WSB", action: async () => { await Promise.all([loadOptionsOI(true), loadSpikeDetector(true), loadRedditWSB(true)]); runFullPipeline(); } },
-    { label: "Ã°ÂÂÂ¥ RUN PIPELINE", color: "#b24fff", desc: "Full intelligence run", action: () => runFullPipeline() },
-    { label: "Ã°ÂÂÂ OI OVERNIGHT", color: "#00ff9d", desc: "Smart money positioning", action: () => loadOptionsOI(true) },
-    { label: "Ã°ÂÂÂ GEO UPDATE", color: "#ffb800", desc: "Scenarios + Polymarket", action: () => loadGeoScenarios(true) },
-    { label: "Ã°ÂÂÂ SMART MONEY", color: "#ff69b4", desc: "Congress + 13F + Whales", action: () => loadSmartMoney(true) },
-    { label: "Ã°ÂÂÂ¡ WATCHLIST", color: "#00d4ff", desc: "89 tickers ÃÂ 16 themes", action: () => loadWatchlistScan(true) },
-    { label: "Ã¢ÂÂ¡ SPIKE SCAN", color: "#ff4500", desc: "FDA + metals + penny", action: () => loadSpikeDetector(true) },
-    { label: "Ã°ÂÂ§Â  AUTO STATUS", color: "#9d7fff", desc: "Learning loop status", action: () => { handleTab("research"); loadLearningStats(); } },
+    { label: "⚡ MORNING SCAN", color: "#39ff14", desc: "Seed + Pipeline + WSB", action: async () => { await Promise.all([loadOptionsOI(true), loadSpikeDetector(true), loadRedditWSB(true)]); runFullPipeline(); } },
+    { label: "🔥 RUN PIPELINE", color: "#b24fff", desc: "Full intelligence run", action: () => runFullPipeline() },
+    { label: "📊 OI OVERNIGHT", color: "#00ff9d", desc: "Smart money positioning", action: () => loadOptionsOI(true) },
+    { label: "🌍 GEO UPDATE", color: "#ffb800", desc: "Scenarios + Polymarket", action: () => loadGeoScenarios(true) },
+    { label: "🐋 SMART MONEY", color: "#ff69b4", desc: "Congress + 13F + Whales", action: () => loadSmartMoney(true) },
+    { label: "📡 WATCHLIST", color: "#00d4ff", desc: "89 tickers × 16 themes", action: () => loadWatchlistScan(true) },
+    { label: "⚡ SPIKE SCAN", color: "#ff4500", desc: "FDA + metals + penny", action: () => loadSpikeDetector(true) },
+    { label: "🧠 AUTO STATUS", color: "#9d7fff", desc: "Learning loop status", action: () => { handleTab("research"); loadLearningStats(); } },
   ];
 
   return (
@@ -1468,33 +1446,33 @@ export default function NexusDashboard({ user, onLogout }) {
           <div style={{ fontSize: 11, color: "#4a6d8c", letterSpacing: 4, fontFamily: "monospace" }}>GLOBAL INTELLIGENCE</div>
         </div>
         <div style={{ display: "flex", gap: 20, alignItems: "center", fontFamily: "monospace", fontSize: 10, color: "#4a6d8c" }}>
-          <span><span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: liveSource ? "#39ff14" : "#ffb800", marginRight: 4, animation: "pulseDot 2s infinite" }} />{liveSource ? "Ã¢ÂÂ GDELT LIVE" : "Ã¢ÂÂ SEED DATA"}</span>
+          <span><span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: liveSource ? "#39ff14" : "#ffb800", marginRight: 4, animation: "pulseDot 2s infinite" }} />{liveSource ? "● GDELT LIVE" : "○ SEED DATA"}</span>
           <span style={{ fontFamily: "monospace", fontSize: 10, color: sessionCost > 0.05 ? "#ff2d55" : "#4a6d8c", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: `1px solid ${sessionCost > 0.05 ? "#ff2d5544" : "#1a3a5c"}` }}>
-            Ã¢ÂÂ¡ {sessionCalls} {sessionCalls === 1 ? "call" : "calls"} ÃÂ· ~${sessionCost.toFixed(4)} used
+            ⚡ {sessionCalls} {sessionCalls === 1 ? "call" : "calls"} · ~${sessionCost.toFixed(4)} used
           </span>
           {qtConnected && qtBalance && (
             <span style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: "1px solid #39ff1444" }}>
-              Ã°ÂÂÂ¦ CAD ${qtBalance.CAD.totalEquity.toLocaleString("en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ÃÂ· USD ${qtBalance.USD.totalEquity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              🏦 CAD ${qtBalance.CAD.totalEquity.toLocaleString("en-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · USD ${qtBalance.USD.totalEquity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
           )}
           {!qtConnected && !qtLoading && !qtError && (
             <span style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d8c", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: "1px solid #1a3a5c", cursor: "pointer" }} onClick={connectQuestrade}>
-              Ã°ÂÂÂ¦ Connect Questrade
+              🏦 Connect Questrade
             </span>
           )}
           {qtLoading && (
             <span style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: "1px solid #ffb80044" }}>
-              Ã°ÂÂÂ¦ Connecting...
+              🏦 Connecting...
             </span>
           )}
           {qtError && !qtLoading && (
             <span style={{ fontFamily: "monospace", fontSize: 10, color: "#ff2d55", background: "rgba(0,0,0,0.4)", padding: "2px 8px", borderRadius: 2, border: "1px solid #ff2d5544", cursor: "pointer", maxWidth: 300 }} onClick={connectQuestrade} title={qtError}>
-              Ã°ÂÂÂ¦ QT Error: {qtError.slice(0, 40)}{qtError.length > 40 ? "..." : ""}
+              🏦 QT Error: {qtError.slice(0, 40)}{qtError.length > 40 ? "..." : ""}
             </span>
           )}
           <span style={{ color: "#ff2d55" }}>{criticals} CRITICAL</span>
           <span>{events.length} EVENTS TRACKED</span>
-          {!API_KEY && <span style={{ color: "#ff2d55" }}>Ã¢ÂÂ  NO API KEY</span>}
+          {!API_KEY && <span style={{ color: "#ff2d55" }}>⚠ NO API KEY</span>}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ fontFamily: "monospace", fontSize: 13, color: "#00d4ff" }}>{clock}</div>
@@ -1519,15 +1497,15 @@ export default function NexusDashboard({ user, onLogout }) {
         {/* SIDEBAR */}
         <div style={S.sidebar}>
           <div style={S.sideScroll}>
-            {/* CATEGORIES Ã¢ÂÂ compact, trading-action labels */}
+            {/* CATEGORIES — compact, trading-action labels */}
             <div style={{ padding: "8px 10px 4px", fontFamily: "monospace", fontSize: 9, color: "#2a3d57", letterSpacing: 2 }}>EVENTS FILTER</div>
             {[
-              ["all","Ã¢ÂÂ","#fff","ALL EVENTS", events.length],
-              ["conflict","Ã¢ÂÂ","#ff2d55","Ã°ÂÂÂ´ CRITICAL", events.filter(e=>e.category==="conflict").length],
-              ["economic","Ã¢ÂÂ","#39ff14","Ã°ÂÂÂ° MARKET MOVERS", events.filter(e=>e.category==="economic").length],
-              ["diplomatic","Ã¢ÂÂ","#ffb800","Ã°ÂÂÂ GEO RISK", events.filter(e=>e.category==="diplomatic").length],
-              ["tech","Ã¢ÂÂ","#b24fff","Ã¢ÂÂ¡ CATALYST", events.filter(e=>e.category==="tech"||e.category==="health").length],
-              ["weather","Ã¢ÂÂ","#00d4ff","Ã°ÂÂÂ CLIMATE", events.filter(e=>e.category==="weather").length],
+              ["all","○","#fff","ALL EVENTS", events.length],
+              ["conflict","●","#ff2d55","🔴 CRITICAL", events.filter(e=>e.category==="conflict").length],
+              ["economic","●","#39ff14","💰 MARKET MOVERS", events.filter(e=>e.category==="economic").length],
+              ["diplomatic","●","#ffb800","🌍 GEO RISK", events.filter(e=>e.category==="diplomatic").length],
+              ["tech","●","#b24fff","⚡ CATALYST", events.filter(e=>e.category==="tech"||e.category==="health").length],
+              ["weather","●","#00d4ff","🌊 CLIMATE", events.filter(e=>e.category==="weather").length],
             ].map(([cat,icon,col,label,count]) => (
               <button key={cat} style={{ ...S.filterBtn(filter === cat), display: "flex", alignItems: "center", gap: 6 }} onClick={() => setFilter(cat)}>
                 <span style={{ color: col, fontSize: 8 }}>{icon}</span>
@@ -1539,7 +1517,7 @@ export default function NexusDashboard({ user, onLogout }) {
             {/* DIVIDER */}
             <div style={{ height: 1, background: "rgba(26,45,71,0.8)", margin: "10px 10px" }}/>
 
-            {/* NEXUS ACTION SHORTCUTS Ã¢ÂÂ replaces generic quick queries */}
+            {/* NEXUS ACTION SHORTCUTS — replaces generic quick queries */}
             <div style={{ padding: "4px 10px 6px", fontFamily: "monospace", fontSize: 9, color: "#2a3d57", letterSpacing: 2 }}>QUICK ACTIONS</div>
             <div style={{ padding: "0 8px", display: "flex", flexDirection: "column", gap: 3 }}>
               {NEXUS_ACTIONS.map((a, i) => (
@@ -1557,22 +1535,22 @@ export default function NexusDashboard({ user, onLogout }) {
             {/* DIVIDER */}
             <div style={{ height: 1, background: "rgba(26,45,71,0.8)", margin: "10px 10px" }}/>
 
-            {/* OPTIONS EXPIRY Ã¢ÂÂ compact, integrated */}
+            {/* OPTIONS EXPIRY — compact, integrated */}
             <div style={{ padding: "4px 10px 6px", fontFamily: "monospace", fontSize: 9, color: "#2a3d57", letterSpacing: 2 }}>OPTIONS EXPIRY</div>
             <div style={{ padding: "0 10px 8px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
-                <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>Ã°ÂÂÂ {fridays.first}</span>
+                <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>📅 {fridays.first}</span>
                 <span style={{ fontSize: 8, padding: "1px 5px", borderRadius: 2, background: "rgba(255,184,0,0.1)", color: "#ffb800", fontFamily: "monospace" }}>WK</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <span style={{ fontSize: 10, color: "#ff6b35", fontFamily: "monospace" }}>Ã°ÂÂÂ {fridays.second}</span>
+                <span style={{ fontSize: 10, color: "#ff6b35", fontFamily: "monospace" }}>📅 {fridays.second}</span>
                 <span style={{ fontSize: 8, padding: "1px 5px", borderRadius: 2, background: "rgba(255,107,53,0.1)", color: "#ff6b35", fontFamily: "monospace" }}>WK</span>
               </div>
               <div style={{ fontSize: 9, color: "#2a3d57" }}>Closes 3:30 PM ET</div>
             </div>
 
             <div style={{ margin: "12px 10px 0", padding: "10px 12px", background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 3 }}>
-              <div style={{ fontSize: 8, color: "#2a3d57" }}>Ã¢ÂÂ  Educational only ÃÂ· Not financial advice ÃÂ· Verify on Questrade</div>
+              <div style={{ fontSize: 8, color: "#2a3d57" }}>⚠ Educational only · Not financial advice · Verify on Questrade</div>
             </div>
           </div>
         </div>
@@ -1581,22 +1559,22 @@ export default function NexusDashboard({ user, onLogout }) {
         <div style={S.main}>
           <div style={S.queryBar}>
             <input style={S.input} value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => e.key === "Enter" && runQuery()} placeholder="e.g. 'Commodity impact of Red Sea tensions' or 'Which countries face grain shortages?'" />
-            <button style={S.btnSecondary} onClick={scanEvents} disabled={scanning}>{scanning ? "SCANNING..." : "Ã¢ÂÂ³ SCAN"}</button>
-            <button style={S.btnPrimary(loading)} onClick={runQuery} disabled={loading}>{loading ? "ANALYZING..." : "ANALYZE Ã¢ÂÂ¶"}</button>
-            {analysisHtml && <button onClick={() => setAnalysisHtml(null)} style={{ ...S.btnSecondary, fontSize: 10, padding: "6px 10px", color: "#4a6d8c" }}>Ã¢ÂÂ CLEAR</button>}
+            <button style={S.btnSecondary} onClick={scanEvents} disabled={scanning}>{scanning ? "SCANNING..." : "⟳ SCAN"}</button>
+            <button style={S.btnPrimary(loading)} onClick={runQuery} disabled={loading}>{loading ? "ANALYZING..." : "ANALYZE ▶"}</button>
+            {analysisHtml && <button onClick={() => setAnalysisHtml(null)} style={{ ...S.btnSecondary, fontSize: 10, padding: "6px 10px", color: "#4a6d8c" }}>✕ CLEAR</button>}
           </div>
 
-          {/* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
-          {/* TOP 3 NEXUS PICKS Ã¢ÂÂ MISSION CONTROL */}
+          {/* ══════════════════════════════════════════════════════ */}
+          {/* TOP 3 NEXUS PICKS — MISSION CONTROL */}
           {/* The entire signal stack exists to produce these 3 picks */}
-          {/* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+          {/* ══════════════════════════════════════════════════════ */}
           {intelPicks && intelPicks.length > 0 ? (
             <div style={{ padding: "8px 12px 0", borderBottom: "1px solid rgba(26,45,71,0.6)" }}>
               {/* Header row */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3 }}>Ã¢ÂÂ TOP 3 NEXUS PICKS</div>
-                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#2a3d57" }}>ALL 20 SIGNAL LAYERS ÃÂ· CONFLICT RESOLVER ÃÂ· SCENARIO ENGINE</div>
+                  <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3 }}>◎ TOP 3 NEXUS PICKS</div>
+                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#2a3d57" }}>ALL 20 SIGNAL LAYERS · CONFLICT RESOLVER · SCENARIO ENGINE</div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>TARGET ACCURACY</div>
@@ -1609,7 +1587,7 @@ export default function NexusDashboard({ user, onLogout }) {
               </div>
 
               {/* Top 3 picks row */}
-              {/* Ã¢ÂÂÃ¢ÂÂ NEXUS PREDICTION PLATFORM Ã¢ÂÂ SCENARIO SIMULATION Ã¢ÂÂÃ¢ÂÂ */}
+              {/* ══ NEXUS PREDICTION PLATFORM — SCENARIO SIMULATION ══ */}
               {/* Selector tabs for pick 1/2/3 */}
               <div style={{ display:"flex", gap:6, marginBottom:8 }}>
                 {intelPicks.slice(0,3).map((pick,i) => {
@@ -1624,7 +1602,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         <span style={{ fontFamily:"monospace", fontSize:18, fontWeight:900, color: activeSim===i ? rc : "#8aabb8" }}>{pick.ticker}</span>
                         <span style={{ fontFamily:"monospace", fontSize:9, padding:"2px 6px", borderRadius:2, background: isCall?"rgba(57,255,20,0.12)":"rgba(255,45,85,0.12)", color: isCall?"#39ff14":"#ff2d55", fontWeight:700 }}>{pick.direction}</span>
                       </div>
-                      <div style={{ fontFamily:"monospace", fontSize:13, color: isCall?"#39ff14":"#ff2d55", fontWeight:700, marginBottom:2 }}>{pick.targetReturn||pick.estimatedMove?.split(" ")[0]||"Ã¢ÂÂ"}</div>
+                      <div style={{ fontFamily:"monospace", fontSize:13, color: isCall?"#39ff14":"#ff2d55", fontWeight:700, marginBottom:2 }}>{pick.targetReturn||pick.estimatedMove?.split(" ")[0]||"—"}</div>
                       <div style={{ display:"flex", gap:6, alignItems:"center" }}>
                         <div style={{ flex:1, height:3, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
                           <div style={{ height:"100%", width: Math.min(pick.score||0,100)+"%", background: activeSim===i?rc:"#2a3d57", borderRadius:2 }}/>
@@ -1636,7 +1614,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 })}
               </div>
 
-              {/* Ã¢ÂÂÃ¢ÂÂ ACTIVE SIMULATION PANEL Ã¢ÂÂÃ¢ÂÂ */}
+              {/* ── ACTIVE SIMULATION PANEL ── */}
               {(() => {
                 const pick = intelPicks[activeSim];
                 if (!pick) return null;
@@ -1676,7 +1654,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 }
                 const bsProb = isCall ? normCDF(d2) : normCDF(-d2);
 
-                // Scenario probabilities Ã¢ÂÂ BS + catalyst adjustment
+                // Scenario probabilities — BS + catalyst adjustment
                 const catalystBoost = (pick.confidence === "HIGH" ? 0.12 : 0.06);
                 const probA = Math.min(0.68, Math.max(0.08, bsProb + catalystBoost));
                 const probB = Math.min(0.42, Math.max(0.05, bsProb + catalystBoost * 0.4));
@@ -1687,7 +1665,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 const scB_price = isCall ? curPrice * (1 + Math.abs(tgtPct)) : curPrice * (1 - Math.abs(tgtPct));
                 const scBear_price = isCall ? curPrice * (1 + stopPct) : curPrice * (1 - stopPct);
 
-                // Option P&L estimates (simplified Ã¢ÂÂ assume 30-delta, $2 avg premium)
+                // Option P&L estimates (simplified — assume 30-delta, $2 avg premium)
                 const optPremium = 2.50;
                 const contracts = 5;
                 const costBasis = optPremium * contracts * 100;
@@ -1708,8 +1686,8 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div>
                         <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
                           <span style={{ fontFamily:"monospace", fontSize:22, fontWeight:900, color:rc }}>{pick.ticker}</span>
-                          <span style={{ fontFamily:"monospace", fontSize:11, padding:"2px 8px", borderRadius:2, background: isCall?"rgba(57,255,20,0.12)":"rgba(255,45,85,0.12)", color: isCall?"#39ff14":"#ff2d55", fontWeight:700 }}>{dir} ÃÂ· {pick.urgency||"THIS WEEK"}</span>
-                          <span style={{ fontFamily:"monospace", fontSize:9, color:"#4a6d8c" }}>exp {pick.expiry?.slice(0,12)||"Ã¢ÂÂ"}</span>
+                          <span style={{ fontFamily:"monospace", fontSize:11, padding:"2px 8px", borderRadius:2, background: isCall?"rgba(57,255,20,0.12)":"rgba(255,45,85,0.12)", color: isCall?"#39ff14":"#ff2d55", fontWeight:700 }}>{dir} · {pick.urgency||"THIS WEEK"}</span>
+                          <span style={{ fontFamily:"monospace", fontSize:9, color:"#4a6d8c" }}>exp {pick.expiry?.slice(0,12)||"—"}</span>
                         </div>
                         <div style={{ fontSize:11, color:"#8aabb8", maxWidth:520, lineHeight:1.6 }}>{pick.catalyst?.slice(0,120)}{pick.catalyst?.length>120?"...":""}</div>
                       </div>
@@ -1720,13 +1698,13 @@ export default function NexusDashboard({ user, onLogout }) {
                       </div>
                     </div>
 
-                    {/* Ã¢ÂÂÃ¢ÂÂ 3-SCENARIO GRID Ã¢ÂÂÃ¢ÂÂ */}
+                    {/* ── 3-SCENARIO GRID ── */}
                     <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:10 }}>
-                      {/* Scenario A Ã¢ÂÂ base case */}
+                      {/* Scenario A — base case */}
                       <div style={{ background:"rgba(57,255,20,0.06)", border:"1px solid rgba(57,255,20,0.2)", borderRadius:5, padding:"10px 12px" }}>
-                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#39ff14", letterSpacing:1, marginBottom:6 }}>SCENARIO A Ã¢ÂÂ BASE</div>
+                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#39ff14", letterSpacing:1, marginBottom:6 }}>SCENARIO A — BASE</div>
                         <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scA_price)}</div>
-                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>from ${Math.round(curPrice)} ÃÂ· {dLabel}</div>
+                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>from ${Math.round(curPrice)} · {dLabel}</div>
                         <div style={{ marginBottom:6 }}>
                           <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#39ff14", fontWeight:700 }}>{Math.round(probA*100)}%</span></div>
                           <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
@@ -1739,9 +1717,9 @@ export default function NexusDashboard({ user, onLogout }) {
                         </div>
                       </div>
 
-                      {/* Scenario B Ã¢ÂÂ bull case */}
+                      {/* Scenario B — bull case */}
                       <div style={{ background:"rgba(0,212,255,0.04)", border:"1px solid rgba(0,212,255,0.2)", borderRadius:5, padding:"10px 12px" }}>
-                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#00d4ff", letterSpacing:1, marginBottom:6 }}>SCENARIO B Ã¢ÂÂ BULL</div>
+                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#00d4ff", letterSpacing:1, marginBottom:6 }}>SCENARIO B — BULL</div>
                         <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scB_price)}</div>
                         <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>full {pick.targetReturn||"target"} realized</div>
                         <div style={{ marginBottom:6 }}>
@@ -1756,11 +1734,11 @@ export default function NexusDashboard({ user, onLogout }) {
                         </div>
                       </div>
 
-                      {/* Scenario C Ã¢ÂÂ bear */}
+                      {/* Scenario C — bear */}
                       <div style={{ background:"rgba(255,45,85,0.04)", border:"1px solid rgba(255,45,85,0.18)", borderRadius:5, padding:"10px 12px" }}>
-                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#ff2d55", letterSpacing:1, marginBottom:6 }}>SCENARIO C Ã¢ÂÂ BEAR</div>
+                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#ff2d55", letterSpacing:1, marginBottom:6 }}>SCENARIO C — BEAR</div>
                         <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scBear_price)}</div>
-                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>stop hit ÃÂ· {pick.stopPct||"-20%"} loss</div>
+                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>stop hit · {pick.stopPct||"-20%"} loss</div>
                         <div style={{ marginBottom:6 }}>
                           <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#ff2d55", fontWeight:700 }}>{Math.round(probBear*100)}%</span></div>
                           <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
@@ -1774,45 +1752,45 @@ export default function NexusDashboard({ user, onLogout }) {
                       </div>
                     </div>
 
-                    {/* Ã¢ÂÂÃ¢ÂÂ CRITICAL DECISION POINTS Ã¢ÂÂÃ¢ÂÂ */}
+                    {/* ── CRITICAL DECISION POINTS ── */}
                     <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 12px", marginBottom:8 }}>
                       <div style={{ fontFamily:"monospace", fontSize:9, color:"#ffb800", marginBottom:6, letterSpacing:1 }}>CRITICAL DECISION POINTS</div>
                       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
                         <div style={{ borderLeft:"2px solid #39ff14", paddingLeft:8 }}>
                           <div style={{ fontFamily:"monospace", fontSize:10, color:"#39ff14", marginBottom:3 }}>IF SCENARIO A</div>
-                          <div style={{ fontSize:10, color:"#c8dff0" }}>Take 50% profit ÃÂ· Hold rest for Scenario B target ÃÂ· Trail stop up</div>
+                          <div style={{ fontSize:10, color:"#c8dff0" }}>Take 50% profit · Hold rest for Scenario B target · Trail stop up</div>
                         </div>
                         <div style={{ borderLeft:"2px solid #ffb800", paddingLeft:8 }}>
                           <div style={{ fontFamily:"monospace", fontSize:10, color:"#ffb800", marginBottom:3 }}>IF STALLING</div>
-                          <div style={{ fontSize:10, color:"#c8dff0" }}>Hold while above stop ÃÂ· Re-evaluate in {Math.round(daysLeft/2)} days ÃÂ· Watch IV</div>
+                          <div style={{ fontSize:10, color:"#c8dff0" }}>Hold while above stop · Re-evaluate in {Math.round(daysLeft/2)} days · Watch IV</div>
                         </div>
                         <div style={{ borderLeft:"2px solid #ff2d55", paddingLeft:8 }}>
                           <div style={{ fontFamily:"monospace", fontSize:10, color:"#ff2d55", marginBottom:3 }}>IF SCENARIO C</div>
-                          <div style={{ fontSize:10, color:"#c8dff0" }}>Close immediately ÃÂ· Do not average down ÃÂ· Capital preservation</div>
+                          <div style={{ fontSize:10, color:"#c8dff0" }}>Close immediately · Do not average down · Capital preservation</div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Ã¢ÂÂÃ¢ÂÂ WHAT HAS TO HAPPEN Ã¢ÂÂÃ¢ÂÂ */}
+                    {/* ── WHAT HAS TO HAPPEN ── */}
                     <div style={{ display:"flex", gap:8, alignItems:"flex-start" }}>
                       <div style={{ flex:1, background:"rgba(0,0,0,0.2)", borderRadius:4, padding:"8px 10px" }}>
                         <div style={{ fontFamily:"monospace", fontSize:9, color:"#9d7fff", marginBottom:4 }}>WHAT HAS TO HAPPEN</div>
-                        <div style={{ fontSize:10, color:"#8aabb8", lineHeight:1.7 }}>{pick.catalyst?.slice(0,200)||"Ã¢ÂÂ"}</div>
+                        <div style={{ fontSize:10, color:"#8aabb8", lineHeight:1.7 }}>{pick.catalyst?.slice(0,200)||"—"}</div>
                       </div>
                       <div style={{ width:120, flexShrink:0 }}>
                         <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px", marginBottom:6 }}>
                           <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:2 }}>TARGET</div>
-                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#39ff14" }}>{pick.targetReturn||"Ã¢ÂÂ"}</div>
+                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#39ff14" }}>{pick.targetReturn||"—"}</div>
                         </div>
                         <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px" }}>
                           <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:2 }}>STOP LOSS</div>
-                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#ff2d55" }}>{pick.stopPct||"Ã¢ÂÂ"}</div>
+                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#ff2d55" }}>{pick.stopPct||"—"}</div>
                         </div>
                       </div>
                     </div>
 
                     <div style={{ marginTop:6, fontSize:9, color:"#2a3d57", textAlign:"center" }}>
-                      Ã¢ÂÂ  Educational only ÃÂ· Probabilities are Black-Scholes estimates ÃÂ· Verify on Questrade ÃÂ· Options carry substantial risk of loss
+                      ⚠ Educational only · Probabilities are Black-Scholes estimates · Verify on Questrade · Options carry substantial risk of loss
                     </div>
                   </div>
                 );
@@ -1823,44 +1801,44 @@ export default function NexusDashboard({ user, onLogout }) {
           ) : (
             <div style={{ padding: "10px 12px", borderBottom: "1px solid rgba(26,45,71,0.6)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
-                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#2a3d57", letterSpacing: 3 }}>Ã¢ÂÂ TOP 3 NEXUS PICKS</div>
+                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#2a3d57", letterSpacing: 3 }}>◎ TOP 3 NEXUS PICKS</div>
                 <div style={{ fontSize: 9, color: "#2a3d57", marginTop: 2 }}>Run pipeline to generate high-conviction picks from all 20 signal layers</div>
               </div>
               <button onClick={runFullPipeline} disabled={pipelineRunning} style={{ background: pipelineRunning ? "#1a2d47" : "linear-gradient(135deg,#7b0000,#ff2d55)", color: pipelineRunning ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "7px 18px", fontSize: 10, fontWeight: 700, cursor: pipelineRunning ? "not-allowed" : "pointer", fontFamily: "monospace", letterSpacing: 2 }}>
-                {pipelineRunning ? "GENERATING..." : "Ã¢ÂÂ RUN PIPELINE"}
+                {pipelineRunning ? "GENERATING..." : "◎ RUN PIPELINE"}
               </button>
             </div>
           )}
 
           <div style={S.tabs}>
             {/* CORE tabs */}
-            {[["events","Ã°ÂÂÂ¡ EVENTS"],["intel","Ã¢Â¬Â¡ PICKS"],["power","Ã¢ÂÂ POWER"],["trades","TRADES"],["positions","Ã°ÂÂÂ POSITIONS"],["watch","WATCHLIST"]].map(([t,l]) => (
+            {[["events","📡 EVENTS"],["intel","⬡ PICKS"],["power","◈ POWER"],["trades","TRADES"],["positions","📋 POSITIONS"],["watch","WATCHLIST"]].map(([t,l]) => (
               <button key={t} style={{ ...S.tab(tab === t, t==="intel"||t==="power"), color: tab === "intel" ? "#b24fff" : tab === "power" ? "#ff6b35" : tab === t ? "#00d4ff" : "#a8cce0" }} onClick={() => handleTab(t)}>{l}</button>
             ))}
             <span style={{ width: 1, background: "#1a2d47", margin: "4px 4px", flexShrink: 0 }}/>
             {/* SIGNALS tab */}
             <button style={{ background: tab === "signals" ? "rgba(57,255,20,0.15)" : "transparent", color: tab === "signals" ? "#39ff14" : "#4a6d8c", border: tab === "signals" ? "1px solid rgba(57,255,20,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace" }} onClick={() => { handleTab("signals"); if (!unusualFlow) loadUnusualFlow(); if (!warRipple) loadWarRipple(); if (!newsBias) loadNewsBias(); if (!insiderData) loadInsiderFilings(); if (!allianceData) loadAlliance(); if (!chartPatterns) loadChartPatterns(""); }}>
-              Ã¢ÂÂ¡ SIGNALS
+              ⚡ SIGNALS
             </button>
             <span style={{ width: 1, background: "#1a2d47", margin: "4px 4px", flexShrink: 0 }}/>
             {/* RESEARCH tab */}
             <button style={{ background: tab === "research" ? "rgba(0,212,255,0.15)" : "transparent", color: tab === "research" ? "#00d4ff" : "#4a6d8c", border: tab === "research" ? "1px solid rgba(0,212,255,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace" }} onClick={() => handleTab("research")}>
-              Ã°ÂÂÂ¬ RESEARCH
+              🔬 RESEARCH
             </button>
           </div>
 
           {/* Pipeline run button + status */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
             <button onClick={runFullPipeline} disabled={pipelineRunning} style={{ background: pipelineRunning ? "#1a2d47" : "linear-gradient(135deg,#7b0000,#ff2d55)", color: pipelineRunning ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "7px 18px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: pipelineRunning ? "not-allowed" : "pointer", fontFamily: "monospace", flexShrink: 0 }}>
-              {pipelineRunning ? pipelineStage : "Ã¢ÂÂ RUN PIPELINE"}
+              {pipelineRunning ? pipelineStage : "◎ RUN PIPELINE"}
             </button>
             {pipelineStatus && (
               <div style={{ display: "flex", gap: 5, fontSize: 9, fontFamily: "monospace", flexWrap: "wrap" }}>
                 {[["DATA", pipelineStatus.dataLayer?.ready], ["PWR-A", pipelineStatus.powerIntelA?.ready], ["PWR-B", pipelineStatus.powerIntelB?.ready], ["PICKS", pipelineStatus.intelPicks?.ready], ["TRADES", pipelineStatus.trades?.ready]].map(([label, ready]) => (
                   <span key={label} style={{ padding: "2px 6px", borderRadius: 2, background: ready ? "rgba(57,255,20,0.1)" : "rgba(74,109,140,0.1)", color: ready ? "#39ff14" : "#4a6d8c", border: `1px solid ${ready ? "rgba(57,255,20,0.3)" : "rgba(74,109,140,0.2)"}` }}>{label}</span>
                 ))}
-                {pipelineStatus.dataLayer?.topGainer && <span style={{ color: "#39ff14", fontSize: 9 }}>Ã¢ÂÂ{pipelineStatus.dataLayer.topGainer}</span>}
-                {pipelineStatus.dataLayer?.topLoser && <span style={{ color: "#ff2d55", fontSize: 9 }}>Ã¢ÂÂ{pipelineStatus.dataLayer.topLoser}</span>}
+                {pipelineStatus.dataLayer?.topGainer && <span style={{ color: "#39ff14", fontSize: 9 }}>↑{pipelineStatus.dataLayer.topGainer}</span>}
+                {pipelineStatus.dataLayer?.topLoser && <span style={{ color: "#ff2d55", fontSize: 9 }}>↓{pipelineStatus.dataLayer.topLoser}</span>}
               </div>
             )}
           </div>
@@ -1874,7 +1852,7 @@ export default function NexusDashboard({ user, onLogout }) {
                   {g.ticker} +{g.changePct != null ? Number(g.changePct).toFixed(1) : "?"}% {g.volRatio > 2 ? g.volRatio + "x" : ""}
                 </span>
               ))}
-              {vixData?.vix && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 8px", borderRadius: 10, background: vixData.vix.current >= 25 ? "rgba(255,45,85,0.15)" : "rgba(0,212,255,0.1)", color: vixData.vix.current >= 25 ? "#ff2d55" : "#00d4ff", border: `1px solid ${vixData.vix.current >= 25 ? "rgba(255,45,85,0.3)" : "rgba(0,212,255,0.2)"}`, marginLeft: 8, flexShrink: 0 }}>VIX {vixData.vix.current} ÃÂ· F/G {vixData.fearGreed?.score}</span>}
+              {vixData?.vix && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 8px", borderRadius: 10, background: vixData.vix.current >= 25 ? "rgba(255,45,85,0.15)" : "rgba(0,212,255,0.1)", color: vixData.vix.current >= 25 ? "#ff2d55" : "#00d4ff", border: `1px solid ${vixData.vix.current >= 25 ? "rgba(255,45,85,0.3)" : "rgba(0,212,255,0.2)"}`, marginLeft: 8, flexShrink: 0 }}>VIX {vixData.vix.current} · F/G {vixData.fearGreed?.score}</span>}
               {pcrData?.ratio && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 8px", borderRadius: 10, background: pcrData.ratio >= 1.2 ? "rgba(57,255,20,0.1)" : pcrData.ratio <= 0.6 ? "rgba(255,45,85,0.1)" : "rgba(74,109,140,0.1)", color: pcrData.ratio >= 1.2 ? "#39ff14" : pcrData.ratio <= 0.6 ? "#ff2d55" : "#8aabb8", border: "1px solid rgba(74,109,140,0.2)", marginLeft: 4, flexShrink: 0 }}>P/C {pcrData.ratio.toFixed(2)}</span>}
               <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", letterSpacing: 2, flexShrink: 0, marginLeft: 8 }}>TOP LOSS:</span>
               {(movers.losers || []).slice(0, 5).map(l => (
@@ -1887,7 +1865,7 @@ export default function NexusDashboard({ user, onLogout }) {
           {/* FOMC countdown pill in header */}
           {fedData?.nextMeeting && fedData.nextMeeting.daysOut <= 14 && (
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "3px 10px", borderRadius: 10, background: "rgba(157,127,255,0.15)", border: "1px solid rgba(157,127,255,0.4)", marginBottom: 6, fontFamily: "monospace", fontSize: 9 }}>
-              <span style={{ color: "#9d7fff" }}>Ã°ÂÂÂ FOMC</span>
+              <span style={{ color: "#9d7fff" }}>🏛 FOMC</span>
               <span style={{ color: "#e8f4ff", fontWeight: 700 }}>{fedData.nextMeeting.daysOut}d</span>
               <span style={{ color: "#9d7fff" }}>{fedData.analysis?.nextExpectation?.toUpperCase()}</span>
             </div>
@@ -1909,19 +1887,19 @@ export default function NexusDashboard({ user, onLogout }) {
             {/* EVENTS */}
             {tab === "events" && (
               <>
-                {/* Ã¢ÂÂÃ¢ÂÂ LIVE SIGNAL PULSE Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+                {/* ══ LIVE SIGNAL PULSE ══════════════════════════════════════ */}
                 <div className="slide-up border-breathe" style={{ background:"rgba(0,0,0,0.5)", border:"1px solid rgba(0,212,255,0.2)", borderRadius:6, padding:"10px 16px", marginBottom:10, display:"flex", alignItems:"center", gap:20, overflowX:"auto" }}>
                   <div style={{ fontFamily:"monospace", fontSize:10, color:"#00d4ff", letterSpacing:3, flexShrink:0, display:"flex", alignItems:"center", gap:8 }}>
                     <span className="signal-live" style={{ width:8, height:8, borderRadius:"50%", background:"#39ff14", display:"inline-block", flexShrink:0 }}/>
                     NEXUS LIVE
                   </div>
                   {[
-                    { label:"VIX", value: vixData?.vix?.current?.toFixed(1)||"Ã¢ÂÂ", color:(vixData?.vix?.current||20)>25?"#ff2d55":"#39ff14" },
-                    { label:"FEAR/GREED", value: String(vixData?.fearGreed?.score||vixData?.fearGreed||"Ã¢ÂÂ"), color:((vixData?.fearGreed?.score||vixData?.fearGreed)||50)<30?"#ff2d55":((vixData?.fearGreed?.score||vixData?.fearGreed)||50)>60?"#39ff14":"#ffb800" },
+                    { label:"VIX", value: vixData?.vix?.current?.toFixed(1)||"—", color:(vixData?.vix?.current||20)>25?"#ff2d55":"#39ff14" },
+                    { label:"FEAR/GREED", value: String(vixData?.fearGreed?.score||vixData?.fearGreed||"—"), color:((vixData?.fearGreed?.score||vixData?.fearGreed)||50)<30?"#ff2d55":((vixData?.fearGreed?.score||vixData?.fearGreed)||50)>60?"#39ff14":"#ffb800" },
                     { label:"SCENARIO", value: geoData?.activeScenario||"STALL", color:"#ffb800" },
                     { label:"SECTOR", value: sectorData?.bias||"NEUTRAL", color:(sectorData?.bias||"").includes("ON")?"#39ff14":"#ff2d55" },
                     { label:"OI SIGNAL", value: oiData?.totalSignals>0?oiData.totalSignals+" signals":"NONE", color:oiData?.totalSignals>0?"#00ff9d":"#2a3d57" },
-                    { label:"DARK POOL", value: darkPoolData?.signals?.length>0?"ACTIVE":"Ã¢ÂÂ", color:darkPoolData?.signals?.length>0?"#9d7fff":"#2a3d57" },
+                    { label:"DARK POOL", value: darkPoolData?.signals?.length>0?"ACTIVE":"—", color:darkPoolData?.signals?.length>0?"#9d7fff":"#2a3d57" },
                   ].map((s,i) => (
                     <div key={i} style={{ flexShrink:0, textAlign:"center", minWidth:60 }}>
                       <div style={{ fontFamily:"monospace", fontSize:8, color:"#2a3d57", marginBottom:3, letterSpacing:1 }}>{s.label}</div>
@@ -1933,11 +1911,11 @@ export default function NexusDashboard({ user, onLogout }) {
                   </div>
                 </div>
 
-                {/* Daily Movers Ã¢ÂÂ compact, not center stage */}
+                {/* Daily Movers — compact, not center stage */}
                 {movers && Array.isArray(movers.gainers) && Array.isArray(movers.losers) && (movers.gainers.length > 0 || movers.losers.length > 0) && (
                   <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:10 }}>
                     <div style={{ background:"rgba(0,0,0,0.35)", border:"1px solid rgba(57,255,20,0.12)", borderRadius:5, padding:"10px 12px" }}>
-                      <div style={{ fontFamily:"monospace", fontSize:9, color:"#39ff14", letterSpacing:2, marginBottom:8 }}>MOVERS Ã¢ÂÂ</div>
+                      <div style={{ fontFamily:"monospace", fontSize:9, color:"#39ff14", letterSpacing:2, marginBottom:8 }}>MOVERS ↑</div>
                       {(movers.gainers||[]).slice(0,3).map((g,i) => (
                         <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6, paddingBottom:i<2?6:0, borderBottom:i<2?"1px solid rgba(57,255,20,0.07)":"none" }}>
                           <div>
@@ -1952,7 +1930,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       ))}
                     </div>
                     <div style={{ background:"rgba(0,0,0,0.35)", border:"1px solid rgba(255,45,85,0.12)", borderRadius:5, padding:"10px 12px" }}>
-                      <div style={{ fontFamily:"monospace", fontSize:9, color:"#ff2d55", letterSpacing:2, marginBottom:8 }}>MOVERS Ã¢ÂÂ</div>
+                      <div style={{ fontFamily:"monospace", fontSize:9, color:"#ff2d55", letterSpacing:2, marginBottom:8 }}>MOVERS ↓</div>
                       {(movers.losers||[]).slice(0,3).map((l,i) => (
                         <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6, paddingBottom:i<2?6:0, borderBottom:i<2?"1px solid rgba(255,45,85,0.07)":"none" }}>
                           <div>
@@ -1971,7 +1949,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 {criticals > 0 && (
                   <div style={{ padding: "7px 12px", background: "rgba(255,45,85,0.08)", border: "1px solid rgba(255,45,85,0.25)", borderRadius: 3, fontFamily: "monospace", fontSize: 10, color: "#ff2d55", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#ff2d55", display: "inline-block", animation: "pulseDot 1s infinite", flexShrink: 0 }} />
-                    {criticals} CRITICAL EVENT{criticals > 1 ? "S" : ""} ACTIVE Ã¢ÂÂ Click any card for AI analysis Ã¢ÂÂ
+                    {criticals} CRITICAL EVENT{criticals > 1 ? "S" : ""} ACTIVE — Click any card for AI analysis →
                   </div>
                 )}
                 {filtered.map(ev => <EventCard key={ev.id} event={ev} selected={selected?.id === ev.id} onClick={() => analyzeEvent(ev)} />)}
@@ -2034,11 +2012,11 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 8 }}>
                       <div>
                         <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>PRIMARY SOURCES</div>
-                        {(chain.primarySources || []).map(s => <div key={s} style={{ fontSize: 11 }}>Ã¢ÂÂ¸ {s}</div>)}
+                        {(chain.primarySources || []).map(s => <div key={s} style={{ fontSize: 11 }}>▸ {s}</div>)}
                       </div>
                       <div>
                         <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>ALTERNATIVES</div>
-                        {(chain.alternatives || []).map(s => <div key={s} style={{ fontSize: 11, color: "#ff6b35" }}>Ã¢ÂÂ¸ {s}</div>)}
+                        {(chain.alternatives || []).map(s => <div key={s} style={{ fontSize: 11, color: "#ff6b35" }}>▸ {s}</div>)}
                       </div>
                     </div>
                     <div style={{ fontSize: 11, fontFamily: "monospace" }}>
@@ -2081,59 +2059,59 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* Header */}
                 <div style={{ background: "linear-gradient(135deg,rgba(178,79,255,0.15),rgba(178,79,255,0.04))", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#b24fff", letterSpacing: 3, marginBottom: 4 }}>Ã¢Â¬Â¡ MULTI-SOURCE INTELLIGENCE PICKS</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#b24fff", letterSpacing: 3, marginBottom: 4 }}>⬡ MULTI-SOURCE INTELLIGENCE PICKS</div>
                     <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 4 }}>
-                      Scanning: <span style={{ color: "#b24fff" }}>CNBC ÃÂ· WSJ ÃÂ· Reddit WSB ÃÂ· r/investing ÃÂ· r/options ÃÂ· SEC 13F ÃÂ· Earnings</span>
+                      Scanning: <span style={{ color: "#b24fff" }}>CNBC · WSJ · Reddit WSB · r/investing · r/options · SEC 13F · Earnings</span>
                     </div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>
-                      Tracking: <span style={{ color: "#ff6b35" }}>Burry ÃÂ· Saylor ÃÂ· Cathie Wood ÃÂ· Buffett ÃÂ· Ryan Cohen</span>
+                      Tracking: <span style={{ color: "#ff6b35" }}>Burry · Saylor · Cathie Wood · Buffett · Ryan Cohen</span>
                     </div>
-                    {intelMeta && <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginTop: 4 }}>{intelMeta.headlinesAnalyzed} headlines analyzed ÃÂ· Up to 4 weekly expiries ÃÂ· ÃÂ±9% move threshold (up or down)</div>}
+                    {intelMeta && <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginTop: 4 }}>{intelMeta.headlinesAnalyzed} headlines analyzed · Up to 4 weekly expiries · ±9% move threshold (up or down)</div>}
                   </div>
                   <button onClick={() => generateIntelPicks(true)} disabled={loadingIntel} style={{ background: loadingIntel ? "#1a2d47" : "linear-gradient(135deg,#6a0dad,#b24fff)", color: loadingIntel ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 18px", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: loadingIntel ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                    {loadingIntel ? "SCANNING..." : intelPicks ? "Ã¢ÂÂ³ REFRESH" : "Ã¢Â¬Â¡ SCAN NOW"}
+                    {loadingIntel ? "SCANNING..." : intelPicks ? "⟳ REFRESH" : "⬡ SCAN NOW"}
                   </button>
                 </div>
 
-                {loadingIntel && <Spinner label="SCANNING CNBC ÃÂ· WSJ ÃÂ· REDDIT ÃÂ· SEC ÃÂ· EARNINGS..." />}
+                {loadingIntel && <Spinner label="SCANNING CNBC · WSJ · REDDIT · SEC · EARNINGS..." />}
 
                 {intelError && !loadingIntel && (
-                  <div style={{ padding: 14, background: "rgba(178,79,255,0.08)", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#b24fff", marginBottom: 12 }}>Ã¢ÂÂ  {intelError}</div>
+                  <div style={{ padding: 14, background: "rgba(178,79,255,0.08)", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#b24fff", marginBottom: 12 }}>⚠ {intelError}</div>
                 )}
 
                 {!intelPicks && !loadingIntel && !intelError && (
                   <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16, color: "#b24fff" }}>Ã¢Â¬Â¡</div>
+                    <div style={{ fontSize: 48, marginBottom: 16, color: "#b24fff" }}>⬡</div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, color: "#b24fff", marginBottom: 8, letterSpacing: 3 }}>MULTI-SOURCE INTELLIGENCE</div>
                     <div style={{ fontSize: 12, color: "#4a6d8c", lineHeight: 1.8, maxWidth: 460, margin: "0 auto 24px" }}>
                       Scans CNBC, WSJ, Reddit threads, SEC whale filings, and earnings calendars. Identifies stocks and commodities likely to move +9% or -9% with CALL or PUT and best expiry up to 4 Fridays out.
                     </div>
                     <button onClick={() => generateIntelPicks(false)} style={{ background: "linear-gradient(135deg,#6a0dad,#b24fff)", color: "#fff", border: "none", borderRadius: 3, padding: "12px 32px", fontSize: 14, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: "pointer", fontFamily: "monospace" }}>
-                      Ã¢Â¬Â¡ SCAN ALL SOURCES NOW
+                      ⬡ SCAN ALL SOURCES NOW
                     </button>
                   </div>
                 )}
 
                 {intelPicks && !loadingIntel && (
                   <div>
-                    {/* SIGNAL CONFLICT RESOLVER Ã¢ÂÂ auto-runs on picks */}
+                    {/* SIGNAL CONFLICT RESOLVER — auto-runs on picks */}
                     {resolverData?.ranked?.length > 0 && (
                       <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.3)", borderRadius: 4, padding: "10px 12px", marginBottom: 12 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", marginBottom: 6, letterSpacing: 1 }}>Ã¢ÂÂÃ¯Â¸Â SIGNAL CONFLICT RESOLVER Ã¢ÂÂ scenario-weighted arbitration</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", marginBottom: 6, letterSpacing: 1 }}>⚖️ SIGNAL CONFLICT RESOLVER — scenario-weighted arbitration</div>
                         <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                           {resolverData.ranked.slice(0,8).map((r, i) => (
                             <div key={i} style={{ background: r.verdict === "BUY" ? "rgba(57,255,20,0.08)" : r.verdict === "SELL" ? "rgba(255,45,85,0.08)" : "rgba(74,109,140,0.06)", border: `1px solid ${r.verdict === "BUY" ? "rgba(57,255,20,0.25)" : r.verdict === "SELL" ? "rgba(255,45,85,0.25)" : "rgba(74,109,140,0.15)"}`, borderRadius: 3, padding: "4px 8px", textAlign: "center" }}>
                               <div style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: r.isConflicted ? "#ffb800" : r.verdict.includes("BUY") ? "#39ff14" : r.verdict.includes("SELL") ? "#ff2d55" : "#4a6d8c" }}>{r.ticker}</div>
                               <div style={{ fontFamily: "monospace", fontSize: 8, color: r.verdict.includes("BUY") ? "#39ff14" : r.verdict.includes("SELL") ? "#ff2d55" : "#4a6d8c" }}>{r.verdict.replace("_"," ")}</div>
                               <div style={{ fontFamily: "monospace", fontSize: 9, color: "#e8f4ff" }}>{r.confidence}%</div>
-                              {r.isConflicted && <div style={{ fontSize: 7, color: "#ffb800" }}>Ã¢ÂÂ  CONFLICT</div>}
+                              {r.isConflicted && <div style={{ fontSize: 7, color: "#ffb800" }}>⚠ CONFLICT</div>}
                             </div>
                           ))}
                         </div>
                         <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 8, color: "#4a6d8c" }}>
                           <span>Scenario: <span style={{ color: "#ffb800" }}>{resolverData.ranked[0]?.scenarioTrust}</span></span>
                           <span>VIX regime: <span style={{ color: "#00d4ff" }}>{resolverData.ranked[0]?.vixRegime}</span></span>
-                          <span style={{ color: "#4a6d8c" }}>Ã¢ÂÂ  = conflicted signals Ã¢ÂÂ use smaller size</span>
+                          <span style={{ color: "#4a6d8c" }}>⚠ = conflicted signals — use smaller size</span>
                         </div>
                       </div>
                     )}
@@ -2142,7 +2120,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     ))}
                   <div style={{ padding: "12px 16px", background: "rgba(178,79,255,0.04)", border: "1px solid rgba(178,79,255,0.15)", borderRadius: 3, marginTop: 6 }}>
                     <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
-                      <span style={{ color: "#b24fff" }}>Ã¢ÂÂ  RESEARCH ONLY:</span> Intelligence picks are AI-synthesized from public sources for educational purposes. Not financial advice. Always verify on Questrade before trading. Options can expire worthless.
+                      <span style={{ color: "#b24fff" }}>⚠ RESEARCH ONLY:</span> Intelligence picks are AI-synthesized from public sources for educational purposes. Not financial advice. Always verify on Questrade before trading. Options can expire worthless.
                     </div>
                   </div>
                 </div>
@@ -2156,28 +2134,28 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* Header */}
                 <div style={{ background: "linear-gradient(135deg,rgba(255,107,53,0.15),rgba(255,107,53,0.04))", border: "1px solid rgba(255,107,53,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff6b35", letterSpacing: 3, marginBottom: 4 }}>Ã¢ÂÂ POWER NETWORK INTELLIGENCE</div>
-                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Profiling: <span style={{ color: "#ff6b35" }}>Trump ÃÂ· Netanyahu ÃÂ· Putin ÃÂ· Xi ÃÂ· Kushner ÃÂ· Trump Family</span></div>
-                    <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginTop: 4 }}>Psychographic analysis ÃÂ· Scenario engine ÃÂ· 4-week predictions ÃÂ· Power network mapping</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff6b35", letterSpacing: 3, marginBottom: 4 }}>◈ POWER NETWORK INTELLIGENCE</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Profiling: <span style={{ color: "#ff6b35" }}>Trump · Netanyahu · Putin · Xi · Kushner · Trump Family</span></div>
+                    <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginTop: 4 }}>Psychographic analysis · Scenario engine · 4-week predictions · Power network mapping</div>
                   </div>
                   <button onClick={() => generatePowerIntel(true)} disabled={loadingPower} style={{ background: loadingPower ? "#1a2d47" : "linear-gradient(135deg,#8b2500,#ff6b35)", color: loadingPower ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 18px", fontSize: 12, fontWeight: 700, letterSpacing: 2, cursor: loadingPower ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                    {loadingPower ? "ANALYZING..." : powerIntel ? "Ã¢ÂÂ³ REFRESH" : "Ã¢ÂÂ ANALYZE NOW"}
+                    {loadingPower ? "ANALYZING..." : powerIntel ? "⟳ REFRESH" : "◈ ANALYZE NOW"}
                   </button>
                 </div>
 
-                {loadingPower && <div style={{ textAlign: "center", padding: 40, color: "#ff6b35", fontFamily: "monospace", fontSize: 12 }}>Ã¢ÂÂ Running psychographic analysis on world leaders...<br/>Building scenario engine...<br/>Mapping power network...<br/><br/>This takes 20-30 seconds.</div>}
+                {loadingPower && <div style={{ textAlign: "center", padding: 40, color: "#ff6b35", fontFamily: "monospace", fontSize: 12 }}>◈ Running psychographic analysis on world leaders...<br/>Building scenario engine...<br/>Mapping power network...<br/><br/>This takes 20-30 seconds.</div>}
 
                 {powerError && !loadingPower && (
-                  <div style={{ padding: 14, background: "rgba(255,107,53,0.08)", border: "1px solid rgba(255,107,53,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#ff6b35" }}>Ã¢ÂÂ  {powerError}</div>
+                  <div style={{ padding: 14, background: "rgba(255,107,53,0.08)", border: "1px solid rgba(255,107,53,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#ff6b35" }}>⚠ {powerError}</div>
                 )}
 
                 {!powerIntel && !loadingPower && !powerError && (
                   <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>Ã¢ÂÂ</div>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>◈</div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ff6b35", marginBottom: 8, letterSpacing: 3 }}>POWER NETWORK ENGINE</div>
                     <div style={{ fontSize: 12, color: "#4a6d8c", lineHeight: 1.8, maxWidth: 500, margin: "0 auto 24px" }}>Psychoanalyzes Trump, Netanyahu, Putin, Xi, Kushner. Maps their hidden connections. Runs 4 geopolitical scenarios with weekly predictions. Generates specific options plays from each scenario.</div>
                     <button onClick={() => generatePowerIntel(false)} style={{ background: "linear-gradient(135deg,#8b2500,#ff6b35)", color: "#fff", border: "none", borderRadius: 3, padding: "12px 32px", fontSize: 14, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace" }}>
-                      Ã¢ÂÂ ACTIVATE POWER INTEL
+                      ◈ ACTIVATE POWER INTEL
                     </button>
                   </div>
                 )}
@@ -2192,7 +2170,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* TOP PLAY THIS WEEK */}
                       {topPlay?.ticker && (
                         <div style={{ background: "linear-gradient(135deg,rgba(255,107,53,0.2),rgba(255,45,85,0.1))", border: "2px solid #ff6b35", borderRadius: 4, padding: 16, marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 8 }}>Ã¢ÂÂ¡ TOP PLAY THIS WEEK Ã¢ÂÂ POWER DRIVEN</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 8 }}>⚡ TOP PLAY THIS WEEK — POWER DRIVEN</div>
                           <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
                             <div style={{ fontFamily: "monospace", fontSize: 32, fontWeight: 900, color: "#e8f4ff" }}>{topPlay.ticker}</div>
                             <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 900, color: topPlay.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{topPlay.direction}</div>
@@ -2211,15 +2189,15 @@ export default function NexusDashboard({ user, onLogout }) {
 
                       {/* WHALE NETWORK */}
                       <div style={{ marginBottom: 20 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3, marginBottom: 12 }}>Ã°ÂÂÂ WHALE NETWORK Ã¢ÂÂ 13F INTELLIGENCE</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3, marginBottom: 12 }}>🐋 WHALE NETWORK — 13F INTELLIGENCE</div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 10, marginBottom: 12 }}>
                           {/* Burry */}
                           <div style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: 14 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                              <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ff2d55" }}>Ã°ÂÂÂ» MICHAEL BURRY Ã¢ÂÂ Q3 2025</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ff2d55" }}>🐻 MICHAEL BURRY — Q3 2025</div>
                               <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>$1.38B</div>
                             </div>
-                            {[{t:"PLTR",d:"PUT",r:"300x+ sales Ã¢ÂÂ AI bubble"},{t:"NVDA",d:"PUT",r:"AI hardware overvalued"},{t:"PFE",d:"CALL",r:"Pharma recovery"},{t:"HAL",d:"CALL",r:"Energy services"}].map((p,i) => (
+                            {[{t:"PLTR",d:"PUT",r:"300x+ sales — AI bubble"},{t:"NVDA",d:"PUT",r:"AI hardware overvalued"},{t:"PFE",d:"CALL",r:"Pharma recovery"},{t:"HAL",d:"CALL",r:"Energy services"}].map((p,i) => (
                               <div key={i} style={{ display:"flex", gap:8, alignItems:"center", marginBottom:5 }}>
                                 <span style={{ fontFamily:"monospace", fontSize:13, fontWeight:900, color:"#e8f4ff", minWidth:45 }}>{p.t}</span>
                                 <span style={{ fontSize:10, fontWeight:700, color:p.d==="PUT"?"#ff2d55":"#39ff14", fontFamily:"monospace", padding:"1px 6px", background:p.d==="PUT"?"#ff2d5511":"#39ff1411", borderRadius:2 }}>{p.d}</span>
@@ -2231,7 +2209,7 @@ export default function NexusDashboard({ user, onLogout }) {
                           {/* Buffett */}
                           <div style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.3)", borderRadius: 4, padding: 14 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                              <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#39ff14" }}>Ã°ÂÂÂ WARREN BUFFETT Ã¢ÂÂ Q4 2025</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#39ff14" }}>📈 WARREN BUFFETT — Q4 2025</div>
                               <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>$274B</div>
                             </div>
                             {[{t:"AAPL",d:"LONG",r:"Core forever hold"},{t:"AXP",d:"LONG",r:"Premium consumer"},{t:"BAC",d:"LONG",r:"Rate normalization"},{t:"NUE+LEN",d:"NEW",r:"Steel + homebuilders"}].map((p,i) => (
@@ -2246,12 +2224,12 @@ export default function NexusDashboard({ user, onLogout }) {
                         </div>
                         {/* Convergence signal */}
                         <div style={{ background: "linear-gradient(135deg,rgba(0,212,255,0.08),rgba(255,107,53,0.05))", border: "1px solid rgba(0,212,255,0.25)", borderRadius: 4, padding: 14, marginBottom: 10 }}>
-                          <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>Ã¢ÂÂ¡ CURRENT CONVERGENCE SIGNAL</div>
+                          <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>⚡ CURRENT CONVERGENCE SIGNAL</div>
                           <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.6 }}>
                             Burry <span style={{ color:"#ff2d55", fontWeight:700 }}>BEARISH AI</span> (NVDA/PLTR puts) + Buffett <span style={{ color:"#39ff14", fontWeight:700 }}>BULLISH HOUSING</span> (LEN/DHI) + Energy recovery
                           </div>
                           <div style={{ fontSize: 11, color: "#ffb800", marginTop: 8, fontFamily: "monospace" }}>
-                            Ã¢ÂÂ ROTATE: Out of AI/tech overvaluation Ã¢ÂÂ Into housing, energy, pharma
+                            → ROTATE: Out of AI/tech overvaluation → Into housing, energy, pharma
                           </div>
                           <div style={{ display:"flex", gap:16, marginTop:10, flexWrap:"wrap" }}>
                             {[{label:"AVOID",tickers:"NVDA, PLTR, SMCI, ARM",col:"#ff2d55"},{label:"BUY",tickers:"DHI, LEN, NUE, PFE, HAL",col:"#39ff14"},{label:"WATCH",tickers:"DJT, MSTR, COIN",col:"#ffb800"}].map((g,i) => (
@@ -2264,7 +2242,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         </div>
                         {/* 13F timing edge */}
                         <div style={{ fontSize: 10, color: "#4a6d8c", padding: "8px 12px", background: "rgba(0,0,0,0.3)", borderRadius: 3, fontFamily: "monospace" }}>
-                          Ã°ÂÂÂ 13F Filing dates: Feb 14 ÃÂ· May 15 ÃÂ· Aug 14 ÃÂ· Nov 14 Ã¢ÂÂ Market moves WHEN filings released. Source: 13f.info
+                          📅 13F Filing dates: Feb 14 · May 15 · Aug 14 · Nov 14 — Market moves WHEN filings released. Source: 13f.info
                         </div>
                       </div>
 
@@ -2272,7 +2250,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* HIGHEST CONVICTION PLAY */}
                       {highestConviction?.ticker && (
                         <div style={{ background: "linear-gradient(135deg,rgba(57,255,20,0.15),rgba(0,212,255,0.08))", border: "2px solid #39ff14", borderRadius: 4, padding: 16, marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 10 }}>Ã°ÂÂÂ¯ HIGHEST CONVICTION PLAY Ã¢ÂÂ MULTI-SIGNAL CONVERGENCE</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 10 }}>🎯 HIGHEST CONVICTION PLAY — MULTI-SIGNAL CONVERGENCE</div>
                           <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
                             <div style={{ fontFamily: "monospace", fontSize: 36, fontWeight: 900, color: "#e8f4ff" }}>{highestConviction.ticker}</div>
                             <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 900, color: highestConviction.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{highestConviction.direction}</div>
@@ -2295,7 +2273,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* PROBABILITY SCORES */}
                       {probabilityScores?.length > 0 && (
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3, marginBottom: 12 }}>Ã°ÂÂÂ PROBABILITY SCORES Ã¢ÂÂ SIGNAL CONVERGENCE</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3, marginBottom: 12 }}>📊 PROBABILITY SCORES — SIGNAL CONVERGENCE</div>
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 10 }}>
                             {probabilityScores.map((p,i) => {
                               const confNum = parseInt(p.confidence) || 50;
@@ -2322,20 +2300,20 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* RISE/FALL PAIRS */}
                       {riseFallPairs?.length > 0 && (
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 3, marginBottom: 12 }}>Ã¢ÂÂ RISE/FALL PAIRS Ã¢ÂÂ MATHEMATICAL INVERSE RELATIONSHIPS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 3, marginBottom: 12 }}>↕ RISE/FALL PAIRS — MATHEMATICAL INVERSE RELATIONSHIPS</div>
                           {riseFallPairs.map((p,i) => (
                             <div key={i} style={{ display: "flex", gap: 12, alignItems: "center", padding: "10px 14px", background: "#080f1a", border: "1px solid #1a3a5c", borderRadius: 4, marginBottom: 8, flexWrap: "wrap" }}>
                               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                                <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>Ã¢ÂÂ² RISES</span>
+                                <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>▲ RISES</span>
                                 <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 900, color: "#39ff14" }}>{p.rise}</span>
                               </div>
-                              <span style={{ color: "#4a6d8c", fontSize: 16 }}>Ã¢ÂÂµÃ¢ÂÂ</span>
+                              <span style={{ color: "#4a6d8c", fontSize: 16 }}>⟵→</span>
                               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                                <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>Ã¢ÂÂ¼ FALLS</span>
+                                <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>▼ FALLS</span>
                                 <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 900, color: "#ff2d55" }}>{p.fall}</span>
                               </div>
                               <span style={{ flex: 1, fontSize: 11, color: "#8aabb8" }}>{p.catalyst}</span>
-                              <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>Ã¢ÂÂ± {p.timing}</span>
+                              <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>⏱ {p.timing}</span>
                             </div>
                           ))}
                         </div>
@@ -2344,11 +2322,11 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* PSYCHOLOGY PLAYS */}
                       {psychology && (
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 3, marginBottom: 12 }}>Ã°ÂÂ§Â  PSYCHOLOGY-DRIVEN PLAYS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 3, marginBottom: 12 }}>🧠 PSYCHOLOGY-DRIVEN PLAYS</div>
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 10 }}>
                             {psychology.trump?.trigger && (
                               <div style={{ background: "#080f1a", border: "1px solid rgba(255,107,53,0.3)", borderRadius: 4, padding: 14 }}>
-                                <div style={{ fontSize: 10, color: "#ff6b35", fontFamily: "monospace", marginBottom: 8 }}>Ã°ÂÂÂºÃ°ÂÂÂ¸ TRUMP PSYCHOLOGICAL PLAY</div>
+                                <div style={{ fontSize: 10, color: "#ff6b35", fontFamily: "monospace", marginBottom: 8 }}>🇺🇸 TRUMP PSYCHOLOGICAL PLAY</div>
                                 <div style={{ fontSize: 11, color: "#c8dff0", marginBottom: 6 }}><span style={{ color: "#4a6d8c" }}>Trigger:</span> {psychology.trump.trigger}</div>
                                 <div style={{ fontSize: 11, color: "#c8dff0", marginBottom: 8 }}><span style={{ color: "#4a6d8c" }}>Window:</span> {psychology.trump.window}</div>
                                 {psychology.trump.play && <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "6px 10px", background: `${psychology.trump.direction === "CALL" ? "#39ff1411" : "#ff2d5511"}`, borderRadius: 3 }}>
@@ -2361,7 +2339,7 @@ export default function NexusDashboard({ user, onLogout }) {
                             )}
                             {psychology.netanyahu?.trigger && (
                               <div style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: 14 }}>
-                                <div style={{ fontSize: 10, color: "#ff2d55", fontFamily: "monospace", marginBottom: 8 }}>Ã°ÂÂÂ®Ã°ÂÂÂ± NETANYAHU DESPERATION INDEX</div>
+                                <div style={{ fontSize: 10, color: "#ff2d55", fontFamily: "monospace", marginBottom: 8 }}>🇮🇱 NETANYAHU DESPERATION INDEX</div>
                                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
                                   <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>DESPERATION:</span>
                                   <span style={{ fontSize: 12, fontWeight: 700, color: psychology.netanyahu.desperation === "CRITICAL" ? "#ff2d55" : psychology.netanyahu.desperation === "HIGH" ? "#ffb800" : "#39ff14", fontFamily: "monospace" }}>{psychology.netanyahu.desperation}</span>
@@ -2376,7 +2354,7 @@ export default function NexusDashboard({ user, onLogout }) {
                             )}
                             {psychology.putin?.trigger && (
                               <div style={{ background: "#080f1a", border: "1px solid rgba(24,95,165,0.3)", borderRadius: 4, padding: 14 }}>
-                                <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>Ã°ÂÂÂ·Ã°ÂÂÂº PUTIN ECONOMIC DESPERATION</div>
+                                <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>🇷🇺 PUTIN ECONOMIC DESPERATION</div>
                                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
                                   <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>PRESSURE:</span>
                                   <span style={{ fontSize: 12, fontWeight: 700, color: psychology.putin.desperation === "CRITICAL" ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>{psychology.putin.desperation}</span>
@@ -2390,36 +2368,36 @@ export default function NexusDashboard({ user, onLogout }) {
                               </div>
                             )}
                           </div>
-                          {psychology.timingEdge && <div style={{ marginTop: 10, padding: "10px 14px", background: "rgba(178,79,255,0.06)", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 3, fontSize: 11, color: "#b24fff" }}>Ã¢ÂÂ± TIMING EDGE: {psychology.timingEdge}</div>}
+                          {psychology.timingEdge && <div style={{ marginTop: 10, padding: "10px 14px", background: "rgba(178,79,255,0.06)", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 3, fontSize: 11, color: "#b24fff" }}>⏱ TIMING EDGE: {psychology.timingEdge}</div>}
                         </div>
                       )}
 
                       {/* COMMUNITY INTELLIGENCE */}
                       {community && (community.topDD?.ticker || community.consensus?.ticker) && (
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 12 }}>Ã°ÂÂÂ¥ COMMUNITY INTELLIGENCE Ã¢ÂÂ PEER-VALIDATED ANALYSIS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 12 }}>👥 COMMUNITY INTELLIGENCE — PEER-VALIDATED ANALYSIS</div>
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 10 }}>
                             {community.topDD?.ticker && (
                               <div style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.25)", borderRadius: 4, padding: 14 }}>
-                                <div style={{ fontSize: 10, color: "#39ff14", fontFamily: "monospace", marginBottom: 8 }}>Ã°ÂÂÂ¥ TOP DD Ã¢ÂÂ MOST UPVOTED</div>
+                                <div style={{ fontSize: 10, color: "#39ff14", fontFamily: "monospace", marginBottom: 8 }}>🔥 TOP DD — MOST UPVOTED</div>
                                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
                                   <span style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 900, color: "#e8f4ff" }}>{community.topDD.ticker}</span>
                                   <span style={{ fontSize: 11, fontWeight: 700, color: community.topDD.direction === "CALL" || community.topDD.direction === "LONG" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{community.topDD.direction}</span>
-                                  {community.topDD.upvotes && <span style={{ fontSize: 10, color: "#b24fff", fontFamily: "monospace" }}>Ã¢ÂÂ{community.topDD.upvotes}</span>}
+                                  {community.topDD.upvotes && <span style={{ fontSize: 10, color: "#b24fff", fontFamily: "monospace" }}>↑{community.topDD.upvotes}</span>}
                                 </div>
                                 <div style={{ fontSize: 11, color: "#8aabb8", lineHeight: 1.5 }}>{community.topDD.thesis}</div>
                               </div>
                             )}
                             {community.consensus?.ticker && (
                               <div style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 14 }}>
-                                <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 8 }}>Ã°ÂÂÂ COMMUNITY CONSENSUS</div>
+                                <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 8 }}>📊 COMMUNITY CONSENSUS</div>
                                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
                                   <span style={{ fontFamily: "monospace", fontSize: 18, fontWeight: 900, color: "#e8f4ff" }}>{community.consensus.ticker}</span>
                                   <span style={{ fontSize: 11, fontWeight: 700, color: community.consensus.direction === "CALL" || community.consensus.direction === "LONG" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{community.consensus.direction}</span>
                                 </div>
                                 {community.contrarian?.signal && (
                                   <div style={{ marginTop: 8, padding: "6px 10px", background: "rgba(255,184,0,0.08)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 3 }}>
-                                    <div style={{ fontSize: 9, color: "#ffb800", fontFamily: "monospace", marginBottom: 3 }}>Ã¢ÂÂ  CONTRARIAN SIGNAL</div>
+                                    <div style={{ fontSize: 9, color: "#ffb800", fontFamily: "monospace", marginBottom: 3 }}>⚠ CONTRARIAN SIGNAL</div>
                                     <div style={{ fontSize: 10, color: "#8aabb8" }}>{community.contrarian.signal}</div>
                                     {community.contrarian.ticker && <div style={{ fontSize: 11, fontWeight: 700, color: "#ffb800", fontFamily: "monospace", marginTop: 4 }}>{community.contrarian.ticker}</div>}
                                   </div>
@@ -2428,10 +2406,10 @@ export default function NexusDashboard({ user, onLogout }) {
                             )}
                             {psychology.networkRising && (
                               <div style={{ background: "#080f1a", border: "1px solid #1a3a5c", borderRadius: 4, padding: 14 }}>
-                                <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 8 }}>Ã¢ÂÂ NETWORK FLOWS</div>
-                                <div style={{ fontSize: 10, color: "#4a6d8c", marginBottom: 3 }}>Ã¢ÂÂ² RISING</div>
+                                <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 8 }}>↕ NETWORK FLOWS</div>
+                                <div style={{ fontSize: 10, color: "#4a6d8c", marginBottom: 3 }}>▲ RISING</div>
                                 <div style={{ fontSize: 11, color: "#39ff14", fontFamily: "monospace", marginBottom: 8 }}>{psychology.networkRising}</div>
-                                <div style={{ fontSize: 10, color: "#4a6d8c", marginBottom: 3 }}>Ã¢ÂÂ¼ FALLING</div>
+                                <div style={{ fontSize: 10, color: "#4a6d8c", marginBottom: 3 }}>▼ FALLING</div>
                                 <div style={{ fontSize: 11, color: "#ff2d55", fontFamily: "monospace" }}>{psychology.networkFalling}</div>
                               </div>
                             )}
@@ -2440,13 +2418,13 @@ export default function NexusDashboard({ user, onLogout }) {
                       )}
 
                       {/* PSYCHOGRAPHIC PROFILES */}
-                      <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 12 }}>Ã¢ÂÂ PSYCHOGRAPHIC PROFILES</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 12 }}>◈ PSYCHOGRAPHIC PROFILES</div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 12, marginBottom: 20 }}>
                         {[
-                          { name: "DONALD TRUMP", emoji: "Ã°ÂÂÂºÃ°ÂÂÂ¸", data: profiles.trump, fields: [["Core Driver", "coreDriver"], ["Vanity Trigger", "vanityTrigger"], ["Announcement Pattern", "announcementPattern"], ["Current Play", "currentPlay"], ["Next Move", "nextMoveProbability"]] },
-                          { name: "BENJAMIN NETANYAHU", emoji: "Ã°ÂÂÂ®Ã°ÂÂÂ±", data: profiles.netanyahu, fields: [["Core Driver", "coreDriver"], ["Survival Play", "survivalPlay"], ["Trump Leverage", "trumpLeverage"], ["Next Move", "nextMove"]] },
-                          { name: "VLADIMIR PUTIN", emoji: "Ã°ÂÂÂ·Ã°ÂÂÂº", data: profiles.putin, fields: [["Core Driver", "coreDriver"], ["Economic Pressure", "economicPressure"], ["Iran Connection", "iranConnection"], ["Sanctions Play", "sanctionsPlay"]] },
-                          { name: "XI JINPING", emoji: "Ã°ÂÂÂ¨Ã°ÂÂÂ³", data: profiles.xi, fields: [["Core Driver", "coreDriver"], ["Taiwan Timeline", "taiwanTimeline"], ["Trade Play", "trumpTradePlay"], ["Next Move", "nextMove"]] },
+                          { name: "DONALD TRUMP", emoji: "🇺🇸", data: profiles.trump, fields: [["Core Driver", "coreDriver"], ["Vanity Trigger", "vanityTrigger"], ["Announcement Pattern", "announcementPattern"], ["Current Play", "currentPlay"], ["Next Move", "nextMoveProbability"]] },
+                          { name: "BENJAMIN NETANYAHU", emoji: "🇮🇱", data: profiles.netanyahu, fields: [["Core Driver", "coreDriver"], ["Survival Play", "survivalPlay"], ["Trump Leverage", "trumpLeverage"], ["Next Move", "nextMove"]] },
+                          { name: "VLADIMIR PUTIN", emoji: "🇷🇺", data: profiles.putin, fields: [["Core Driver", "coreDriver"], ["Economic Pressure", "economicPressure"], ["Iran Connection", "iranConnection"], ["Sanctions Play", "sanctionsPlay"]] },
+                          { name: "XI JINPING", emoji: "🇨🇳", data: profiles.xi, fields: [["Core Driver", "coreDriver"], ["Taiwan Timeline", "taiwanTimeline"], ["Trade Play", "trumpTradePlay"], ["Next Move", "nextMove"]] },
                         ].map((p, i) => p.data && (
                           <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(255,107,53,0.25)", borderRadius: 4, padding: 14 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -2472,7 +2450,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
                         {profiles.kushner && (
                           <div style={{ background: "#080f1a", border: "1px solid rgba(255,184,0,0.25)", borderRadius: 4, padding: 14 }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffb800", marginBottom: 10 }}>Ã°ÂÂÂ° JARED KUSHNER</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffb800", marginBottom: 10 }}>💰 JARED KUSHNER</div>
                             {[["Key Investments", "keyInvestments"], ["Saudi PIF Play", "saudiPlay"], ["Benefiting From", "benefitingFrom"], ["Watch Sectors", "watchSectors"]].map(([label, key], j) => profiles.kushner[key] && (
                               <div key={j} style={{ marginBottom: 6 }}>
                                 <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>{label.toUpperCase()}</div>
@@ -2483,7 +2461,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         )}
                         {profiles.trumpFamily && (
                           <div style={{ background: "#080f1a", border: "1px solid rgba(255,184,0,0.25)", borderRadius: 4, padding: 14 }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffb800", marginBottom: 10 }}>Ã°ÂÂÂÃ¯Â¸Â TRUMP FAMILY WATCH</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffb800", marginBottom: 10 }}>🏛️ TRUMP FAMILY WATCH</div>
                             <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 4 }}>STOCKS/SECTORS SINCE NOV 2024</div>
                             <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.6 }}>{profiles.trumpFamily.watchList}</div>
                           </div>
@@ -2493,15 +2471,15 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* NETWORK CONNECTIONS */}
                       {network && (
                         <div style={{ background: "#080f1a", border: "1px solid rgba(255,107,53,0.25)", borderRadius: 4, padding: 14, marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 12 }}>Ã¢ÂÂ HIDDEN POWER CONNECTIONS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 12 }}>◈ HIDDEN POWER CONNECTIONS</div>
                           {[network.connection1, network.connection2, network.connection3].filter(Boolean).map((c, i) => (
                             <div key={i} style={{ display: "flex", gap: 10, marginBottom: 8 }}>
-                              <div style={{ color: "#ff6b35", fontFamily: "monospace", fontSize: 12, flexShrink: 0 }}>Ã¢ÂÂ¶</div>
+                              <div style={{ color: "#ff6b35", fontFamily: "monospace", fontSize: 12, flexShrink: 0 }}>⟶</div>
                               <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.5 }}>{c}</div>
                             </div>
                           ))}
                           <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr", gap: 10 }}>
-                            {[["Ã°ÂÂÂ¢Ã¯Â¸Â IRAN WAR THESIS", network.iranWarThesis], ["Ã°ÂÂÂ·Ã°ÂÂÂº RUSSIA SANCTIONS THESIS", network.russiaSanctionsThesis], ["Ã¢ÂÂÃ¯Â¸Â NETANYAHU SURVIVAL THESIS", network.netanyahuSurvivalThesis]].map(([title, text], i) => text && (
+                            {[["🛢️ IRAN WAR THESIS", network.iranWarThesis], ["🇷🇺 RUSSIA SANCTIONS THESIS", network.russiaSanctionsThesis], ["⚖️ NETANYAHU SURVIVAL THESIS", network.netanyahuSurvivalThesis]].map(([title, text], i) => text && (
                               <div key={i} style={{ padding: 12, background: "rgba(255,107,53,0.05)", border: "1px solid rgba(255,107,53,0.15)", borderRadius: 3 }}>
                                 <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", marginBottom: 6 }}>{title}</div>
                                 <div style={{ fontSize: 11, color: "#8aabb8", lineHeight: 1.6 }}>{text}</div>
@@ -2512,7 +2490,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       )}
 
                       {/* SCENARIO ENGINE */}
-                      <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 12 }}>Ã¢ÂÂ 4-WEEK SCENARIO ENGINE</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 12 }}>◈ 4-WEEK SCENARIO ENGINE</div>
                       {scenarios.filter(s => s.name).map((sc, si) => (
                         <div key={si} style={{ background: "#080f1a", border: "1px solid rgba(255,107,53,0.2)", borderLeft: "4px solid #ff6b35", borderRadius: 4, padding: 16, marginBottom: 12 }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
@@ -2553,44 +2531,44 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* AI ECOSYSTEM */}
                       {aiEcosystem && (
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3, marginBottom: 12 }}>Ã°ÂÂ¤Â AI ECOSYSTEM INTELLIGENCE</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3, marginBottom: 12 }}>🤖 AI ECOSYSTEM INTELLIGENCE</div>
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 10, marginBottom: 12 }}>
                             {/* Hardware Winners */}
                             <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 4, padding: 12 }}>
-                              <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>Ã¢ÂÂ¡ HARDWARE WINNERS</div>
+                              <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>⚡ HARDWARE WINNERS</div>
                               {aiEcosystem.hardwareWinners?.map((h,i) => h.ticker && <div key={i} style={{ marginBottom: 6 }}><span style={{ color: "#39ff14", fontFamily: "monospace", fontWeight: 700 }}>{h.ticker}</span><span style={{ fontSize: 10, color: "#8aabb8", marginLeft: 8 }}>{h.reason}</span></div>)}
-                              {aiEcosystem.hardwareLosers?.map((h,i) => h.ticker && <div key={i} style={{ marginBottom: 6 }}><span style={{ color: "#ff2d55", fontFamily: "monospace", fontWeight: 700 }}>Ã¢ÂÂ{h.ticker}</span><span style={{ fontSize: 10, color: "#8aabb8", marginLeft: 8 }}>{h.reason}</span></div>)}
+                              {aiEcosystem.hardwareLosers?.map((h,i) => h.ticker && <div key={i} style={{ marginBottom: 6 }}><span style={{ color: "#ff2d55", fontFamily: "monospace", fontWeight: 700 }}>↓{h.ticker}</span><span style={{ fontSize: 10, color: "#8aabb8", marginLeft: 8 }}>{h.reason}</span></div>)}
                             </div>
                             {/* Energy + Data Centers */}
                             <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 4, padding: 12 }}>
-                              <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>Ã¢ÂÂ¡ ENERGY + DATA CENTERS</div>
+                              <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>⚡ ENERGY + DATA CENTERS</div>
                               {aiEcosystem.energyPlays?.map((e,i) => e.ticker && <div key={i} style={{ marginBottom: 6 }}><span style={{ color: "#39ff14", fontFamily: "monospace", fontWeight: 700 }}>{e.ticker}</span><span style={{ fontSize: 10, color: "#8aabb8", marginLeft: 8 }}>{e.reason}</span></div>)}
                               {aiEcosystem.datacenterPlay?.ticker && <div style={{ marginBottom: 6 }}><span style={{ color: "#ffb800", fontFamily: "monospace", fontWeight: 700 }}>{aiEcosystem.datacenterPlay.ticker}</span><span style={{ fontSize: 10, color: "#8aabb8", marginLeft: 8 }}>{aiEcosystem.datacenterPlay.reason}</span></div>}
                             </div>
                             {/* Minerals */}
                             <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 4, padding: 12 }}>
-                              <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>Ã¢ÂÂ CRITICAL MINERALS</div>
+                              <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>⛏ CRITICAL MINERALS</div>
                               {aiEcosystem.mineralPlays?.map((m,i) => m.ticker && <div key={i} style={{ marginBottom: 6 }}><span style={{ color: "#ffb800", fontFamily: "monospace", fontWeight: 700 }}>{m.mineral}</span><span style={{ color: "#39ff14", fontFamily: "monospace", marginLeft: 6 }}>{m.ticker}</span><span style={{ fontSize: 10, color: "#8aabb8", marginLeft: 8 }}>{m.reason}</span></div>)}
                             </div>
                           </div>
                           {/* Inverse pairs */}
                           {aiEcosystem.inversePairs?.length > 0 && (
                             <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 4, padding: 12, marginBottom: 10 }}>
-                              <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>Ã¢ÂÂ INVERSE PAIRS Ã¢ÂÂ When one rises the other falls</div>
+                              <div style={{ fontSize: 10, color: "#00d4ff", fontFamily: "monospace", marginBottom: 8 }}>↕ INVERSE PAIRS — When one rises the other falls</div>
                               {aiEcosystem.inversePairs.map((p,i) => <div key={i} style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 6 }}>
-                                <span style={{ color: "#39ff14", fontFamily: "monospace", fontWeight: 700 }}>Ã¢ÂÂ²{p.up}</span>
-                                <span style={{ color: "#4a6d8c" }}>Ã¢ÂÂ</span>
-                                <span style={{ color: "#ff2d55", fontFamily: "monospace", fontWeight: 700 }}>Ã¢ÂÂ¼{p.down}</span>
+                                <span style={{ color: "#39ff14", fontFamily: "monospace", fontWeight: 700 }}>▲{p.up}</span>
+                                <span style={{ color: "#4a6d8c" }}>→</span>
+                                <span style={{ color: "#ff2d55", fontFamily: "monospace", fontWeight: 700 }}>▼{p.down}</span>
                                 <span style={{ fontSize: 10, color: "#8aabb8" }}>{p.reason}</span>
                               </div>)}
                             </div>
                           )}
-                          {aiEcosystem.historicalPattern && <div style={{ fontSize: 10, color: "#4a6d8c", fontStyle: "italic", padding: "8px 12px", background: "rgba(0,212,255,0.03)", borderRadius: 3 }}>Ã°ÂÂÂ Historical Pattern: {aiEcosystem.historicalPattern}</div>}
+                          {aiEcosystem.historicalPattern && <div style={{ fontSize: 10, color: "#4a6d8c", fontStyle: "italic", padding: "8px 12px", background: "rgba(0,212,255,0.03)", borderRadius: 3 }}>📊 Historical Pattern: {aiEcosystem.historicalPattern}</div>}
                           {/* AI top plays */}
                           <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
                             {aiEcosystem.topCall?.ticker && <div style={{ flex:1, padding: 10, background: "#39ff1411", border: "1px solid #39ff1444", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>AI TOP CALL</div><div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#39ff14" }}>{aiEcosystem.topCall.ticker}</div><div style={{ fontSize: 10, color: "#ffb800" }}>{aiEcosystem.topCall.expiry}</div></div>}
                             {aiEcosystem.topPut?.ticker && <div style={{ flex:1, padding: 10, background: "#ff2d5511", border: "1px solid #ff2d5544", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>AI TOP PUT</div><div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#ff2d55" }}>{aiEcosystem.topPut.ticker}</div><div style={{ fontSize: 10, color: "#ffb800" }}>{aiEcosystem.topPut.expiry}</div></div>}
-                            {aiEcosystem.ma?.target && <div style={{ flex:2, padding: 10, background: "rgba(255,184,0,0.08)", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>M&A WATCH</div><div style={{ fontSize: 12, fontWeight: 700, color: "#ffb800", fontFamily: "monospace" }}>{aiEcosystem.ma.acquirer} Ã¢ÂÂ {aiEcosystem.ma.target}</div><div style={{ fontSize: 10, color: "#8aabb8" }}>{aiEcosystem.ma.reason}</div></div>}
+                            {aiEcosystem.ma?.target && <div style={{ flex:2, padding: 10, background: "rgba(255,184,0,0.08)", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>M&A WATCH</div><div style={{ fontSize: 12, fontWeight: 700, color: "#ffb800", fontFamily: "monospace" }}>{aiEcosystem.ma.acquirer} → {aiEcosystem.ma.target}</div><div style={{ fontSize: 10, color: "#8aabb8" }}>{aiEcosystem.ma.reason}</div></div>}
                           </div>
                         </div>
                       )}
@@ -2598,7 +2576,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* MINING */}
                       {mining && (
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 3, marginBottom: 12 }}>Ã¢ÂÂÃ¯Â¸Â MINING INTELLIGENCE</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 3, marginBottom: 12 }}>⛏️ MINING INTELLIGENCE</div>
                           {/* Metal outlooks */}
                           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
                             {mining.outlooks?.filter(o=>o.metal).map((o,i) => (
@@ -2622,7 +2600,7 @@ export default function NexusDashboard({ user, onLogout }) {
                               </div>
                             ))}
                           </div>
-                          {mining.maTarget && <div style={{ fontSize: 11, color: "#ffb800", padding: "8px 12px", background: "rgba(255,184,0,0.06)", borderRadius: 3 }}>Ã°ÂÂÂ¯ M&A Target: <strong>{mining.maTarget}</strong> Ã¢ÂÂ {mining.maReason}</div>}
+                          {mining.maTarget && <div style={{ fontSize: 11, color: "#ffb800", padding: "8px 12px", background: "rgba(255,184,0,0.06)", borderRadius: 3 }}>🎯 M&A Target: <strong>{mining.maTarget}</strong> — {mining.maReason}</div>}
                           {mining.redditBuzz && <div style={{ fontSize: 10, color: "#b24fff", marginTop: 6, fontStyle: "italic" }}>Reddit Buzz: {mining.redditBuzz}</div>}
                         </div>
                       )}
@@ -2630,7 +2608,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* PHARMA */}
                       {pharma && (
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 12 }}>Ã°ÂÂÂ PHARMA CATALYST WATCH</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 12 }}>💊 PHARMA CATALYST WATCH</div>
                           {pharma.pdufa?.length > 0 && (
                             <div style={{ marginBottom: 12 }}>
                               <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 8 }}>FDA PDUFA DATES</div>
@@ -2638,7 +2616,7 @@ export default function NexusDashboard({ user, onLogout }) {
                                 <div key={i} style={{ display: "flex", gap: 12, alignItems: "center", padding: "8px 12px", background: "#080f1a", border: `1px solid ${dirCol(p.play)}33`, borderRadius: 3, marginBottom: 6, flexWrap: "wrap" }}>
                                   <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#e8f4ff", minWidth: 60 }}>{p.ticker}</span>
                                   <span style={{ fontSize: 11, color: "#c8dff0", flex: 1 }}>{p.drug}</span>
-                                  <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>Ã°ÂÂÂ {p.date}</span>
+                                  <span style={{ fontSize: 10, color: "#ffb800", fontFamily: "monospace" }}>📅 {p.date}</span>
                                   <span style={{ fontSize: 10, fontWeight: 700, color: dirCol(p.play), fontFamily: "monospace", padding: "2px 8px", background: `${dirCol(p.play)}11`, border: `1px solid ${dirCol(p.play)}44`, borderRadius: 2 }}>{p.play}</span>
                                   <span style={{ fontSize: 10, color: "#8aabb8", flex: 2 }}>{p.reason}</span>
                                 </div>
@@ -2648,7 +2626,7 @@ export default function NexusDashboard({ user, onLogout }) {
                           {pharma.maTargets?.length > 0 && (
                             <div style={{ marginBottom: 8 }}>
                               <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 6 }}>M&A ACQUISITION TARGETS</div>
-                              {pharma.maTargets.map((t,i) => <div key={i} style={{ fontSize: 11, color: "#c8dff0", marginBottom: 4 }}>Ã°ÂÂÂ¯ <strong style={{ color: "#ffb800" }}>{t.ticker}</strong> Ã¢ÂÂ {t.reason}</div>)}
+                              {pharma.maTargets.map((t,i) => <div key={i} style={{ fontSize: 11, color: "#c8dff0", marginBottom: 4 }}>🎯 <strong style={{ color: "#ffb800" }}>{t.ticker}</strong> — {t.reason}</div>)}
                             </div>
                           )}
                           {pharma.redditBuzz && <div style={{ fontSize: 10, color: "#b24fff", fontStyle: "italic" }}>Reddit Buzz: {pharma.redditBuzz}</div>}
@@ -2658,7 +2636,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* PENNY STOCKS */}
                       {pennyStocks && (
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff2d55", letterSpacing: 3, marginBottom: 12 }}>Ã°ÂÂÂ¯ PENNY STOCK RADAR</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff2d55", letterSpacing: 3, marginBottom: 12 }}>🎯 PENNY STOCK RADAR</div>
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 8, marginBottom: 10 }}>
                             {pennyStocks.picks?.map((p,i) => (
                               <div key={i} style={{ background: "#080f1a", border: `1px solid ${dirCol(p.direction)}33`, borderRadius: 4, padding: 12 }}>
@@ -2669,15 +2647,15 @@ export default function NexusDashboard({ user, onLogout }) {
                                   </div>
                                   <span style={{ fontSize: 10, fontWeight: 700, color: dirCol(p.direction), fontFamily: "monospace", padding: "2px 6px", background: `${dirCol(p.direction)}11`, border: `1px solid ${dirCol(p.direction)}44`, borderRadius: 2 }}>{p.direction}</span>
                                 </div>
-                                <div style={{ fontSize: 10, color: "#ff2d55", fontFamily: "monospace", marginBottom: 4 }}>Ã¢ÂÂ¡ {p.catalyst}</div>
+                                <div style={{ fontSize: 10, color: "#ff2d55", fontFamily: "monospace", marginBottom: 4 }}>⚡ {p.catalyst}</div>
                                 <div style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.4 }}>{p.reason}</div>
                                 {p.redditScore && <div style={{ fontSize: 9, color: "#b24fff", marginTop: 4, fontFamily: "monospace" }}>Reddit: {p.redditScore}</div>}
                               </div>
                             ))}
                           </div>
                           <div style={{ display: "flex", gap: 10 }}>
-                            {pennyStocks.squeezeCandidate && <div style={{ flex:1, padding: 10, background: "rgba(255,45,85,0.08)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#ff2d55", fontFamily: "monospace", marginBottom: 4 }}>Ã°ÂÂÂ SQUEEZE CANDIDATE</div><div style={{ fontFamily: "monospace", fontWeight: 700, color: "#e8f4ff" }}>{pennyStocks.squeezeCandidate}</div><div style={{ fontSize: 10, color: "#8aabb8" }}>{pennyStocks.squeezeReason}</div></div>}
-                            {pennyStocks.avoid && <div style={{ flex:1, padding: 10, background: "rgba(255,184,0,0.06)", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#ffb800", fontFamily: "monospace", marginBottom: 4 }}>Ã¢ÂÂ  AVOID</div><div style={{ fontFamily: "monospace", fontWeight: 700, color: "#e8f4ff" }}>{pennyStocks.avoid}</div><div style={{ fontSize: 10, color: "#8aabb8" }}>{pennyStocks.avoidReason}</div></div>}
+                            {pennyStocks.squeezeCandidate && <div style={{ flex:1, padding: 10, background: "rgba(255,45,85,0.08)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#ff2d55", fontFamily: "monospace", marginBottom: 4 }}>🚀 SQUEEZE CANDIDATE</div><div style={{ fontFamily: "monospace", fontWeight: 700, color: "#e8f4ff" }}>{pennyStocks.squeezeCandidate}</div><div style={{ fontSize: 10, color: "#8aabb8" }}>{pennyStocks.squeezeReason}</div></div>}
+                            {pennyStocks.avoid && <div style={{ flex:1, padding: 10, background: "rgba(255,184,0,0.06)", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 3 }}><div style={{ fontSize: 9, color: "#ffb800", fontFamily: "monospace", marginBottom: 4 }}>⚠ AVOID</div><div style={{ fontFamily: "monospace", fontWeight: 700, color: "#e8f4ff" }}>{pennyStocks.avoid}</div><div style={{ fontSize: 10, color: "#8aabb8" }}>{pennyStocks.avoidReason}</div></div>}
                           </div>
                         </div>
                       )}
@@ -2686,7 +2664,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* MACRO & FED */}
                       {macro && macro.nextEvent && (
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 12 }}>Ã°ÂÂÂ MACRO CALENDAR & FED SIGNALS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6b35", letterSpacing: 3, marginBottom: 12 }}>📅 MACRO CALENDAR & FED SIGNALS</div>
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 10 }}>
                             <div style={{ background: "#080f1a", border: `1px solid ${macro.fedSignal === "DOVISH" ? "#39ff1444" : macro.fedSignal === "HAWKISH" ? "#ff2d5544" : "#1a3a5c"}`, borderRadius: 4, padding: 14 }}>
                               <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 6 }}>FED SIGNAL</div>
@@ -2716,7 +2694,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* MARKET MICROSTRUCTURE */}
                       {microstructure && (microstructure.squeezeTicker || microstructure.insiderTicker || microstructure.optionsTicker) && (
                         <div style={{ marginBottom: 20 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3, marginBottom: 12 }}>Ã¢ÂÂ¡ MARKET MICROSTRUCTURE SIGNALS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3, marginBottom: 12 }}>⚡ MARKET MICROSTRUCTURE SIGNALS</div>
                           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 10 }}>
                             {microstructure.pcRatio && (
                               <div style={{ background: "#080f1a", border: `1px solid ${microstructure.pcSignal === "BEARISH" ? "#ff2d5544" : "#39ff1444"}`, borderRadius: 4, padding: 12 }}>
@@ -2727,14 +2705,14 @@ export default function NexusDashboard({ user, onLogout }) {
                             )}
                             {microstructure.squeezeTicker && (
                               <div style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: 12 }}>
-                                <div style={{ fontSize: 9, color: "#ff2d55", fontFamily: "monospace", marginBottom: 4 }}>Ã°ÂÂÂ SHORT SQUEEZE WATCH</div>
+                                <div style={{ fontSize: 9, color: "#ff2d55", fontFamily: "monospace", marginBottom: 4 }}>🚀 SHORT SQUEEZE WATCH</div>
                                 <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#e8f4ff" }}>{microstructure.squeezeTicker}</div>
                                 <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 4 }}>{microstructure.squeezeReason}</div>
                               </div>
                             )}
                             {microstructure.insiderTicker && (
                               <div style={{ background: "#080f1a", border: `1px solid ${microstructure.insiderDirection === "BULLISH" ? "#39ff1444" : "#ff2d5544"}`, borderRadius: 4, padding: 12 }}>
-                                <div style={{ fontSize: 9, color: "#ffb800", fontFamily: "monospace", marginBottom: 4 }}>Ã°ÂÂÂ¤ INSIDER SIGNAL</div>
+                                <div style={{ fontSize: 9, color: "#ffb800", fontFamily: "monospace", marginBottom: 4 }}>👤 INSIDER SIGNAL</div>
                                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                                   <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#e8f4ff" }}>{microstructure.insiderTicker}</span>
                                   <span style={{ fontSize: 10, color: microstructure.insiderDirection === "BULLISH" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{microstructure.insiderDirection}</span>
@@ -2744,7 +2722,7 @@ export default function NexusDashboard({ user, onLogout }) {
                             )}
                             {microstructure.optionsTicker && (
                               <div style={{ background: `${microstructure.optionsDirection === "CALL" ? "#39ff1411" : "#ff2d5511"}`, border: `1px solid ${microstructure.optionsDirection === "CALL" ? "#39ff1444" : "#ff2d5544"}`, borderRadius: 4, padding: 12 }}>
-                                <div style={{ fontSize: 9, color: "#00d4ff", fontFamily: "monospace", marginBottom: 4 }}>Ã¢ÂÂ¡ UNUSUAL OPTIONS FLOW</div>
+                                <div style={{ fontSize: 9, color: "#00d4ff", fontFamily: "monospace", marginBottom: 4 }}>⚡ UNUSUAL OPTIONS FLOW</div>
                                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                                   <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 900, color: "#e8f4ff" }}>{microstructure.optionsTicker}</span>
                                   <span style={{ fontSize: 10, fontWeight: 700, color: microstructure.optionsDirection === "CALL" ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{microstructure.optionsDirection}</span>
@@ -2760,7 +2738,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
                         {seasonal && seasonal.pattern && (
                           <div style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.25)", borderRadius: 4, padding: 14 }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 2, marginBottom: 10 }}>Ã°ÂÂÂ SEASONAL PATTERN</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 2, marginBottom: 10 }}>📊 SEASONAL PATTERN</div>
                             <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.6, marginBottom: 10 }}>{seasonal.pattern}</div>
                             {seasonal.ticker && (
                               <div style={{ display: "flex", gap: 10, alignItems: "center", padding: "8px 10px", background: `${seasonal.direction === "CALL" ? "#39ff1411" : "#ff2d5511"}`, borderRadius: 3 }}>
@@ -2774,7 +2752,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         )}
                         {cryptoSignal && cryptoSignal.btcSignal && (
                           <div style={{ background: "#080f1a", border: "1px solid rgba(178,79,255,0.25)", borderRadius: 4, padding: 14 }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 2, marginBottom: 10 }}>Ã¢ÂÂ¿ CRYPTO Ã¢ÂÂ EQUITY SIGNAL</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 2, marginBottom: 10 }}>₿ CRYPTO → EQUITY SIGNAL</div>
                             <div style={{ fontSize: 14, fontWeight: 700, color: cryptoSignal.btcSignal === "BULLISH" ? "#39ff14" : cryptoSignal.btcSignal === "BEARISH" ? "#ff2d55" : "#ffb800", fontFamily: "monospace", marginBottom: 6 }}>BTC {cryptoSignal.btcSignal}</div>
                             <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 8 }}>{cryptoSignal.btcReason}</div>
                             <div style={{ fontSize: 11, color: "#c8dff0", marginBottom: 8 }}>{cryptoSignal.equityImpact}</div>
@@ -2791,7 +2769,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
                       <div style={{ padding: "12px 16px", background: "rgba(255,107,53,0.04)", border: "1px solid rgba(255,107,53,0.15)", borderRadius: 3, marginTop: 6 }}>
                         <div style={{ fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
-                          <span style={{ color: "#ff6b35" }}>Ã¢ÂÂ  IMPORTANT:</span> Power Intel analysis is AI-synthesized geopolitical research for educational purposes only. Psychographic profiles are analytical models, not definitive statements of intent. Not financial advice. Always verify on Questrade before trading.
+                          <span style={{ color: "#ff6b35" }}>⚠ IMPORTANT:</span> Power Intel analysis is AI-synthesized geopolitical research for educational purposes only. Psychographic profiles are analytical models, not definitive statements of intent. Not financial advice. Always verify on Questrade before trading.
                         </div>
                       </div>
                     </div>
@@ -2808,28 +2786,28 @@ export default function NexusDashboard({ user, onLogout }) {
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(255,45,85,0.1),rgba(255,45,85,0.03))", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55", letterSpacing: 3, marginBottom: 4 }}>Ã¢ÂÂ TOP 3 TRADE EXECUTION</div>
-                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Final output of the pipeline Ã¢ÂÂ 27 candidates Ã¢ÂÂ 9 scored Ã¢ÂÂ 3 validated with live Questrade data</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55", letterSpacing: 3, marginBottom: 4 }}>◎ TOP 3 TRADE EXECUTION</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Final output of the pipeline — 27 candidates → 9 scored → 3 validated with live Questrade data</div>
                   </div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button onClick={runFullPipeline} disabled={pipelineRunning} style={{ background: pipelineRunning ? "#1a2d47" : "linear-gradient(135deg,#7b0000,#ff2d55)", color: pipelineRunning ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: pipelineRunning ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                      {pipelineRunning ? pipelineStage : "Ã¢ÂÂ RUN PIPELINE"}
+                      {pipelineRunning ? pipelineStage : "◎ RUN PIPELINE"}
                     </button>
                     <button onClick={() => loadTrades(true)} disabled={loadingTrades} style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.4)", color: "#ff2d55", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>
-                      Ã¢ÂÂ³ REFRESH
+                      ⟳ REFRESH
                     </button>
-                    {trades?.trades && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "4px 10px", background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3 }}>Ã¢ÂÂ AUTO-LOGGED</span>}
+                    {trades?.trades && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "4px 10px", background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3 }}>✓ AUTO-LOGGED</span>}
                   </div>
                 </div>
 
-                {tradesError && <div style={{ padding: 12, background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, color: "#ff6b8a", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>Ã¢ÂÂ  {tradesError}</div>}
+                {tradesError && <div style={{ padding: 12, background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, color: "#ff6b8a", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>⚠ {tradesError}</div>}
 
                 {!trades && !loadingTrades && !tradesError && (
                   <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>Ã¢ÂÂ</div>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>◎</div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ff2d55", letterSpacing: 3, marginBottom: 8 }}>NO TRADES GENERATED</div>
                     <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Run the full pipeline to generate your top 3 validated trades</div>
-                    <button onClick={runFullPipeline} style={{ background: "linear-gradient(135deg,#7b0000,#ff2d55)", color: "#fff", border: "none", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>Ã¢ÂÂ RUN FULL PIPELINE</button>
+                    <button onClick={runFullPipeline} style={{ background: "linear-gradient(135deg,#7b0000,#ff2d55)", color: "#fff", border: "none", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>◎ RUN FULL PIPELINE</button>
                   </div>
                 )}
 
@@ -2852,22 +2830,22 @@ export default function NexusDashboard({ user, onLogout }) {
                           </div>
                         </div>
 
-                        {/* Live options data Ã¢ÂÂ Yahoo Finance (no QT dependency) */}
+                        {/* Live options data — Yahoo Finance (no QT dependency) */}
                         {(() => {
                           const yc = qtChains?.[trade.ticker];
                           const sp = qtQuotes?.[trade.ticker]?.lastTradePrice || yc?.currentPrice;
                           return (
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: 14, background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 4, padding: 12 }}>
                               {[
-                                ["STOCK", sp ? "$" + Number(sp).toFixed(2) : "Ã¢ÂÂ"],
+                                ["STOCK", sp ? "$" + Number(sp).toFixed(2) : "—"],
                                 ["STRIKE", yc?.bestStrike?.strike ? "$" + Number(yc.bestStrike.strike).toFixed(0) : (trade.strike || "ATM")],
-                                ["BID", yc?.bid ? "$" + Number(yc.bid).toFixed(2) : "Ã¢ÂÂ"],
-                                ["ASK", yc?.ask ? "$" + Number(yc.ask).toFixed(2) : "Ã¢ÂÂ"],
-                                ["MID", yc?.mid ? "$" + Number(yc.mid).toFixed(2) : yc?.bid && yc?.ask ? "$" + (( Number(yc.bid) + Number(yc.ask)) / 2).toFixed(2) : "Ã¢ÂÂ"],
+                                ["BID", yc?.bid ? "$" + Number(yc.bid).toFixed(2) : "—"],
+                                ["ASK", yc?.ask ? "$" + Number(yc.ask).toFixed(2) : "—"],
+                                ["MID", yc?.mid ? "$" + Number(yc.mid).toFixed(2) : yc?.bid && yc?.ask ? "$" + (( Number(yc.bid) + Number(yc.ask)) / 2).toFixed(2) : "—"],
                               ].map(([label, val]) => (
                                 <div key={label} style={{ textAlign: "center" }}>
                                   <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
-                                  <div style={{ fontSize: 13, fontFamily: "monospace", color: val === "Ã¢ÂÂ" ? "#2a3d57" : "#00d4ff", fontWeight: 700 }}>{val}</div>
+                                  <div style={{ fontSize: 13, fontFamily: "monospace", color: val === "—" ? "#2a3d57" : "#00d4ff", fontWeight: 700 }}>{val}</div>
                                 </div>
                               ))}
                             </div>
@@ -2876,10 +2854,10 @@ export default function NexusDashboard({ user, onLogout }) {
 
                         {/* Expiry + timing */}
                         <div style={{ display: "flex", gap: 16, marginBottom: 12, fontSize: 11, fontFamily: "monospace" }}>
-                          <span style={{ color: "#8aabb8" }}>EXPIRY: <span style={{ color: "#e8f4ff" }}>{trade.expiry && !trade.expiry.includes("00:00:00") ? trade.expiry : trade.expiry?.slice(0,10) || "Ã¢ÂÂ"}</span></span>
-                          <span style={{ color: "#8aabb8" }}>TIMING: <span style={{ color: "#e8f4ff" }}>{trade.urgency || (trade.timing && !trade.timing.includes("*") ? trade.timing : "Ã¢ÂÂ")}</span></span>
+                          <span style={{ color: "#8aabb8" }}>EXPIRY: <span style={{ color: "#e8f4ff" }}>{trade.expiry && !trade.expiry.includes("00:00:00") ? trade.expiry : trade.expiry?.slice(0,10) || "—"}</span></span>
+                          <span style={{ color: "#8aabb8" }}>TIMING: <span style={{ color: "#e8f4ff" }}>{trade.urgency || (trade.timing && !trade.timing.includes("*") ? trade.timing : "—")}</span></span>
                           {qtChains?.[trade.ticker]?.iv && qtChains[trade.ticker].iv < 5 ? <span style={{ color: "#8aabb8" }}>IV: <span style={{ color: "#ffb800" }}>{(qtChains[trade.ticker].iv * 100).toFixed(0)}%</span></span> : null}
-                          {qtChains?.[trade.ticker]?.delta ? <span style={{ color: "#8aabb8" }}>ÃÂ: <span style={{ color: "#e8f4ff" }}>{Number(qtChains[trade.ticker].delta).toFixed(2)}</span></span> : null}
+                          {qtChains?.[trade.ticker]?.delta ? <span style={{ color: "#8aabb8" }}>Δ: <span style={{ color: "#e8f4ff" }}>{Number(qtChains[trade.ticker].delta).toFixed(2)}</span></span> : null}
                           <span style={{ color: "#2a3d57", fontSize: 9 }}>via Yahoo Finance</span>
                         </div>
 
@@ -2890,11 +2868,11 @@ export default function NexusDashboard({ user, onLogout }) {
                         <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
                           <div style={{ flex: 1, background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 3, padding: "8px 12px" }}>
                             <div style={{ fontSize: 9, fontFamily: "monospace", color: "#39ff14", marginBottom: 3 }}>TARGET</div>
-                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#39ff14", fontWeight: 700 }}>{trade.targetReturn || (trade.targetPct && !trade.targetPct.includes("*") ? trade.targetPct : null) || trade.estimatedMove?.split(" ")[0] || "Ã¢ÂÂ"}</div>
+                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#39ff14", fontWeight: 700 }}>{trade.targetReturn || (trade.targetPct && !trade.targetPct.includes("*") ? trade.targetPct : null) || trade.estimatedMove?.split(" ")[0] || "—"}</div>
                           </div>
                           <div style={{ flex: 1, background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 3, padding: "8px 12px" }}>
                             <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ff2d55", marginBottom: 3 }}>STOP</div>
-                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#ff2d55", fontWeight: 700 }}>{trade.stopPct && !trade.stopPct.includes("*") ? trade.stopPct : "Ã¢ÂÂ"}</div>
+                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#ff2d55", fontWeight: 700 }}>{trade.stopPct && !trade.stopPct.includes("*") ? trade.stopPct : "—"}</div>
                           </div>
                           {trade.hedge?.ticker && !trade.hedge.ticker.includes("*") && (
                             <div style={{ flex: 2, background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 3, padding: "8px 12px" }}>
@@ -2906,7 +2884,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         </div>
 
                         {/* Risk factors */}
-                        {trade.riskFactors && <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", padding: "6px 10px", background: "rgba(255,45,85,0.04)", borderRadius: 3 }}>Ã¢ÂÂ  RISKS: {trade.riskFactors}</div>}
+                        {trade.riskFactors && <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", padding: "6px 10px", background: "rgba(255,45,85,0.04)", borderRadius: 3 }}>⚠ RISKS: {trade.riskFactors}</div>}
                       </div>
                     ))}
 
@@ -2921,7 +2899,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* PICK TRACKER */}
                 <div style={{ marginTop: 24 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, cursor: "pointer" }} onClick={() => { setShowTracker(!showTracker); if (!trackerData) loadTrackerData(); }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 3 }}>Ã°ÂÂÂ PICK TRACKER ({trackerData?.stats?.total || trackedPicks.length} logged)</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 3 }}>📋 PICK TRACKER ({trackerData?.stats?.total || trackedPicks.length} logged)</div>
                     <div style={{ fontSize: 11, color: "#4a6d8c", display: "flex", gap: 8, alignItems: "center" }}>
                       {trackerData?.stats && <>
                         <span style={{ color: "#39ff14" }}>{trackerData.stats.wins}W</span>
@@ -2930,7 +2908,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         {trackerData.stats.winRate !== null && <span style={{ color: "#ffd700", fontWeight: 700 }}>{trackerData.stats.winRate}% WR</span>}
                         {trackerData.stats.avgPnl !== null && <span style={{ color: trackerData.stats.avgPnl >= 0 ? "#39ff14" : "#ff2d55" }}>avg {trackerData.stats.avgPnl >= 0 ? "+" : ""}{trackerData.stats.avgPnl}%</span>}
                       </>}
-                      <span>{showTracker ? "Ã¢ÂÂ²" : "Ã¢ÂÂ¼"}</span>
+                      <span>{showTracker ? "▲" : "▼"}</span>
                     </div>
                   </div>
 
@@ -2939,15 +2917,15 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* Analytics */}
                       {trackerData?.stats && trackerData.stats.closed >= 3 && (
                         <div style={{ background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 4, padding: 12, marginBottom: 12 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 2, marginBottom: 10 }}>Ã°ÂÂÂ PERFORMANCE ANALYTICS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 2, marginBottom: 10 }}>📊 PERFORMANCE ANALYTICS</div>
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
                             <div style={{ background: "#080f1a", borderRadius: 3, padding: "8px 10px" }}>
                               <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 3 }}>CALL WIN RATE</div>
-                              <div style={{ fontSize: 16, fontFamily: "monospace", fontWeight: 700, color: (trackerData.stats.callWinRate || 0) >= 50 ? "#39ff14" : "#ff2d55" }}>{trackerData.stats.callWinRate !== null ? trackerData.stats.callWinRate + "%" : "Ã¢ÂÂ"}</div>
+                              <div style={{ fontSize: 16, fontFamily: "monospace", fontWeight: 700, color: (trackerData.stats.callWinRate || 0) >= 50 ? "#39ff14" : "#ff2d55" }}>{trackerData.stats.callWinRate !== null ? trackerData.stats.callWinRate + "%" : "—"}</div>
                             </div>
                             <div style={{ background: "#080f1a", borderRadius: 3, padding: "8px 10px" }}>
                               <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 3 }}>PUT WIN RATE</div>
-                              <div style={{ fontSize: 16, fontFamily: "monospace", fontWeight: 700, color: (trackerData.stats.putWinRate || 0) >= 50 ? "#39ff14" : "#ff2d55" }}>{trackerData.stats.putWinRate !== null ? trackerData.stats.putWinRate + "%" : "Ã¢ÂÂ"}</div>
+                              <div style={{ fontSize: 16, fontFamily: "monospace", fontWeight: 700, color: (trackerData.stats.putWinRate || 0) >= 50 ? "#39ff14" : "#ff2d55" }}>{trackerData.stats.putWinRate !== null ? trackerData.stats.putWinRate + "%" : "—"}</div>
                             </div>
                           </div>
                           {trackerData.stats.weights && (
@@ -2961,7 +2939,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         </div>
                       )}
                       {trackedPicks.length === 0 && !loadingTracker && (
-                        <div style={{ fontSize: 11, color: "#4a6d8c", fontStyle: "italic", padding: 12 }}>No picks logged yet. Run the pipeline Ã¢ÂÂ trades auto-log after every run.</div>
+                        <div style={{ fontSize: 11, color: "#4a6d8c", fontStyle: "italic", padding: 12 }}>No picks logged yet. Run the pipeline — trades auto-log after every run.</div>
                       )}
                       {loadingTracker && <div style={{ fontSize: 11, color: "#4a6d8c", padding: 12 }}>Loading tracker...</div>}
                       {trackedPicks.map((pick) => (
@@ -2978,7 +2956,7 @@ export default function NexusDashboard({ user, onLogout }) {
                             <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{new Date(pick.entryDate).toLocaleDateString()}</div>
                           </div>
                           {pick.thesis && <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 6, lineHeight: 1.5 }}>{pick.thesis.slice(0, 120)}{pick.thesis.length > 120 ? "..." : ""}</div>}
-                          {pick.entryPrice && <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 4, fontFamily: "monospace" }}>Entry: ${pick.entryPrice} ÃÂ· Target: {pick.targetPct} ÃÂ· Stop: {pick.stopPct}</div>}
+                          {pick.entryPrice && <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 4, fontFamily: "monospace" }}>Entry: ${pick.entryPrice} · Target: {pick.targetPct} · Stop: {pick.stopPct}</div>}
                           {pick.outcome === "OPEN" && (
                             <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
                               <input placeholder="Exit price" style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "4px 8px", fontSize: 11, fontFamily: "monospace", width: 90, outline: "none" }}
@@ -2999,41 +2977,41 @@ export default function NexusDashboard({ user, onLogout }) {
               </div>
             )}
 
-            {/* SIGNALS TAB Ã¢ÂÂ All intelligence layers in one view */}
+            {/* SIGNALS TAB — All intelligence layers in one view */}
             {tab === "signals" && (
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
 
                 {/* Header */}
                 <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: "12px 16px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>Ã¢ÂÂ¡ SIGNALS INTELLIGENCE</div>
-                    <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers Ã¢ÂÂ each signal automatically feeds the pipeline</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#39ff14", letterSpacing: 3, marginBottom: 2 }}>⚡ SIGNALS INTELLIGENCE</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>All 7 intelligence layers — each signal automatically feeds the pipeline</div>
                   </div>
-                  <button onClick={() => { loadOptionsOI(true); loadRedditWSB(true); loadSpikeDetector(true); loadWatchlistScan(true); loadSmartMoney(true); loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>Ã¢ÂÂ³ REFRESH ALL</button>
+                  <button onClick={() => { loadOptionsOI(true); loadRedditWSB(true); loadSpikeDetector(true); loadWatchlistScan(true); loadSmartMoney(true); loadGeoScenarios(true); loadAiInfra(true); loadWhispers(true); loadDarkPool(true); loadSectorRotation(true); loadPCR(true); loadFedCalendar(true); loadVixSentiment(true); loadUnusualFlow(true); loadWarRipple(true); loadNewsBias(true); loadInsiderFilings(true); loadAlliance(true); loadChartPatterns("", true); }} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "8px 16px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>⟳ REFRESH ALL</button>
                 </div>
 
                 {/* Signal summary pills */}
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
                   {[
-                    { label: "Ã¢ÂÂ¡ SPIKE", active: !!spikeData, color: spikeData?.analysis?.direction === "UP" ? "#39ff14" : "#ff2d55", count: spikeData?.topAlerts?.length, onClick: () => loadSpikeDetector(true) },
-                    { label: "Ã°ÂÂÂ¡ WATCH", active: !!watchlistScan, color: "#00d4ff", count: watchlistScan?.totalScanned, onClick: () => loadWatchlistScan(true) },
-                    { label: "Ã°ÂÂÂ OI FLOW", active: !!oiData, color: oiData?.totalSignals > 0 ? "#00ff9d" : "#4a6d8c", count: oiData?.totalSignals, onClick: () => loadOptionsOI(true) },
-                    { label: "Ã°ÂÂÂ¥ WSB", active: !!redditData, color: "#ff4500", count: redditData?.spikeBuys?.length, onClick: () => loadRedditWSB(true) },
-                    { label: "Ã°ÂÂÂ SMART$", active: !!smartMoneyData, color: "#ff69b4", count: smartMoneyData?.smartMoney?.buyTickers?.length, onClick: () => loadSmartMoney(true) },
-                    { label: "Ã°ÂÂÂ GEO", active: !!geoData, color: geoData?.activeScenario === "ESCALATION" ? "#ff2d55" : geoData?.activeScenario === "RESOLUTION" ? "#39ff14" : geoData?.activeScenario === "BLOCKADE" ? "#9d7fff" : "#ffb800", count: geoData?.activeScenario?.slice(0,4), onClick: () => loadGeoScenarios(true) },
-                    { label: "Ã°ÂÂ¤Â AI INFRA", active: !!aiInfraData, color: "#00ff9d", count: aiInfraData?.totalStocks, onClick: () => loadAiInfra(true) },
-                    { label: "Ã°ÂÂÂ¯ WHISPER", active: !!whisperData, color: "#ff6eb4", count: whisperData?.tickersAnalyzed, onClick: () => loadWhispers(true) },
-                    { label: "Ã°ÂÂÂ DARK POOL", active: !!darkPoolData, color: darkPoolData?.accumulation?.length > 0 ? "#39ff14" : "#9d7fff", count: darkPoolData?.accumulation?.length, onClick: () => loadDarkPool(true) },
-                    { label: "Ã°ÂÂÂ SECTOR", active: !!sectorData, color: sectorData?.riskRegime === "RISK_ON" ? "#39ff14" : sectorData?.riskRegime === "RISK_OFF" ? "#ff2d55" : "#ffb800", count: null, onClick: () => loadSectorRotation(true) },
-                    { label: "Ã°ÂÂÂ P/C", active: !!pcrData, color: pcrData?.ratio >= 1.2 ? "#39ff14" : pcrData?.ratio <= 0.6 ? "#ff2d55" : "#00d4ff", count: pcrData?.ratio, onClick: () => loadPCR(true) },
-                    { label: "Ã°ÂÂÂ FED", active: !!fedData, color: "#9d7fff", count: fedData?.nextMeeting?.daysOut, onClick: () => loadFedCalendar(true) },
-                    { label: "Ã°ÂÂÂ VIX/FG", active: !!vixData, color: "#00d4ff", count: vixData?.fearGreed?.score, onClick: () => loadVixSentiment(true) },
-                    { label: "Ã¢ÂÂ¡ FLOW", active: !!unusualFlow, color: "#b24fff", count: unusualFlow?.signals?.length, onClick: () => loadUnusualFlow(true) },
-                    { label: "Ã¢ÂÂ¢ WAR", active: !!warRipple, color: "#ff3c00", count: warRipple?.rippleLayers?.length, onClick: () => loadWarRipple(true) },
-                    { label: "Ã°ÂÂÂ BIAS", active: !!newsBias, color: "#ffb800", count: newsBias?.headlinesAnalyzed, onClick: () => loadNewsBias(true) },
-                    { label: "Ã°ÂÂÂ INSIDER", active: !!insiderData, color: "#ff8c00", count: insiderData?.strongBuys?.length, onClick: () => loadInsiderFilings(true) },
-                    { label: "Ã°ÂÂÂµ ALLIANCE", active: !!allianceData, color: "#ff6400", count: allianceData?.insiderData?.length, onClick: () => loadAlliance(true) },
-                    { label: "Ã°ÂÂÂ CHART", active: !!chartPatterns, color: "#64c8ff", count: chartPatterns?.patternSignals?.length, onClick: () => loadChartPatterns("", true) },
+                    { label: "⚡ SPIKE", active: !!spikeData, color: spikeData?.analysis?.direction === "UP" ? "#39ff14" : "#ff2d55", count: spikeData?.topAlerts?.length, onClick: () => loadSpikeDetector(true) },
+                    { label: "📡 WATCH", active: !!watchlistScan, color: "#00d4ff", count: watchlistScan?.totalScanned, onClick: () => loadWatchlistScan(true) },
+                    { label: "📊 OI FLOW", active: !!oiData, color: oiData?.totalSignals > 0 ? "#00ff9d" : "#4a6d8c", count: oiData?.totalSignals, onClick: () => loadOptionsOI(true) },
+                    { label: "🔥 WSB", active: !!redditData, color: "#ff4500", count: redditData?.spikeBuys?.length, onClick: () => loadRedditWSB(true) },
+                    { label: "🐋 SMART$", active: !!smartMoneyData, color: "#ff69b4", count: smartMoneyData?.smartMoney?.buyTickers?.length, onClick: () => loadSmartMoney(true) },
+                    { label: "🌍 GEO", active: !!geoData, color: geoData?.activeScenario === "ESCALATION" ? "#ff2d55" : geoData?.activeScenario === "RESOLUTION" ? "#39ff14" : geoData?.activeScenario === "BLOCKADE" ? "#9d7fff" : "#ffb800", count: geoData?.activeScenario?.slice(0,4), onClick: () => loadGeoScenarios(true) },
+                    { label: "🤖 AI INFRA", active: !!aiInfraData, color: "#00ff9d", count: aiInfraData?.totalStocks, onClick: () => loadAiInfra(true) },
+                    { label: "🎯 WHISPER", active: !!whisperData, color: "#ff6eb4", count: whisperData?.tickersAnalyzed, onClick: () => loadWhispers(true) },
+                    { label: "🌑 DARK POOL", active: !!darkPoolData, color: darkPoolData?.accumulation?.length > 0 ? "#39ff14" : "#9d7fff", count: darkPoolData?.accumulation?.length, onClick: () => loadDarkPool(true) },
+                    { label: "🔄 SECTOR", active: !!sectorData, color: sectorData?.riskRegime === "RISK_ON" ? "#39ff14" : sectorData?.riskRegime === "RISK_OFF" ? "#ff2d55" : "#ffb800", count: null, onClick: () => loadSectorRotation(true) },
+                    { label: "📉 P/C", active: !!pcrData, color: pcrData?.ratio >= 1.2 ? "#39ff14" : pcrData?.ratio <= 0.6 ? "#ff2d55" : "#00d4ff", count: pcrData?.ratio, onClick: () => loadPCR(true) },
+                    { label: "🏛 FED", active: !!fedData, color: "#9d7fff", count: fedData?.nextMeeting?.daysOut, onClick: () => loadFedCalendar(true) },
+                    { label: "📊 VIX/FG", active: !!vixData, color: "#00d4ff", count: vixData?.fearGreed?.score, onClick: () => loadVixSentiment(true) },
+                    { label: "⚡ FLOW", active: !!unusualFlow, color: "#b24fff", count: unusualFlow?.signals?.length, onClick: () => loadUnusualFlow(true) },
+                    { label: "☢ WAR", active: !!warRipple, color: "#ff3c00", count: warRipple?.rippleLayers?.length, onClick: () => loadWarRipple(true) },
+                    { label: "🔍 BIAS", active: !!newsBias, color: "#ffb800", count: newsBias?.headlinesAnalyzed, onClick: () => loadNewsBias(true) },
+                    { label: "🔎 INSIDER", active: !!insiderData, color: "#ff8c00", count: insiderData?.strongBuys?.length, onClick: () => loadInsiderFilings(true) },
+                    { label: "🕵 ALLIANCE", active: !!allianceData, color: "#ff6400", count: allianceData?.insiderData?.length, onClick: () => loadAlliance(true) },
+                    { label: "📈 CHART", active: !!chartPatterns, color: "#64c8ff", count: chartPatterns?.patternSignals?.length, onClick: () => loadChartPatterns("", true) },
                   ].map(s => (
                     <button key={s.label} onClick={s.onClick} style={{ background: s.active ? `rgba(0,0,0,0.3)` : "rgba(26,45,71,0.3)", border: `1px solid ${s.active ? s.color + "50" : "#1a2d47"}`, borderRadius: 20, padding: "4px 12px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", color: s.active ? s.color : "#4a6d8c", display: "flex", alignItems: "center", gap: 5 }}>
                       {s.label} {s.active && s.count !== undefined && <span style={{ background: s.color + "20", borderRadius: 10, padding: "0 5px", fontSize: 9 }}>{s.count}</span>}
@@ -3045,25 +3023,25 @@ export default function NexusDashboard({ user, onLogout }) {
                 <div style={{ background: "#080f1a", border: `1px solid ${oiData?.totalSignals > 0 ? "rgba(0,255,157,0.3)" : "rgba(74,109,140,0.2)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <div>
-                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00ff9d", letterSpacing: 2 }}>Ã°ÂÂÂ OPTIONS OI OVERNIGHT CHANGE Ã¢ÂÂ SMART MONEY</div>
-                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>OI buildup after close = institutions positioning before you wake up ÃÂ· 20 tickers monitored ÃÂ· delta vs prior snapshot</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00ff9d", letterSpacing: 2 }}>📊 OPTIONS OI OVERNIGHT CHANGE — SMART MONEY</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>OI buildup after close = institutions positioning before you wake up · 20 tickers monitored · delta vs prior snapshot</div>
                     </div>
                     {oiData && (
                       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                        <span style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>{oiData.tickersAnalyzed} tickers ÃÂ· {oiData.totalSignals} signals</span>
-                        <button onClick={() => loadOptionsOI(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³</button>
+                        <span style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>{oiData.tickersAnalyzed} tickers · {oiData.totalSignals} signals</span>
+                        <button onClick={() => loadOptionsOI(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>
                       </div>
                     )}
                   </div>
 
                   {!oiData ? (
-                    <button onClick={() => loadOptionsOI(true)} disabled={loadingOI} style={{ background: "rgba(0,255,157,0.1)", border: "1px solid rgba(0,255,157,0.3)", color: "#00ff9d", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingOI ? "SCANNING OPTIONS CHAINS..." : "Ã°ÂÂÂ LOAD OI OVERNIGHT CHANGE"}</button>
+                    <button onClick={() => loadOptionsOI(true)} disabled={loadingOI} style={{ background: "rgba(0,255,157,0.1)", border: "1px solid rgba(0,255,157,0.3)", color: "#00ff9d", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingOI ? "SCANNING OPTIONS CHAINS..." : "📊 LOAD OI OVERNIGHT CHANGE"}</button>
                   ) : (
                     <div>
                       {/* First run notice */}
                       {oiData.isFirstRun && (
                         <div style={{ background: "rgba(255,184,0,0.06)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 3, padding: "6px 10px", marginBottom: 8, fontSize: 9, color: "#ffb800" }}>
-                          Ã°ÂÂÂ¸ First run Ã¢ÂÂ OI snapshot saved. Run again tomorrow pre-market to see overnight OI changes vs today's baseline.
+                          📸 First run — OI snapshot saved. Run again tomorrow pre-market to see overnight OI changes vs today's baseline.
                         </div>
                       )}
 
@@ -3078,7 +3056,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* Bullish / Bearish OI grid */}
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
                         <div style={{ background: "rgba(57,255,20,0.04)", border: "1px solid rgba(57,255,20,0.15)", borderRadius: 4, padding: "8px 10px" }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 4 }}>Ã°ÂÂÂ CALL OI BUILDUP Ã¢ÂÂ BULLISH</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 4 }}>📈 CALL OI BUILDUP — BULLISH</div>
                           {oiData.topBullishOI?.length > 0 ? oiData.topBullishOI.map((a, i) => (
                             <div key={i} style={{ marginBottom: 6, paddingBottom: 6, borderBottom: i < oiData.topBullishOI.length - 1 ? "1px solid rgba(57,255,20,0.08)" : "none" }}>
                               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
@@ -3087,7 +3065,7 @@ export default function NexusDashboard({ user, onLogout }) {
                               </div>
                               {a.unusualCallBuildup?.slice(0, 2).map((opt, j) => (
                                 <div key={j} style={{ fontSize: 8, color: "#8aabb8", marginBottom: 1 }}>
-                                  ${opt.strike} CALL {opt.expiration} ÃÂ· +{opt.oiDelta?.toLocaleString()} OI ({opt.oiPct > 0 ? "+" + opt.oiPct + "%" : "new"}) ÃÂ· {opt.moneyness} ÃÂ· IV {opt.iv}%
+                                  ${opt.strike} CALL {opt.expiration} · +{opt.oiDelta?.toLocaleString()} OI ({opt.oiPct > 0 ? "+" + opt.oiPct + "%" : "new"}) · {opt.moneyness} · IV {opt.iv}%
                                 </div>
                               ))}
                               <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>{a.interpretation?.slice(0, 60)}</div>
@@ -3096,7 +3074,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         </div>
 
                         <div style={{ background: "rgba(255,45,85,0.04)", border: "1px solid rgba(255,45,85,0.15)", borderRadius: 4, padding: "8px 10px" }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 4 }}>Ã°ÂÂÂ PUT OI BUILDUP Ã¢ÂÂ BEARISH</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 4 }}>📉 PUT OI BUILDUP — BEARISH</div>
                           {oiData.topBearishOI?.length > 0 ? oiData.topBearishOI.map((a, i) => (
                             <div key={i} style={{ marginBottom: 6 }}>
                               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
@@ -3105,7 +3083,7 @@ export default function NexusDashboard({ user, onLogout }) {
                               </div>
                               {a.unusualPutBuildup?.slice(0, 2).map((opt, j) => (
                                 <div key={j} style={{ fontSize: 8, color: "#8aabb8", marginBottom: 1 }}>
-                                  ${opt.strike} PUT {opt.expiration} ÃÂ· +{opt.oiDelta?.toLocaleString()} OI ÃÂ· {opt.moneyness} ÃÂ· IV {opt.iv}%
+                                  ${opt.strike} PUT {opt.expiration} · +{opt.oiDelta?.toLocaleString()} OI · {opt.moneyness} · IV {opt.iv}%
                                 </div>
                               ))}
                             </div>
@@ -3114,9 +3092,9 @@ export default function NexusDashboard({ user, onLogout }) {
                           {/* Volatile plays */}
                           {oiData.highVolatilityOI?.length > 0 && (
                             <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid rgba(255,184,0,0.15)" }}>
-                              <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 3 }}>Ã¢ÂÂ¡ STRADDLE / VOLATILE</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 3 }}>⚡ STRADDLE / VOLATILE</div>
                               {oiData.highVolatilityOI.map((a, i) => (
-                                <div key={i} style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800", marginBottom: 1 }}>{a.ticker} Ã¢ÂÂ {a.interpretation?.slice(0, 40)}</div>
+                                <div key={i} style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800", marginBottom: 1 }}>{a.ticker} — {a.interpretation?.slice(0, 40)}</div>
                               ))}
                             </div>
                           )}
@@ -3131,7 +3109,7 @@ export default function NexusDashboard({ user, onLogout }) {
                             {oiData.ranked.slice(0, 8).map((a, i) => (
                               <div key={i} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "3px 8px", textAlign: "center" }}>
                                 <div style={{ fontFamily: "monospace", fontSize: 9, fontWeight: 700, color: a.smartMoneyBias === "BULLISH" ? "#39ff14" : a.smartMoneyBias === "BEARISH" ? "#ff2d55" : "#ffb800" }}>{a.ticker}</div>
-                                <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>P/C: {a.pcRatioOI || "Ã¢ÂÂ"}</div>
+                                <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>P/C: {a.pcRatioOI || "—"}</div>
                                 <div style={{ fontSize: 7, color: a.smartMoneyBias === "BULLISH" ? "#39ff14" : a.smartMoneyBias === "BEARISH" ? "#ff2d55" : "#ffb800" }}>{a.smartMoneyBias}</div>
                               </div>
                             ))}
@@ -3140,7 +3118,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       )}
 
                       {oiData.totalSignals === 0 && !oiData.isFirstRun && (
-                        <div style={{ fontSize: 10, color: "#4a6d8c", textAlign: "center", padding: "8px 0" }}>No unusual OI changes detected Ã¢ÂÂ market positioned normally. Best signals appear pre-market 8-9am ET.</div>
+                        <div style={{ fontSize: 10, color: "#4a6d8c", textAlign: "center", padding: "8px 0" }}>No unusual OI changes detected — market positioned normally. Best signals appear pre-market 8-9am ET.</div>
                       )}
                     </div>
                   )}
@@ -3150,32 +3128,32 @@ export default function NexusDashboard({ user, onLogout }) {
                 <div style={{ background: "#080f1a", border: "1px solid rgba(255,69,0,0.3)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <div>
-                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff4500", letterSpacing: 2 }}>Ã°ÂÂÂ¥ REDDIT WSB MENTION VELOCITY</div>
-                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>r/wallstreetbets ÃÂ· r/stocks ÃÂ· r/options ÃÂ· r/pennystocks ÃÂ· r/investing Ã¢ÂÂ velocity spikes precede retail-driven moves</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff4500", letterSpacing: 2 }}>🔥 REDDIT WSB MENTION VELOCITY</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>r/wallstreetbets · r/stocks · r/options · r/pennystocks · r/investing — velocity spikes precede retail-driven moves</div>
                     </div>
                     {redditData && (
                       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                        <span style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>{redditData.postsScanned} posts ÃÂ· {redditData.uniqueTickers} tickers</span>
-                        <button onClick={() => loadRedditWSB(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³</button>
+                        <span style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>{redditData.postsScanned} posts · {redditData.uniqueTickers} tickers</span>
+                        <button onClick={() => loadRedditWSB(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>
                       </div>
                     )}
                   </div>
 
                   {!redditData ? (
-                    <button onClick={() => loadRedditWSB(true)} disabled={loadingReddit} style={{ background: "rgba(255,69,0,0.1)", border: "1px solid rgba(255,69,0,0.3)", color: "#ff4500", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingReddit ? "SCANNING REDDIT..." : "Ã°ÂÂÂ¥ LOAD WSB VELOCITY"}</button>
+                    <button onClick={() => loadRedditWSB(true)} disabled={loadingReddit} style={{ background: "rgba(255,69,0,0.1)", border: "1px solid rgba(255,69,0,0.3)", color: "#ff4500", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingReddit ? "SCANNING REDDIT..." : "🔥 LOAD WSB VELOCITY"}</button>
                   ) : (
                     <div>
                       {/* Velocity spike callouts */}
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
                         {/* Spike buys */}
                         <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: "8px 10px" }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 4 }}>Ã°ÂÂÂ VELOCITY SPIKE Ã¢ÂÂ BULLISH</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 4 }}>🚀 VELOCITY SPIKE — BULLISH</div>
                           {redditData.spikeBuys?.length > 0 ? redditData.spikeBuys.map((m, i) => (
                             <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                               <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffd700" }}>{m.ticker}</span>
                               <div style={{ textAlign: "right" }}>
                                 <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff4500" }}>{m.velocity}x velocity</div>
-                                <div style={{ fontSize: 8, color: "#4a6d8c" }}>{m.count6h}posts/6h ÃÂ· {m.count24h}/24h</div>
+                                <div style={{ fontSize: 8, color: "#4a6d8c" }}>{m.count6h}posts/6h · {m.count24h}/24h</div>
                               </div>
                             </div>
                           )) : <div style={{ fontSize: 9, color: "#2a3d57" }}>No spike buys detected</div>}
@@ -3183,7 +3161,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
                         {/* Bearish spikes */}
                         <div style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: "8px 10px" }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 4 }}>Ã¢ÂÂ Ã¯Â¸Â BEARISH SENTIMENT SPIKE</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 4 }}>⚠️ BEARISH SENTIMENT SPIKE</div>
                           {redditData.bearishSpikes?.length > 0 ? redditData.bearishSpikes.map((m, i) => (
                             <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                               <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ff2d55" }}>{m.ticker}</span>
@@ -3199,16 +3177,16 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* Top mentioned + accelerating */}
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
                         <div>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 4 }}>Ã°ÂÂÂ ACCELERATING MENTIONS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 4 }}>📈 ACCELERATING MENTIONS</div>
                           {redditData.accelerating?.slice(0,4).map((m, i) => (
                             <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
                               <span style={{ fontFamily: "monospace", fontSize: 9, color: "#e8f4ff" }}>{m.ticker} <span style={{ fontSize: 8, color: m.sentimentBias === "BULLISH" ? "#39ff14" : "#ff2d55" }}>{m.sentimentBias}</span></span>
-                              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800" }}>{m.velocity}x ÃÂ· {m.count24h}posts</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800" }}>{m.velocity}x · {m.count24h}posts</span>
                             </div>
                           ))}
                         </div>
                         <div>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 4 }}>Ã°ÂÂÂ¬ MOST MENTIONED TODAY</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 4 }}>💬 MOST MENTIONED TODAY</div>
                           {redditData.topMentioned?.slice(0,4).map((m, i) => (
                             <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
                               <span style={{ fontFamily: "monospace", fontSize: 9, color: "#e8f4ff" }}>{m.ticker}</span>
@@ -3221,13 +3199,13 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* Viral posts */}
                       {redditData.viralPosts?.length > 0 && (
                         <div>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff4500", marginBottom: 4 }}>Ã°ÂÂÂ¥ VIRAL WSB POSTS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff4500", marginBottom: 4 }}>🔥 VIRAL WSB POSTS</div>
                           {redditData.viralPosts.slice(0,3).map((p, i) => (
                             <div key={i} style={{ padding: "4px 8px", marginBottom: 3, background: "rgba(255,69,0,0.04)", border: "1px solid rgba(255,69,0,0.15)", borderRadius: 3 }}>
                               <div style={{ fontSize: 9, color: "#e8f4ff", marginBottom: 2 }}>{p.title}</div>
                               <div style={{ display: "flex", gap: 8 }}>
-                                <span style={{ fontSize: 8, color: "#ffb800" }}>Ã¢ÂÂ {p.score}</span>
-                                <span style={{ fontSize: 8, color: "#4a6d8c" }}>Ã°ÂÂÂ¬ {p.comments}</span>
+                                <span style={{ fontSize: 8, color: "#ffb800" }}>↑ {p.score}</span>
+                                <span style={{ fontSize: 8, color: "#4a6d8c" }}>💬 {p.comments}</span>
                                 {p.tickers?.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 8, color: "#ff4500" }}>${t}</span>)}
                                 <span style={{ fontSize: 8, color: p.sentiment === "BULLISH" ? "#39ff14" : p.sentiment === "BEARISH" ? "#ff2d55" : "#4a6d8c" }}>{p.sentiment}</span>
                               </div>
@@ -3243,14 +3221,14 @@ export default function NexusDashboard({ user, onLogout }) {
                 <div style={{ background: "#080f1a", border: `2px solid ${spikeData?.analysis?.direction === "UP" ? "rgba(57,255,20,0.4)" : spikeData?.analysis?.direction === "DOWN" ? "rgba(255,45,85,0.4)" : "rgba(255,184,0,0.25)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <div>
-                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2 }}>Ã¢ÂÂ¡ SPIKE DETECTOR Ã¢ÂÂ PHARMA ÃÂ· METALS ÃÂ· MINING ÃÂ· PENNY</div>
-                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>FDA approvals ÃÂ· Clinical trials ÃÂ· Pre-market gaps ÃÂ· Volume coiling ÃÂ· Pre-spike pattern recognition</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2 }}>⚡ SPIKE DETECTOR — PHARMA · METALS · MINING · PENNY</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>FDA approvals · Clinical trials · Pre-market gaps · Volume coiling · Pre-spike pattern recognition</div>
                     </div>
-                    {spikeData && <button onClick={() => loadSpikeDetector(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³</button>}
+                    {spikeData && <button onClick={() => loadSpikeDetector(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
                   </div>
 
                   {!spikeData ? (
-                    <button onClick={() => loadSpikeDetector(true)} disabled={loadingSpike} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", color: "#ffb800", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingSpike ? "SCANNING PHARMA + METALS + PENNIES..." : "Ã¢ÂÂ¡ DETECT PRE-SPIKE PATTERNS"}</button>
+                    <button onClick={() => loadSpikeDetector(true)} disabled={loadingSpike} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", color: "#ffb800", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingSpike ? "SCANNING PHARMA + METALS + PENNIES..." : "⚡ DETECT PRE-SPIKE PATTERNS"}</button>
                   ) : (
                     <div>
                       {/* Primary alert */}
@@ -3261,9 +3239,9 @@ export default function NexusDashboard({ user, onLogout }) {
                             <span style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 700, color: "#ffd700" }}>{spikeData.analysis.highestSpikeRisk}</span>
                             <span style={{ fontFamily: "monospace", fontSize: 11, padding: "2px 8px", borderRadius: 10, background: spikeData.analysis.direction === "UP" ? "rgba(57,255,20,0.15)" : "rgba(255,45,85,0.15)", color: spikeData.analysis.direction === "UP" ? "#39ff14" : "#ff2d55", fontWeight: 700 }}>{spikeData.analysis.direction} {spikeData.analysis.magnitude}</span>
                           </div>
-                          <div style={{ fontSize: 10, color: "#c8dce8", marginBottom: 4 }}>Ã°ÂÂÂ {spikeData.analysis.preSpikePattern}</div>
-                          <div style={{ fontSize: 10, color: "#ffb800", marginBottom: 4 }}>Ã¢ÂÂ¡ CATALYST: {spikeData.analysis.catalyst}</div>
-                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", fontWeight: 700 }}>Ã°ÂÂÂ¯ {spikeData.analysis.optionsPlay}</div>
+                          <div style={{ fontSize: 10, color: "#c8dce8", marginBottom: 4 }}>📍 {spikeData.analysis.preSpikePattern}</div>
+                          <div style={{ fontSize: 10, color: "#ffb800", marginBottom: 4 }}>⚡ CATALYST: {spikeData.analysis.catalyst}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", fontWeight: 700 }}>🎯 {spikeData.analysis.optionsPlay}</div>
                         </div>
                       )}
 
@@ -3301,7 +3279,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* FDA view */}
                       {spikeView === "fda" && (
                         <div>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff69b4", marginBottom: 6 }}>Ã°ÂÂÂ RECENT FDA APPROVALS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff69b4", marginBottom: 6 }}>📋 RECENT FDA APPROVALS</div>
                           {spikeData.fdaData?.recentApprovals?.slice(0,4).map((a, i) => (
                             <div key={i} style={{ padding: "4px 8px", marginBottom: 3, background: "rgba(0,0,0,0.3)", borderRadius: 3, border: "1px solid rgba(255,105,180,0.15)" }}>
                               <span style={{ fontFamily: "monospace", fontSize: 10, color: "#ff69b4", fontWeight: 700 }}>{a.name}</span>
@@ -3309,15 +3287,15 @@ export default function NexusDashboard({ user, onLogout }) {
                               <span style={{ fontFamily: "monospace", fontSize: 8, marginLeft: 8, color: "#8aabb8" }}>{a.type}</span>
                             </div>
                           ))}
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff69b4", margin: "8px 0 4px" }}>Ã°ÂÂ§Âª PHASE 3 UPCOMING READOUTS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff69b4", margin: "8px 0 4px" }}>🧪 PHASE 3 UPCOMING READOUTS</div>
                           {spikeData.fdaData?.upcomingReadouts?.slice(0,3).map((t, i) => (
                             <div key={i} style={{ padding: "4px 8px", marginBottom: 3, background: "rgba(0,0,0,0.3)", borderRadius: 3 }}>
                               <div style={{ fontSize: 9, color: "#c8dce8" }}>{t.title}</div>
-                              <div style={{ fontSize: 8, color: "#4a6d8c" }}>{t.sponsor} ÃÂ· {t.completionDate}</div>
+                              <div style={{ fontSize: 8, color: "#4a6d8c" }}>{t.sponsor} · {t.completionDate}</div>
                             </div>
                           ))}
                           {spikeData.fdaNews?.slice(0,4).map((h, i) => (
-                            <div key={i} style={{ fontSize: 9, color: "#8aabb8", marginBottom: 2, padding: "2px 0", borderBottom: "1px solid rgba(74,109,140,0.05)" }}>Ã¢ÂÂ¢ {h.slice(0,80)}</div>
+                            <div key={i} style={{ fontSize: 9, color: "#8aabb8", marginBottom: 2, padding: "2px 0", borderBottom: "1px solid rgba(74,109,140,0.05)" }}>• {h.slice(0,80)}</div>
                           ))}
                         </div>
                       )}
@@ -3325,7 +3303,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* METALS view */}
                       {spikeView === "metals" && (
                         <div>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ffd700", marginBottom: 6 }}>Ã°ÂÂ¥Â PRECIOUS METALS & MINING</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ffd700", marginBottom: 6 }}>🥇 PRECIOUS METALS & MINING</div>
                           {spikeData.analysis?.metalSignal && (
                             <div style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: 4, padding: "8px 10px", marginBottom: 8 }}>
                               <div style={{ fontSize: 10, color: "#ffd700" }}>{spikeData.analysis.metalSignal}</div>
@@ -3339,7 +3317,7 @@ export default function NexusDashboard({ user, onLogout }) {
                             </div>
                           ))}
                           {spikeData.metalNews?.slice(0,4).map((h, i) => (
-                            <div key={i} style={{ fontSize: 9, color: "#8aabb8", marginBottom: 2 }}>Ã¢ÂÂ¢ {h.slice(0,80)}</div>
+                            <div key={i} style={{ fontSize: 9, color: "#8aabb8", marginBottom: 2 }}>• {h.slice(0,80)}</div>
                           ))}
                         </div>
                       )}
@@ -3347,7 +3325,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* PENNY view */}
                       {spikeView === "penny" && (
                         <div>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#9d7fff", marginBottom: 6 }}>Ã°ÂÂÂ PENNY STOCKS + SMALL CAPS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#9d7fff", marginBottom: 6 }}>💊 PENNY STOCKS + SMALL CAPS</div>
                           {spikeData.patterns?.filter(p => p.type?.includes("PENNY") || p.type?.includes("SMALL")).map((p, i) => (
                             <div key={i} style={{ padding: "5px 8px", marginBottom: 3, background: "rgba(0,0,0,0.3)", borderRadius: 3, border: `1px solid ${p.score >= 3 ? "rgba(157,127,255,0.3)" : "rgba(74,109,140,0.1)"}` }}>
                               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -3360,7 +3338,7 @@ export default function NexusDashboard({ user, onLogout }) {
                                   {p.volRatio >= 2 && <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800" }}>{p.volRatio}x vol</div>}
                                 </div>
                               </div>
-                              {p.signals?.length > 0 && <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 2 }}>{p.signals.join(" ÃÂ· ")}</div>}
+                              {p.signals?.length > 0 && <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 2 }}>{p.signals.join(" · ")}</div>}
                             </div>
                           ))}
                         </div>
@@ -3369,7 +3347,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* PATTERNS view */}
                       {spikeView === "patterns" && (
                         <div>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", marginBottom: 6 }}>Ã°ÂÂÂ PRE-SPIKE PATTERN LIBRARY</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", marginBottom: 6 }}>📚 PRE-SPIKE PATTERN LIBRARY</div>
                           {Object.entries(spikeData.spikePatterns || {}).map(([key, p], i) => (
                             <div key={i} style={{ padding: "6px 8px", marginBottom: 4, background: "rgba(0,0,0,0.3)", borderRadius: 3, border: "1px solid rgba(0,212,255,0.1)" }}>
                               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
@@ -3377,8 +3355,8 @@ export default function NexusDashboard({ user, onLogout }) {
                                 <span style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14" }}>{p.confidence}% conf</span>
                               </div>
                               <div style={{ fontSize: 9, color: "#8aabb8", marginBottom: 2 }}>{p.description}</div>
-                              <div style={{ fontSize: 8, color: "#ffb800" }}>Ã°ÂÂÂ {p.historicalMove}</div>
-                              <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 2 }}>Ã°ÂÂÂ¯ {p.playbook?.slice(0,80)}</div>
+                              <div style={{ fontSize: 8, color: "#ffb800" }}>📈 {p.historicalMove}</div>
+                              <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 2 }}>🎯 {p.playbook?.slice(0,80)}</div>
                             </div>
                           ))}
                         </div>
@@ -3391,10 +3369,10 @@ export default function NexusDashboard({ user, onLogout }) {
                 <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.25)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <div>
-                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>Ã°ÂÂÂ¡ MASTER WATCHLIST Ã¢ÂÂ 89 TICKERS ÃÂ 12 THEMES</div>
-                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>AI ÃÂ· Quantum ÃÂ· Space ÃÂ· Nuclear ÃÂ· Defense ÃÂ· Optical ÃÂ· Crypto ÃÂ· Biotech ÃÂ· Energy ÃÂ· Transport ÃÂ· Macro + 15 smart money operators</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>📡 MASTER WATCHLIST — 89 TICKERS × 12 THEMES</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>AI · Quantum · Space · Nuclear · Defense · Optical · Crypto · Biotech · Energy · Transport · Macro + 15 smart money operators</div>
                     </div>
-                    {watchlistScan && <button onClick={() => loadWatchlistScan(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³</button>}
+                    {watchlistScan && <button onClick={() => loadWatchlistScan(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
                   </div>
 
                   {!watchlistScan ? (
@@ -3406,7 +3384,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       </div>
                       <div style={{ fontFamily:"monospace", fontSize:15, color:"#00d4ff", marginBottom:6, letterSpacing:2 }}>MASTER WATCHLIST</div>
                       <div style={{ fontSize:11, color:"#4a6d8c", marginBottom:16, maxWidth:380, margin:"0 auto 20px" }}>
-                        89 tickers ÃÂ 16 themes Ã¢ÂÂ each scored on momentum, volume surge, signal alignment, and geo scenario fit. Results auto-inject into every pipeline run and weight adjuster.
+                        89 tickers × 16 themes — each scored on momentum, volume surge, signal alignment, and geo scenario fit. Results auto-inject into every pipeline run and weight adjuster.
                       </div>
                       <div style={{ display:"flex", gap:6, justifyContent:"center", marginBottom:24, flexWrap:"wrap" }}>
                         {["AI Compute","Quantum","Space","Nuclear","Defense","Crypto","Biotech","Energy","Oil/Gas","Solar","Helium","Transport","Utilities","Macro","AI Software","Optical"].map((t,i) => (
@@ -3414,7 +3392,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         ))}
                       </div>
                       <button onClick={() => loadWatchlistScan(true)} disabled={loadingWatchlist} className="nexus-pick" style={{ background:"linear-gradient(135deg,rgba(0,212,255,0.12),rgba(0,212,255,0.04))", border:"1px solid rgba(0,212,255,0.4)", color:"#00d4ff", borderRadius:5, padding:"12px 32px", fontSize:13, cursor:loadingWatchlist?"not-allowed":"pointer", fontFamily:"monospace", fontWeight:700, letterSpacing:2, opacity:loadingWatchlist?0.6:1 }}>
-                        {loadingWatchlist ? "Ã¢ÂÂ³ SCANNING 89 TICKERS..." : "SCAN 89 TICKERS Ã¢ÂÂ"}
+                        {loadingWatchlist ? "⏳ SCANNING 89 TICKERS..." : "SCAN 89 TICKERS →"}
                       </button>
                     </div>
                   ) : (
@@ -3436,13 +3414,13 @@ export default function NexusDashboard({ user, onLogout }) {
                         )}
                         {watchlistScan.analysis?.hiddenGem && (
                           <div style={{ background: "rgba(255,184,0,0.04)", border: "1px solid rgba(255,184,0,0.15)", borderRadius: 4, padding: "8px 10px" }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 3 }}>HIDDEN GEM Ã°ÂÂÂ</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 3 }}>HIDDEN GEM 💎</div>
                             <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ffb800" }}>{watchlistScan.analysis.hiddenGem}</div>
                           </div>
                         )}
                       </div>
 
-                      {/* Theme grid Ã¢ÂÂ click to expand */}
+                      {/* Theme grid — click to expand */}
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 4, marginBottom: 10 }}>
                         {Object.entries(watchlistScan.themeScores || {}).map(([key, theme]) => (
                           <div key={key} onClick={() => setWatchTheme(watchTheme === key ? null : key)} style={{ background: watchTheme === key ? "rgba(0,212,255,0.08)" : "rgba(0,0,0,0.3)", border: `1px solid ${theme.avg1w >= 3 ? "rgba(57,255,20,0.3)" : theme.avg1w >= 0 ? "rgba(74,109,140,0.2)" : "rgba(255,45,85,0.2)"}`, borderRadius: 3, padding: "5px 6px", cursor: "pointer", textAlign: "center" }}>
@@ -3456,7 +3434,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* Expanded theme */}
                       {watchTheme && watchlistScan.themeScores?.[watchTheme] && (
                         <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 4, padding: 10, marginBottom: 8 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", marginBottom: 6 }}>{watchlistScan.themeScores[watchTheme].emoji} {watchlistScan.themeScores[watchTheme].label?.toUpperCase()} Ã¢ÂÂ {watchlistScan.themeScores[watchTheme].rationale}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff", marginBottom: 6 }}>{watchlistScan.themeScores[watchTheme].emoji} {watchlistScan.themeScores[watchTheme].label?.toUpperCase()} — {watchlistScan.themeScores[watchTheme].rationale}</div>
                           <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                             {watchlistScan.themeScores[watchTheme].tickers?.map((s, i) => (
                               <div key={i} style={{ background: s.chg1w >= 0 ? "rgba(57,255,20,0.06)" : "rgba(255,45,85,0.06)", border: `1px solid ${s.chg1w >= 0 ? "rgba(57,255,20,0.2)" : "rgba(255,45,85,0.2)"}`, borderRadius: 3, padding: "4px 8px", textAlign: "center" }}>
@@ -3492,7 +3470,7 @@ export default function NexusDashboard({ user, onLogout }) {
                           </div>
                           {watchlistScan.watchAlerts?.length > 0 && (
                             <div style={{ marginTop: 6 }}>
-                              <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 2 }}>Ã¢ÂÂ¡ VOLUME ALERTS</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 2 }}>⚡ VOLUME ALERTS</div>
                               {watchlistScan.watchAlerts.slice(0,3).map((s, i) => (
                                 <div key={i} style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55" }}>{s.ticker} {s.chg1w >= 0 ? "+" : ""}{s.chg1w}% {s.volRatio}x</div>
                               ))}
@@ -3516,14 +3494,14 @@ export default function NexusDashboard({ user, onLogout }) {
                 <div style={{ background: "#080f1a", border: "1px solid rgba(255,105,180,0.25)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <div>
-                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff69b4", letterSpacing: 2 }}>Ã°ÂÂÂ SMART MONEY INTELLIGENCE</div>
-                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Polymarket whales ÃÂ· Congressional trades ÃÂ· Billionaire 13F ÃÂ· Prediction market probabilities</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff69b4", letterSpacing: 2 }}>🐋 SMART MONEY INTELLIGENCE</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Polymarket whales · Congressional trades · Billionaire 13F · Prediction market probabilities</div>
                     </div>
-                    {smartMoneyData && <button onClick={() => loadSmartMoney(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³</button>}
+                    {smartMoneyData && <button onClick={() => loadSmartMoney(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
                   </div>
 
                   {!smartMoneyData ? (
-                    <button onClick={() => loadSmartMoney(true)} disabled={loadingSmartMoney} style={{ background: "rgba(255,105,180,0.1)", border: "1px solid rgba(255,105,180,0.3)", color: "#ff69b4", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingSmartMoney ? "SCANNING..." : "Ã°ÂÂÂ LOAD SMART MONEY"}</button>
+                    <button onClick={() => loadSmartMoney(true)} disabled={loadingSmartMoney} style={{ background: "rgba(255,105,180,0.1)", border: "1px solid rgba(255,105,180,0.3)", color: "#ff69b4", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingSmartMoney ? "SCANNING..." : "🐋 LOAD SMART MONEY"}</button>
                   ) : (
                     <div>
                       {/* Best buy + sell */}
@@ -3548,7 +3526,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>
                         {/* Polymarket */}
                         <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,105,180,0.15)", borderRadius: 4, padding: "8px 10px" }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff69b4", marginBottom: 4 }}>Ã°ÂÂÂ¯ POLYMARKET MARKETS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff69b4", marginBottom: 4 }}>🎯 POLYMARKET MARKETS</div>
                           <div style={{ fontFamily: "monospace", fontSize: 11, color: "#e8f4ff", marginBottom: 3 }}>{smartMoneyData.polymarket?.marketCount || 0} geo markets</div>
                           {smartMoneyData.polymarket?.geoMarkets?.slice(0,2).map((m, i) => (
                             <div key={i} style={{ fontSize: 9, color: "#8aabb8", marginBottom: 2 }}>
@@ -3556,31 +3534,31 @@ export default function NexusDashboard({ user, onLogout }) {
                             </div>
                           ))}
                           {smartMoneyData.polymarket?.megaWhales?.length > 0 && (
-                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff69b4", marginTop: 4 }}>Ã°ÂÂÂ {smartMoneyData.polymarket.megaWhales.length} MEGA-WHALE trades</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff69b4", marginTop: 4 }}>🐋 {smartMoneyData.polymarket.megaWhales.length} MEGA-WHALE trades</div>
                           )}
                           {smartMoneyData.analysis?.polymarketSignal && <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 3 }}>{smartMoneyData.analysis.polymarketSignal?.slice(0,50)}</div>}
                         </div>
 
                         {/* Congressional */}
                         <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,105,180,0.15)", borderRadius: 4, padding: "8px 10px" }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff69b4", marginBottom: 4 }}>Ã°ÂÂÂ CONGRESSIONAL TRADES</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff69b4", marginBottom: 4 }}>🏛 CONGRESSIONAL TRADES</div>
                           <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 4 }}>
                             {smartMoneyData.congressional?.buyTickers?.map(t => (
-                              <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 4px", borderRadius: 2, background: "rgba(57,255,20,0.08)", color: "#39ff14" }}>{t} Ã¢ÂÂ²</span>
+                              <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 4px", borderRadius: 2, background: "rgba(57,255,20,0.08)", color: "#39ff14" }}>{t} ▲</span>
                             ))}
                             {smartMoneyData.congressional?.sellTickers?.map(t => (
-                              <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 4px", borderRadius: 2, background: "rgba(255,45,85,0.08)", color: "#ff2d55" }}>{t} Ã¢ÂÂ¼</span>
+                              <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 4px", borderRadius: 2, background: "rgba(255,45,85,0.08)", color: "#ff2d55" }}>{t} ▼</span>
                             ))}
                           </div>
                           {smartMoneyData.congressional?.bipartisanBuys?.length > 0 && (
-                            <div style={{ fontSize: 9, color: "#ffd700", fontFamily: "monospace" }}>Ã¢Â­Â BIPARTISAN: {smartMoneyData.congressional.bipartisanBuys.join(",")}</div>
+                            <div style={{ fontSize: 9, color: "#ffd700", fontFamily: "monospace" }}>⭐ BIPARTISAN: {smartMoneyData.congressional.bipartisanBuys.join(",")}</div>
                           )}
                           {smartMoneyData.analysis?.congressEdge && <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 3 }}>{smartMoneyData.analysis.congressEdge?.slice(0,55)}</div>}
                         </div>
 
                         {/* Billionaires */}
                         <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,105,180,0.15)", borderRadius: 4, padding: "8px 10px" }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff69b4", marginBottom: 4 }}>Ã°ÂÂÂ BILLIONAIRE 13F</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff69b4", marginBottom: 4 }}>💎 BILLIONAIRE 13F</div>
                           {smartMoneyData.billionaires?.consensusBuys?.length > 0 && (
                             <div style={{ fontSize: 9, color: "#ffd700", fontFamily: "monospace", marginBottom: 3 }}>CONSENSUS: {smartMoneyData.billionaires.consensusBuys.join(",")}</div>
                           )}
@@ -3599,11 +3577,11 @@ export default function NexusDashboard({ user, onLogout }) {
 
                         {/* Whale detector */}
                         <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,105,180,0.15)", borderRadius: 4, padding: "8px 10px" }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff69b4", marginBottom: 4 }}>Ã°ÂÂÂ³ POLYMARKET WHALES</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff69b4", marginBottom: 4 }}>🐳 POLYMARKET WHALES</div>
                           <div style={{ fontFamily: "monospace", fontSize: 11, color: "#e8f4ff", marginBottom: 3 }}>{smartMoneyData.polymarket?.whaleCount || 0} trades $50K+</div>
                           {smartMoneyData.polymarket?.whales?.slice(0,3).map((w, i) => (
                             <div key={i} style={{ fontSize: 9, color: "#8aabb8", marginBottom: 1 }}>
-                              {w.tier === "MEGA_WHALE" ? "Ã°ÂÂÂ" : "Ã°ÂÂÂ³"} ${(w.size/1000).toFixed(0)}K {w.side} @ {w.price}%
+                              {w.tier === "MEGA_WHALE" ? "🐋" : "🐳"} ${(w.size/1000).toFixed(0)}K {w.side} @ {w.price}%
                             </div>
                           ))}
                           {smartMoneyData.polymarket?.whaleCount === 0 && <div style={{ fontSize: 9, color: "#2a3d57" }}>No whale activity detected today</div>}
@@ -3633,23 +3611,23 @@ export default function NexusDashboard({ user, onLogout }) {
                 <div style={{ background: "#080f1a", border: `2px solid ${geoData?.activeScenario === "ESCALATION" ? "rgba(255,45,85,0.5)" : geoData?.activeScenario === "RESOLUTION" ? "rgba(57,255,20,0.5)" : geoData?.activeScenario === "BLOCKADE" ? "rgba(157,127,255,0.5)" : "rgba(255,184,0,0.4)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <div>
-                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2 }}>Ã°ÂÂÂ GEOPOLITICAL SCENARIO ENGINE</div>
-                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>4 war scenarios ÃÂ 3 time horizons ÃÂ options playbook | auto-updates with events | feeds pipeline</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2 }}>🌍 GEOPOLITICAL SCENARIO ENGINE</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>4 war scenarios × 3 time horizons × options playbook | auto-updates with events | feeds pipeline</div>
                     </div>
-                    {geoData && <button onClick={() => loadGeoScenarios(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³</button>}
+                    {geoData && <button onClick={() => loadGeoScenarios(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
                   </div>
 
                   {!geoData ? (
-                    <button onClick={() => loadGeoScenarios(true)} disabled={loadingGeo} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", color: "#ffb800", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingGeo ? "ANALYZING SCENARIOS..." : "Ã°ÂÂÂ RUN SCENARIO ANALYSIS"}</button>
+                    <button onClick={() => loadGeoScenarios(true)} disabled={loadingGeo} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", color: "#ffb800", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingGeo ? "ANALYZING SCENARIOS..." : "🌍 RUN SCENARIO ANALYSIS"}</button>
                   ) : (
                     <div>
                       {/* Scenario probability bars */}
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 6, marginBottom: 12 }}>
                         {[
-                          { id: "ESCALATION", label: "Ã°ÂÂÂ´ ESCALATION", color: "#ff2d55" },
-                          { id: "STALL", label: "Ã°ÂÂÂ¡ STALL", color: "#ffb800" },
-                          { id: "BLOCKADE", label: "Ã°ÂÂÂ£ BLOCKADE", color: "#9d7fff" },
-                          { id: "RESOLUTION", label: "Ã°ÂÂÂ¢ RESOLUTION", color: "#39ff14" },
+                          { id: "ESCALATION", label: "🔴 ESCALATION", color: "#ff2d55" },
+                          { id: "STALL", label: "🟡 STALL", color: "#ffb800" },
+                          { id: "BLOCKADE", label: "🟣 BLOCKADE", color: "#9d7fff" },
+                          { id: "RESOLUTION", label: "🟢 RESOLUTION", color: "#39ff14" },
                         ].map(s => {
                           const prob = geoData.probabilities?.[s.id] || 0;
                           const isActive = geoData.activeScenario === s.id;
@@ -3685,20 +3663,20 @@ export default function NexusDashboard({ user, onLogout }) {
                                     <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 4 }}>{tf === "week1" ? "WEEK 1" : tf === "month1" ? "MONTH 1" : "QUARTER 1"}</div>
                                     <div style={{ fontSize: 9, color: "#8aabb8", lineHeight: 1.4, marginBottom: 4 }}>{t.narrative?.slice(0, 80)}...</div>
                                     {t.oil && <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800" }}>OIL: {t.oil}</div>}
-                                    {t.sectorWinners && <div style={{ fontSize: 8, color: "#39ff14", marginTop: 2 }}>Ã¢ÂÂ² {t.sectorWinners.slice(0,4).join(" ")}</div>}
-                                    {t.sectorLosers && <div style={{ fontSize: 8, color: "#ff2d55" }}>Ã¢ÂÂ¼ {t.sectorLosers.slice(0,3).join(" ")}</div>}
+                                    {t.sectorWinners && <div style={{ fontSize: 8, color: "#39ff14", marginTop: 2 }}>▲ {t.sectorWinners.slice(0,4).join(" ")}</div>}
+                                    {t.sectorLosers && <div style={{ fontSize: 8, color: "#ff2d55" }}>▼ {t.sectorLosers.slice(0,3).join(" ")}</div>}
                                   </div>
                                 );
                               })}
                             </div>
 
                             {/* Top options for this scenario */}
-                            <div style={{ fontFamily: "monospace", fontSize: 9, color: color, marginBottom: 6 }}>OPTIONS PLAYBOOK Ã¢ÂÂ {(geoScenario || geoData.activeScenario)} SCENARIO</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: color, marginBottom: 6 }}>OPTIONS PLAYBOOK — {(geoScenario || geoData.activeScenario)} SCENARIO</div>
                             <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                               {geoData.weeklyOptionsPlaybook?.filter(o => o.scenario === (geoScenario || geoData.activeScenario)).slice(0, 6).map((opt, i) => (
                                 <div key={i} style={{ background: opt.play.includes("PUT") ? "rgba(255,45,85,0.08)" : "rgba(57,255,20,0.08)", border: `1px solid ${opt.play.includes("PUT") ? "rgba(255,45,85,0.2)" : "rgba(57,255,20,0.2)"}`, borderRadius: 3, padding: "4px 8px" }}>
                                   <div style={{ fontFamily: "monospace", fontSize: 9, fontWeight: 700, color: opt.play.includes("PUT") ? "#ff2d55" : "#39ff14" }}>{opt.play}</div>
-                                  <div style={{ fontSize: 8, color: "#4a6d8c" }}>{opt.period?.replace("week1","W1").replace("month1","M1").replace("quarter1","Q1")} ÃÂ· {opt.confidence}%</div>
+                                  <div style={{ fontSize: 8, color: "#4a6d8c" }}>{opt.period?.replace("week1","W1").replace("month1","M1").replace("quarter1","Q1")} · {opt.confidence}%</div>
                                 </div>
                               ))}
                             </div>
@@ -3746,12 +3724,12 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* Upcoming summits */}
                       {geoData.upcomingSummits?.length > 0 && (
                         <div>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#9d7fff", marginBottom: 6 }}>Ã°ÂÂÂ UPCOMING SUMMITS (next 90 days)</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#9d7fff", marginBottom: 6 }}>📅 UPCOMING SUMMITS (next 90 days)</div>
                           {geoData.upcomingSummits.slice(0, 3).map((s, i) => (
                             <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 5, paddingBottom: 5, borderBottom: i < 2 ? "1px solid rgba(74,109,140,0.1)" : "none" }}>
                               <div>
                                 <div style={{ fontFamily: "monospace", fontSize: 10, color: "#9d7fff", fontWeight: 700 }}>{s.event}</div>
-                                <div style={{ fontSize: 9, color: "#4a6d8c" }}>{s.location} ÃÂ· {s.date}</div>
+                                <div style={{ fontSize: 9, color: "#4a6d8c" }}>{s.location} · {s.date}</div>
                                 <div style={{ fontSize: 9, color: "#8aabb8", marginTop: 2 }}>{s.watchFor?.slice(0, 60)}</div>
                               </div>
                               <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 10, background: "rgba(157,127,255,0.1)", color: "#9d7fff", flexShrink: 0, marginLeft: 8 }}>{s.daysOut}d</span>
@@ -3762,7 +3740,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
                       {/* Change trigger */}
                       {geoData.analysis?.changeTrigger && (
-                        <div style={{ marginTop: 8, fontSize: 9, color: "#ffb800", fontFamily: "monospace" }}>Ã¢ÂÂ¡ SCENARIO FLIP TRIGGER: {geoData.analysis.changeTrigger}</div>
+                        <div style={{ marginTop: 8, fontSize: 9, color: "#ffb800", fontFamily: "monospace" }}>⚡ SCENARIO FLIP TRIGGER: {geoData.analysis.changeTrigger}</div>
                       )}
                     </div>
                   )}
@@ -3771,11 +3749,11 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* FED CALENDAR section */}
                 <div style={{ background: "#080f1a", border: `1px solid ${fedData?.nextMeeting?.daysOut <= 7 ? "rgba(157,127,255,0.5)" : "rgba(157,127,255,0.2)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#9d7fff", letterSpacing: 2 }}>Ã°ÂÂÂ FED CALENDAR + RATES</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#9d7fff", letterSpacing: 2 }}>🏛 FED CALENDAR + RATES</div>
                     {fedData?.nextMeeting && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 8px", borderRadius: 10, background: fedData.nextMeeting.daysOut <= 7 ? "rgba(157,127,255,0.2)" : "rgba(157,127,255,0.08)", color: "#9d7fff" }}>FOMC in {fedData.nextMeeting.daysOut}d</span>}
                   </div>
                   {!fedData ? (
-                    <button onClick={() => loadFedCalendar(true)} disabled={loadingFed} style={{ background: "rgba(157,127,255,0.1)", border: "1px solid rgba(157,127,255,0.3)", color: "#9d7fff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingFed ? "LOADING..." : "Ã°ÂÂÂ LOAD FED DATA"}</button>
+                    <button onClick={() => loadFedCalendar(true)} disabled={loadingFed} style={{ background: "rgba(157,127,255,0.1)", border: "1px solid rgba(157,127,255,0.3)", color: "#9d7fff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingFed ? "LOADING..." : "🏛 LOAD FED DATA"}</button>
                   ) : (
                     <div>
                       {/* Yields row */}
@@ -3802,7 +3780,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         </div>
                         <div style={{ background: "rgba(157,127,255,0.05)", border: "1px solid rgba(157,127,255,0.15)", borderRadius: 4, padding: "8px 10px" }}>
                           <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>NEXT FOMC EXPECTATION</div>
-                          <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: fedData.analysis?.nextExpectation === "cut" ? "#39ff14" : fedData.analysis?.nextExpectation === "hike" ? "#ff2d55" : "#ffb800" }}>{fedData.analysis?.nextExpectation?.toUpperCase()} ÃÂ· {fedData.analysis?.nextProbability}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: fedData.analysis?.nextExpectation === "cut" ? "#39ff14" : fedData.analysis?.nextExpectation === "hike" ? "#ff2d55" : "#ffb800" }}>{fedData.analysis?.nextExpectation?.toUpperCase()} · {fedData.analysis?.nextProbability}</div>
                           <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 3 }}>{fedData.nextMeeting?.decision}</div>
                         </div>
                       </div>
@@ -3839,11 +3817,11 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* VIX + FEAR/GREED section */}
                 <div style={{ background: "#080f1a", border: `1px solid ${vixData?.vix?.regime === "EXTREME_FEAR" ? "rgba(255,45,85,0.4)" : vixData?.vix?.regime === "COMPLACENT" ? "rgba(255,184,0,0.4)" : "rgba(0,212,255,0.2)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>Ã°ÂÂÂ VIX + FEAR/GREED INDEX</div>
-                    {vixData && <button onClick={() => loadVixSentiment(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³</button>}
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>📊 VIX + FEAR/GREED INDEX</div>
+                    {vixData && <button onClick={() => loadVixSentiment(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
                   </div>
                   {!vixData ? (
-                    <button onClick={() => loadVixSentiment(true)} disabled={loadingVix} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingVix ? "LOADING..." : "Ã°ÂÂÂ LOAD"}</button>
+                    <button onClick={() => loadVixSentiment(true)} disabled={loadingVix} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingVix ? "LOADING..." : "📊 LOAD"}</button>
                   ) : (
                     <div>
                       {/* VIX + FG gauges */}
@@ -3881,17 +3859,17 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* SECTOR ROTATION section */}
                 <div style={{ background: "#080f1a", border: `1px solid ${sectorData?.riskRegime === "RISK_ON" ? "rgba(57,255,20,0.3)" : sectorData?.riskRegime === "RISK_OFF" ? "rgba(255,45,85,0.3)" : "rgba(255,184,0,0.2)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2 }}>Ã°ÂÂÂ SECTOR ROTATION</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2 }}>🔄 SECTOR ROTATION</div>
                     {sectorData && (
                       <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                         <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 8px", borderRadius: 10, background: sectorData.riskRegime === "RISK_ON" ? "rgba(57,255,20,0.15)" : sectorData.riskRegime === "RISK_OFF" ? "rgba(255,45,85,0.15)" : "rgba(255,184,0,0.15)", color: sectorData.riskRegime === "RISK_ON" ? "#39ff14" : sectorData.riskRegime === "RISK_OFF" ? "#ff2d55" : "#ffb800" }}>{sectorData.riskRegime?.replace("_"," ")}</span>
-                        <button onClick={() => loadSectorRotation(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³</button>
+                        <button onClick={() => loadSectorRotation(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>
                       </div>
                     )}
                   </div>
 
                   {!sectorData ? (
-                    <button onClick={() => loadSectorRotation(true)} disabled={loadingSector} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", color: "#ffb800", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingSector ? "SCANNING 15 SECTORS..." : "Ã°ÂÂÂ SCAN SECTORS"}</button>
+                    <button onClick={() => loadSectorRotation(true)} disabled={loadingSector} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", color: "#ffb800", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingSector ? "SCANNING 15 SECTORS..." : "🔄 SCAN SECTORS"}</button>
                   ) : (
                     <div>
                       {/* Analysis */}
@@ -3947,18 +3925,18 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* PUT/CALL RATIO section */}
                 <div style={{ background: "#080f1a", border: `1px solid ${pcrData?.ratio >= 1.2 ? "rgba(57,255,20,0.3)" : pcrData?.ratio <= 0.6 ? "rgba(255,45,85,0.3)" : "rgba(0,212,255,0.2)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>Ã°ÂÂÂ PUT/CALL RATIO</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>📉 PUT/CALL RATIO</div>
                     {pcrData && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 8px", borderRadius: 10, background: pcrData.ratio >= 1.2 ? "rgba(57,255,20,0.15)" : pcrData.ratio <= 0.6 ? "rgba(255,45,85,0.15)" : "rgba(0,212,255,0.1)", color: pcrData.ratio >= 1.2 ? "#39ff14" : pcrData.ratio <= 0.6 ? "#ff2d55" : "#00d4ff" }}>{pcrData.signal}</span>}
                   </div>
                   {!pcrData ? (
-                    <button onClick={() => loadPCR(true)} disabled={loadingPcr} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingPcr ? "LOADING..." : "Ã°ÂÂÂ LOAD P/C RATIO"}</button>
+                    <button onClick={() => loadPCR(true)} disabled={loadingPcr} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingPcr ? "LOADING..." : "📉 LOAD P/C RATIO"}</button>
                   ) : (
                     <div>
                       {/* Main ratio gauge */}
                       <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
                         <div style={{ textAlign: "center", background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "10px 20px" }}>
                           <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 2 }}>P/C RATIO</div>
-                          <div style={{ fontFamily: "monospace", fontSize: 28, fontWeight: 700, color: pcrData.ratio >= 1.2 ? "#39ff14" : pcrData.ratio >= 1.0 ? "#ffb800" : pcrData.ratio <= 0.6 ? "#ff2d55" : "#00d4ff" }}>{pcrData.ratio?.toFixed(2) || "Ã¢ÂÂ"}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 28, fontWeight: 700, color: pcrData.ratio >= 1.2 ? "#39ff14" : pcrData.ratio >= 1.0 ? "#ffb800" : pcrData.ratio <= 0.6 ? "#ff2d55" : "#00d4ff" }}>{pcrData.ratio?.toFixed(2) || "—"}</div>
                           <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>source: {pcrData.marketPCR?.source?.replace(/_/g," ")}</div>
                         </div>
                         <div style={{ flex: 1 }}>
@@ -3987,7 +3965,7 @@ export default function NexusDashboard({ user, onLogout }) {
                           <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                             {pcrData.tickerPCR.slice(0, 8).map(t => (
                               <span key={t.ticker} style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 7px", borderRadius: 3, background: t.bias === "PUT_HEAVY" ? "rgba(255,45,85,0.08)" : t.bias === "CALL_HEAVY" ? "rgba(57,255,20,0.08)" : "rgba(74,109,140,0.1)", color: t.bias === "PUT_HEAVY" ? "#ff2d55" : t.bias === "CALL_HEAVY" ? "#39ff14" : "#8aabb8", border: `1px solid ${t.bias === "PUT_HEAVY" ? "rgba(255,45,85,0.2)" : t.bias === "CALL_HEAVY" ? "rgba(57,255,20,0.2)" : "rgba(74,109,140,0.15)"}` }}>
-                                {t.ticker} {t.ratio !== null ? t.ratio.toFixed(1) : "Ã¢ÂÂ"}
+                                {t.ticker} {t.ratio !== null ? t.ratio.toFixed(1) : "—"}
                               </span>
                             ))}
                           </div>
@@ -4000,15 +3978,15 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* INSIDER section */}
                 <div style={{ background: "#080f1a", border: "1px solid rgba(255,140,0,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff8c00", letterSpacing: 2 }}>Ã°ÂÂÂ SEC INSIDER FILINGS</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff8c00", letterSpacing: 2 }}>🔎 SEC INSIDER FILINGS</div>
                     {insiderData && <span style={{ fontFamily: "monospace", fontSize: 9, color: insiderData.interpretation?.overallSentiment === "BULLISH" ? "#39ff14" : "#ff2d55" }}>{insiderData.interpretation?.overallSentiment}</span>}
                   </div>
-                  {!insiderData ? <button onClick={() => loadInsiderFilings(true)} disabled={loadingInsider} style={{ background: "rgba(255,140,0,0.1)", border: "1px solid rgba(255,140,0,0.3)", color: "#ff8c00", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingInsider ? "SCANNING..." : "Ã°ÂÂÂ SCAN INSIDERS"}</button>
+                  {!insiderData ? <button onClick={() => loadInsiderFilings(true)} disabled={loadingInsider} style={{ background: "rgba(255,140,0,0.1)", border: "1px solid rgba(255,140,0,0.3)", color: "#ff8c00", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingInsider ? "SCANNING..." : "🔎 SCAN INSIDERS"}</button>
                   : <div>
                       {insiderData.interpretation?.bestTrade && <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffd700", marginBottom: 8 }}>BEST TRADE: {insiderData.interpretation.bestTrade}</div>}
                       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 6 }}>
-                        {insiderData.strongBuys?.map(d => <span key={d.ticker} style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 3, background: "rgba(57,255,20,0.1)", color: "#39ff14", border: "1px solid rgba(57,255,20,0.3)" }}>{d.ticker} Ã¢ÂÂ² {d.signal.replace("_"," ")}</span>)}
-                        {insiderData.sells?.map(d => <span key={d.ticker} style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 3, background: "rgba(255,45,85,0.1)", color: "#ff2d55", border: "1px solid rgba(255,45,85,0.3)" }}>{d.ticker} Ã¢ÂÂ¼ SELL</span>)}
+                        {insiderData.strongBuys?.map(d => <span key={d.ticker} style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 3, background: "rgba(57,255,20,0.1)", color: "#39ff14", border: "1px solid rgba(57,255,20,0.3)" }}>{d.ticker} ▲ {d.signal.replace("_"," ")}</span>)}
+                        {insiderData.sells?.map(d => <span key={d.ticker} style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 3, background: "rgba(255,45,85,0.1)", color: "#ff2d55", border: "1px solid rgba(255,45,85,0.3)" }}>{d.ticker} ▼ SELL</span>)}
                       </div>
                       {insiderData.interpretation?.contrarianInsight && <div style={{ fontSize: 11, color: "#8aabb8", lineHeight: 1.5 }}>{insiderData.interpretation.contrarianInsight}</div>}
                     </div>}
@@ -4017,10 +3995,10 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* WAR RIPPLE section */}
                 <div style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff3c00", letterSpacing: 2 }}>Ã¢ÂÂ¢ WAR RIPPLE ENGINE</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff3c00", letterSpacing: 2 }}>☢ WAR RIPPLE ENGINE</div>
                     {warRipple && <div style={{ display: "flex", gap: 6 }}><span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffb800" }}>{warRipple.warStatus?.toUpperCase()}</span><span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff8c00" }}>HORMUZ: {warRipple.hormuz?.status?.toUpperCase()}</span></div>}
                   </div>
-                  {!warRipple ? <button onClick={() => loadWarRipple(true)} disabled={loadingWar} style={{ background: "rgba(255,60,0,0.1)", border: "1px solid rgba(255,60,0,0.3)", color: "#ff3c00", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingWar ? "ANALYZING..." : "Ã¢ÂÂ¢ ANALYZE"}</button>
+                  {!warRipple ? <button onClick={() => loadWarRipple(true)} disabled={loadingWar} style={{ background: "rgba(255,60,0,0.1)", border: "1px solid rgba(255,60,0,0.3)", color: "#ff3c00", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingWar ? "ANALYZING..." : "☢ ANALYZE"}</button>
                   : <div>
                       {warRipple.highestConviction?.ticker && <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: warRipple.highestConviction.direction === "CALL" ? "#39ff14" : "#ff2d55", marginBottom: 8 }}>TOP PLAY: {warRipple.highestConviction.ticker} {warRipple.highestConviction.direction}</div>}
                       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
@@ -4028,7 +4006,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         {warRipple.predictions?.day7?.bestPlay && <span style={{ fontFamily:"monospace",fontSize:9,color:"#39ff14" }}>7D: {warRipple.predictions.day7.bestPlay}</span>}
                       </div>
                       <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                        {warRipple.rippleLayers?.slice(0,3).map((l,i) => <span key={i} style={{ fontSize:9, fontFamily:"monospace", color:"#4a6d8c" }}>L{l.layer}: {l.stocksUp?.slice(0,2).join(",")} Ã¢ÂÂ² {l.stocksDown?.slice(0,2).join(",")} Ã¢ÂÂ¼</span>)}
+                        {warRipple.rippleLayers?.slice(0,3).map((l,i) => <span key={i} style={{ fontSize:9, fontFamily:"monospace", color:"#4a6d8c" }}>L{l.layer}: {l.stocksUp?.slice(0,2).join(",")} ▲ {l.stocksDown?.slice(0,2).join(",")} ▼</span>)}
                       </div>
                     </div>}
                 </div>
@@ -4036,15 +4014,15 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* BIAS section */}
                 <div style={{ background: "#080f1a", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2 }}>Ã°ÂÂÂ NEWS BIAS FILTER</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2 }}>🔍 NEWS BIAS FILTER</div>
                     {newsBias && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: newsBias.manipulationRisk === "HIGH" || newsBias.manipulationRisk === "CRITICAL" ? "rgba(255,45,85,0.1)" : "rgba(57,255,20,0.1)", color: newsBias.manipulationRisk === "HIGH" || newsBias.manipulationRisk === "CRITICAL" ? "#ff2d55" : "#39ff14" }}>{newsBias.manipulationRisk} RISK</span>}
                   </div>
-                  {!newsBias ? <button onClick={() => loadNewsBias(true)} disabled={loadingBias} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", color: "#ffb800", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingBias ? "SCANNING..." : "Ã°ÂÂÂ SCAN BIAS"}</button>
+                  {!newsBias ? <button onClick={() => loadNewsBias(true)} disabled={loadingBias} style={{ background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", color: "#ffb800", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingBias ? "SCANNING..." : "🔍 SCAN BIAS"}</button>
                   : <div>
                       {newsBias.contrarianPlay && <div style={{ fontSize: 11, color: "#39ff14", marginBottom: 6 }}>CONTRARIAN: {newsBias.contrarianPlay}</div>}
                       <div style={{ display: "flex", gap: 8 }}>
-                        {newsBias.pumpTickers?.length > 0 && <span style={{ fontSize:10, color:"#ff2d55", fontFamily:"monospace" }}>PUMP: {newsBias.pumpTickers.join(",")} Ã¢ÂÂ </span>}
-                        {newsBias.realSignal?.ticker && <span style={{ fontSize:10, color:"#39ff14", fontFamily:"monospace" }}>REAL: {newsBias.realSignal.ticker} Ã¢ÂÂ</span>}
+                        {newsBias.pumpTickers?.length > 0 && <span style={{ fontSize:10, color:"#ff2d55", fontFamily:"monospace" }}>PUMP: {newsBias.pumpTickers.join(",")} ⚠</span>}
+                        {newsBias.realSignal?.ticker && <span style={{ fontSize:10, color:"#39ff14", fontFamily:"monospace" }}>REAL: {newsBias.realSignal.ticker} ✓</span>}
                       </div>
                     </div>}
                 </div>
@@ -4052,12 +4030,12 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* UNUSUAL FLOW section */}
                 <div style={{ background: "#080f1a", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#b24fff", letterSpacing: 2 }}>Ã¢ÂÂ¡ UNUSUAL OPTIONS FLOW</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#b24fff", letterSpacing: 2 }}>⚡ UNUSUAL OPTIONS FLOW</div>
                     {unusualFlow && <span style={{ fontFamily: "monospace", fontSize: 9, color: unusualFlow.interpretation?.marketBias === "BULLISH" ? "#39ff14" : unusualFlow.interpretation?.marketBias === "BEARISH" ? "#ff2d55" : "#ffb800" }}>{unusualFlow.interpretation?.marketBias}</span>}
                   </div>
-                  {!unusualFlow ? <button onClick={() => loadUnusualFlow(true)} disabled={loadingFlow} style={{ background: "rgba(178,79,255,0.1)", border: "1px solid rgba(178,79,255,0.3)", color: "#b24fff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingFlow ? "SCANNING..." : "Ã¢ÂÂ¡ SCAN FLOW"}</button>
+                  {!unusualFlow ? <button onClick={() => loadUnusualFlow(true)} disabled={loadingFlow} style={{ background: "rgba(178,79,255,0.1)", border: "1px solid rgba(178,79,255,0.3)", color: "#b24fff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingFlow ? "SCANNING..." : "⚡ SCAN FLOW"}</button>
                   : <div>
-                      {unusualFlow.interpretation?.topSignal?.ticker && <div style={{ fontFamily:"monospace",fontSize:13,fontWeight:700, color: unusualFlow.interpretation.topSignal.direction==="CALL"?"#39ff14":"#ff2d55",marginBottom:6 }}>TOP: {unusualFlow.interpretation.topSignal.ticker} {unusualFlow.interpretation.topSignal.direction} ÃÂ· {unusualFlow.interpretation.topSignal.urgency}</div>}
+                      {unusualFlow.interpretation?.topSignal?.ticker && <div style={{ fontFamily:"monospace",fontSize:13,fontWeight:700, color: unusualFlow.interpretation.topSignal.direction==="CALL"?"#39ff14":"#ff2d55",marginBottom:6 }}>TOP: {unusualFlow.interpretation.topSignal.ticker} {unusualFlow.interpretation.topSignal.direction} · {unusualFlow.interpretation.topSignal.urgency}</div>}
                       <div style={{ display:"flex",gap:4,flexWrap:"wrap" }}>
                         {unusualFlow.signals?.slice(0,6).map((s,i)=><span key={i} style={{ fontFamily:"monospace",fontSize:9,padding:"1px 6px",borderRadius:2,background:s.optionType==="CALL"?"rgba(57,255,20,0.08)":"rgba(255,45,85,0.08)",color:s.optionType==="CALL"?"#39ff14":"#ff2d55" }}>{s.ticker} {s.optionType} {s.volOiRatio}x</span>)}
                       </div>
@@ -4067,22 +4045,22 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* CHART PATTERNS section */}
                 <div style={{ background: "#080f1a", border: "1px solid rgba(100,200,255,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#64c8ff", letterSpacing: 2 }}>Ã°ÂÂÂ CHART PATTERNS</div>
-                    {chartPatterns && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#64c8ff" }}>{chartPatterns.tickersScanned} scanned ÃÂ· {chartPatterns.patternSignals?.length} signals</span>}
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#64c8ff", letterSpacing: 2 }}>📈 CHART PATTERNS</div>
+                    {chartPatterns && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#64c8ff" }}>{chartPatterns.tickersScanned} scanned · {chartPatterns.patternSignals?.length} signals</span>}
                   </div>
-                  {!chartPatterns ? <button onClick={() => loadChartPatterns("", true)} disabled={loadingPatterns} style={{ background: "rgba(100,200,255,0.1)", border: "1px solid rgba(100,200,255,0.3)", color: "#64c8ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingPatterns ? "SCANNING..." : "Ã°ÂÂÂ SCAN PATTERNS"}</button>
+                  {!chartPatterns ? <button onClick={() => loadChartPatterns("", true)} disabled={loadingPatterns} style={{ background: "rgba(100,200,255,0.1)", border: "1px solid rgba(100,200,255,0.3)", color: "#64c8ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingPatterns ? "SCANNING..." : "📈 SCAN PATTERNS"}</button>
                   : <div style={{ display:"flex",gap:4,flexWrap:"wrap" }}>
-                      {chartPatterns.patternSignals?.slice(0,8).map((s,i)=><span key={i} style={{ fontFamily:"monospace",fontSize:9,padding:"2px 7px",borderRadius:3,background:s.direction==="CALL"?"rgba(57,255,20,0.08)":"rgba(255,45,85,0.08)",color:s.direction==="CALL"?"#39ff14":"#ff2d55",border:`1px solid ${s.direction==="CALL"?"rgba(57,255,20,0.2)":"rgba(255,45,85,0.2)"}` }}>{s.ticker} {s.direction} {s.strength==="HIGH"?"Ã¢ÂÂ":""}</span>)}
+                      {chartPatterns.patternSignals?.slice(0,8).map((s,i)=><span key={i} style={{ fontFamily:"monospace",fontSize:9,padding:"2px 7px",borderRadius:3,background:s.direction==="CALL"?"rgba(57,255,20,0.08)":"rgba(255,45,85,0.08)",color:s.direction==="CALL"?"#39ff14":"#ff2d55",border:`1px solid ${s.direction==="CALL"?"rgba(57,255,20,0.2)":"rgba(255,45,85,0.2)"}` }}>{s.ticker} {s.direction} {s.strength==="HIGH"?"★":""}</span>)}
                     </div>}
                 </div>
 
                 {/* ALLIANCE section */}
                 <div style={{ background: "#080f1a", border: "1px solid rgba(255,100,0,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff6400", letterSpacing: 2 }}>Ã°ÂÂÂµ ALLIANCE DETECTION</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff6400", letterSpacing: 2 }}>🕵 ALLIANCE DETECTION</div>
                     {allianceData && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 6px", borderRadius: 2, background: "rgba(255,100,0,0.1)", color: "#ff6400" }}>{allianceData.allianceRiskLevel} RISK</span>}
                   </div>
-                  {!allianceData ? <button onClick={() => loadAlliance(true)} disabled={loadingAlliance} style={{ background: "rgba(255,100,0,0.1)", border: "1px solid rgba(255,100,0,0.3)", color: "#ff6400", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingAlliance ? "SCANNING..." : "Ã°ÂÂÂµ DETECT"}</button>
+                  {!allianceData ? <button onClick={() => loadAlliance(true)} disabled={loadingAlliance} style={{ background: "rgba(255,100,0,0.1)", border: "1px solid rgba(255,100,0,0.3)", color: "#ff6400", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingAlliance ? "SCANNING..." : "🕵 DETECT"}</button>
                   : <div>
                       {allianceData.safestPlay?.play && <div style={{ fontSize:11, color:"#39ff14", marginBottom:6 }}>SAFEST: {allianceData.safestPlay.play}</div>}
                       <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
@@ -4096,16 +4074,16 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* DARK POOL section */}
                 <div style={{ background: "#080f1a", border: "1px solid rgba(157,127,255,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#9d7fff", letterSpacing: 2 }}>Ã°ÂÂÂ DARK POOL PRINTS</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#9d7fff", letterSpacing: 2 }}>🌑 DARK POOL PRINTS</div>
                     {darkPoolData && <div style={{ display: "flex", gap: 6 }}>
                       <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 7px", borderRadius: 10, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>{darkPoolData.accumulation?.length} ACCUM</span>
                       <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 7px", borderRadius: 10, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>{darkPoolData.distribution?.length} DIST</span>
-                      <button onClick={() => loadDarkPool(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³</button>
+                      <button onClick={() => loadDarkPool(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>
                     </div>}
                   </div>
 
                   {!darkPoolData ? (
-                    <button onClick={() => loadDarkPool(true)} disabled={loadingDarkPool} style={{ background: "rgba(157,127,255,0.1)", border: "1px solid rgba(157,127,255,0.3)", color: "#9d7fff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingDarkPool ? "SCANNING FINRA + VOLUME..." : "Ã°ÂÂÂ DETECT DARK POOL"}</button>
+                    <button onClick={() => loadDarkPool(true)} disabled={loadingDarkPool} style={{ background: "rgba(157,127,255,0.1)", border: "1px solid rgba(157,127,255,0.3)", color: "#9d7fff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingDarkPool ? "SCANNING FINRA + VOLUME..." : "🌑 DETECT DARK POOL"}</button>
                   ) : (
                     <div>
                       {/* Claude insight */}
@@ -4130,7 +4108,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 8 }}>
                         {/* Accumulation */}
                         <div>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 4 }}>ACCUMULATION Ã¢ÂÂ CALL</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 4 }}>ACCUMULATION → CALL</div>
                           {darkPoolData.accumulation?.slice(0, 5).map(p => (
                             <div key={p.ticker} style={{ background: "rgba(57,255,20,0.04)", border: "1px solid rgba(57,255,20,0.15)", borderRadius: 3, padding: "5px 8px", marginBottom: 4 }}>
                               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -4150,7 +4128,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
                         {/* Distribution */}
                         <div>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 4 }}>DISTRIBUTION Ã¢ÂÂ PUT/AVOID</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 4 }}>DISTRIBUTION → PUT/AVOID</div>
                           {darkPoolData.distribution?.slice(0, 5).map(p => (
                             <div key={p.ticker} style={{ background: "rgba(255,45,85,0.04)", border: "1px solid rgba(255,45,85,0.15)", borderRadius: 3, padding: "5px 8px", marginBottom: 4 }}>
                               <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -4169,7 +4147,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       </div>
 
                       <div style={{ fontSize: 8, color: "#2a3d57", fontFamily: "monospace" }}>
-                        Sources: FINRA Reg SHO short volume + Yahoo Finance volume anomaly detection ÃÂ· {darkPoolData.tickersScanned} tickers scanned
+                        Sources: FINRA Reg SHO short volume + Yahoo Finance volume anomaly detection · {darkPoolData.tickersScanned} tickers scanned
                       </div>
                     </div>
                   )}
@@ -4179,14 +4157,14 @@ export default function NexusDashboard({ user, onLogout }) {
                 <div style={{ background: "#080f1a", border: "1px solid rgba(0,255,157,0.25)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <div>
-                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00ff9d", letterSpacing: 2 }}>Ã°ÂÂ¤Â AI INFRASTRUCTURE STACK</div>
-                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>30 stocks across 8 pillars: GPU Ã¢ÂÂ Networking Ã¢ÂÂ Power Ã¢ÂÂ Cooling Ã¢ÂÂ Data Center Ã¢ÂÂ MLOps Ã¢ÂÂ Energy</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00ff9d", letterSpacing: 2 }}>🤖 AI INFRASTRUCTURE STACK</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>30 stocks across 8 pillars: GPU → Networking → Power → Cooling → Data Center → MLOps → Energy</div>
                     </div>
-                    {aiInfraData && <button onClick={() => loadAiInfra(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³</button>}
+                    {aiInfraData && <button onClick={() => loadAiInfra(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
                   </div>
 
                   {!aiInfraData ? (
-                    <button onClick={() => loadAiInfra(true)} disabled={loadingAiInfra} style={{ background: "rgba(0,255,157,0.1)", border: "1px solid rgba(0,255,157,0.3)", color: "#00ff9d", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingAiInfra ? "SCANNING 30 TICKERS..." : "Ã°ÂÂ¤Â SCAN AI STACK"}</button>
+                    <button onClick={() => loadAiInfra(true)} disabled={loadingAiInfra} style={{ background: "rgba(0,255,157,0.1)", border: "1px solid rgba(0,255,157,0.3)", color: "#00ff9d", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingAiInfra ? "SCANNING 30 TICKERS..." : "🤖 SCAN AI STACK"}</button>
                   ) : (
                     <div>
                       {/* Best trade */}
@@ -4194,7 +4172,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         <div style={{ background: "rgba(0,255,157,0.06)", border: "1px solid rgba(0,255,157,0.2)", borderRadius: 4, padding: "8px 12px", marginBottom: 10, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
                           <span style={{ fontFamily: "monospace", fontSize: 9, color: "#00ff9d" }}>BEST AI INFRA TRADE</span>
                           <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ffd700" }}>{aiInfraData.analysis.bestTrade}</span>
-                          {aiInfraData.analysis.hottestPillar && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 7px", borderRadius: 10, background: "rgba(0,255,157,0.1)", color: "#00ff9d" }}>Ã°ÂÂÂ¥ {aiInfraData.analysis.hottestPillar}</span>}
+                          {aiInfraData.analysis.hottestPillar && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 7px", borderRadius: 10, background: "rgba(0,255,157,0.1)", color: "#00ff9d" }}>🔥 {aiInfraData.analysis.hottestPillar}</span>}
                         </div>
                       )}
 
@@ -4212,13 +4190,13 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* Selected pillar stocks */}
                       {aiInfraPillar && aiInfraData.byPillar?.[aiInfraPillar] && (
                         <div style={{ background: "rgba(0,255,157,0.04)", border: "1px solid rgba(0,255,157,0.15)", borderRadius: 4, padding: 10, marginBottom: 10 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00ff9d", marginBottom: 6 }}>{aiInfraPillar.toUpperCase()} Ã¢ÂÂ CLICK PILLAR TO FILTER</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00ff9d", marginBottom: 6 }}>{aiInfraPillar.toUpperCase()} — CLICK PILLAR TO FILTER</div>
                           <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                             {aiInfraData.byPillar[aiInfraPillar].filter(s => s.hasData).map((s, i) => (
                               <div key={i} style={{ background: "rgba(0,0,0,0.4)", borderRadius: 3, padding: "4px 8px", textAlign: "center" }}>
                                 <div style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: s.chg1w >= 0 ? "#00ff9d" : "#ff2d55" }}>{s.ticker}</div>
                                 <div style={{ fontFamily: "monospace", fontSize: 9, color: s.chg1w >= 0 ? "#00ff9d" : "#ff2d55" }}>{s.chg1w >= 0 ? "+" : ""}{s.chg1w}%</div>
-                                <div style={{ fontSize: 7, color: "#4a6d8c" }}>{s.tier === 1 ? "Ã¢ÂÂ" : "ÃÂ·"} ${s.price}</div>
+                                <div style={{ fontSize: 7, color: "#4a6d8c" }}>{s.tier === 1 ? "★" : "·"} ${s.price}</div>
                               </div>
                             ))}
                           </div>
@@ -4271,15 +4249,15 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* EARNINGS WHISPER section */}
                 <div style={{ background: "#080f1a", border: "1px solid rgba(255,110,180,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff6eb4", letterSpacing: 2 }}>Ã°ÂÂÂ¯ EARNINGS WHISPER NUMBERS</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff6eb4", letterSpacing: 2 }}>🎯 EARNINGS WHISPER NUMBERS</div>
                     {whisperData && <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                       <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff6eb4" }}>{whisperData.tickersAnalyzed} analyzed</span>
-                      <button onClick={() => loadWhispers(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³</button>
+                      <button onClick={() => loadWhispers(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>
                     </div>}
                   </div>
 
                   {!whisperData ? (
-                    <button onClick={() => loadWhispers(true)} disabled={loadingWhisper} style={{ background: "rgba(255,110,180,0.1)", border: "1px solid rgba(255,110,180,0.3)", color: "#ff6eb4", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingWhisper ? "FETCHING ALPHA VANTAGE..." : "Ã°ÂÂÂ¯ LOAD WHISPER NUMBERS"}</button>
+                    <button onClick={() => loadWhispers(true)} disabled={loadingWhisper} style={{ background: "rgba(255,110,180,0.1)", border: "1px solid rgba(255,110,180,0.3)", color: "#ff6eb4", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>{loadingWhisper ? "FETCHING ALPHA VANTAGE..." : "🎯 LOAD WHISPER NUMBERS"}</button>
                   ) : whisperData.whispers?.length === 0 ? (
                     <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>No earnings in next 30 days</div>
                   ) : (
@@ -4345,46 +4323,18 @@ export default function NexusDashboard({ user, onLogout }) {
               </div>
             )}
 
-            {/* POSITIONS TAB Ã¢ÂÂ My Open Questrade Options */}
-{tab === "oracle" && (
-<div style={{height:"100%",overflowY:"auto",paddingBottom:40}}>
-<div style={{background:"rgba(4,10,20,0.98)",borderRadius:8,padding:"26px 22px",marginBottom:14}}>
-<div style={{textAlign:"center",marginBottom:18}}>
-<div style={{fontFamily:"monospace",fontSize:24,fontWeight:900,color:"#e8f4ff",letterSpacing:3,marginBottom:4}}>THE ORACLE</div>
-<div style={{fontSize:11,color:"#4a6d8c"}}>Type any stock or question and get the week-by-week prediction</div>
-</div>
-<div style={{display:"flex",gap:8}}>
-<input value={oracleQuery} onChange={e=>setOracleQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runOracle()} placeholder="e.g. NVDA by May 30 or GLD June 20" style={{flex:1,padding:"12px 14px",background:"rgba(0,0,0,0.5)",border:"1px solid rgba(0,212,255,0.3)",borderRadius:5,color:"#e8f4ff",fontFamily:"monospace",fontSize:12,outline:"none"}}/>
-<input type="date" value={oracleDate} onChange={e=>setOracleDate(e.target.value)} style={{padding:"12px 8px",background:"rgba(0,0,0,0.5)",border:"1px solid rgba(0,212,255,0.2)",borderRadius:5,color:"#e8f4ff",width:140}}/>
-<button onClick={runOracle} disabled={oracleLoading} className="nexus-pick" style={{padding:"12px 18px",background:"rgba(0,212,255,0.1)",border:"1px solid rgba(0,212,255,0.4)",borderRadius:5,color:"#00d4ff",fontFamily:"monospace",fontSize:11,fontWeight:700,cursor:"pointer"}}>{oracleLoading?"Consulting...":"PREDICT"}</button>
-</div></div>
-{oracleError&&<div style={{color:"#ff2d55",fontFamily:"monospace",fontSize:10,marginBottom:10}}>Error: {oracleError}</div>}
-{oracleLoading&&<div style={{textAlign:"center",padding:"40px",color:"#00d4ff",fontFamily:"monospace"}}>Consulting all intelligence sources...</div>}
-{oracleResult&&!oracleLoading&&<div className="slide-up">
-<div style={{fontFamily:"monospace",fontSize:24,fontWeight:900,color:"#e8f4ff",marginBottom:6}}>{oracleResult.ticker} â ${oracleResult.predictionBand?.mid||oracleResult.targetPrice}</div>
-<div style={{fontSize:11,color:"#8aabb8",marginBottom:10}}>{oracleResult.executiveSummary}</div>
-<div style={{fontFamily:"monospace",fontSize:9,color:"#00d4ff",marginBottom:8}}>WEEK-BY-WEEK ROADMAP</div>
-{(oracleResult.weeks||[]).map((w,i)=>(
-<div key={i} style={{background:"rgba(0,0,0,0.35)",borderRadius:5,padding:"8px 12px",marginBottom:6}}>
-<div style={{fontFamily:"monospace",fontSize:11,color:"#e8f4ff",marginBottom:2}}>Week {w.weekNumber}: ${w.endPrice} ({w.changePercent>=0?"+":""}{w.changePercent?.toFixed(1)}%) â {w.actionSignal}</div>
-<div style={{fontSize:10,color:"#8aabb8"}}>{w.keyEvent&&<span style={{color:"#ffb800",marginRight:6}}>{w.keyEvent}</span>}{w.reasoning}</div>
-</div>
-))}
-</div>}
-</div>
-)}
-
+            {/* POSITIONS TAB — My Open Questrade Options */}
             {tab === "positions" && (
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 {/* Header */}
                 <div style={{ background: "linear-gradient(135deg,rgba(0,212,255,0.06),rgba(57,255,20,0.03))", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
-                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>Ã°ÂÂÂ MY OPEN QUESTRADE POSITIONS</div>
-                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Deep analysis ÃÂ· 7 / 14 / 21 day prediction ÃÂ· Black-Scholes probability + NEXUS 20-signal stack</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>📋 MY OPEN QUESTRADE POSITIONS</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Deep analysis · 7 / 14 / 21 day prediction · Black-Scholes probability + NEXUS 20-signal stack</div>
                     </div>
                     <button onClick={loadMyPositions} disabled={loadingPositions} style={{ background: loadingPositions ? "#1a2d47" : "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "6px 14px", fontSize: 10, cursor: loadingPositions ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                      {loadingPositions ? "Ã¢ÂÂ³ LOADING..." : "Ã¢ÂÂ³ REFRESH"}
+                      {loadingPositions ? "⏳ LOADING..." : "⟳ REFRESH"}
                     </button>
                   </div>
                 </div>
@@ -4397,7 +4347,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 ) : myPositions.optionPositions?.length === 0 ? (
                   <div style={{ textAlign: "center", padding: 40 }}>
                     <div style={{ fontFamily: "monospace", fontSize: 11, color: "#4a6d8c" }}>No open option positions found</div>
-                    <div style={{ fontSize: 9, color: "#2a3d57", marginTop: 6 }}>Total positions: {myPositions.totalPositions} ÃÂ· All positions may be equity/stock</div>
+                    <div style={{ fontSize: 9, color: "#2a3d57", marginTop: 6 }}>Total positions: {myPositions.totalPositions} · All positions may be equity/stock</div>
                   </div>
                 ) : (
                   <div>
@@ -4444,9 +4394,9 @@ export default function NexusDashboard({ user, onLogout }) {
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 10 }}>
                               {[
                                 { label: "QTY", value: pos.quantity + " contracts" },
-                                { label: "AVG COST", value: pos.avgCost ? "$" + pos.avgCost.toFixed(2) : "Ã¢ÂÂ" },
-                                { label: "CURRENT", value: pos.currentPrice ? "$" + pos.currentPrice.toFixed(2) : "Ã¢ÂÂ" },
-                                { label: "MARKET VALUE", value: pos.currentValue ? "$" + pos.currentValue.toFixed(2) : "Ã¢ÂÂ" },
+                                { label: "AVG COST", value: pos.avgCost ? "$" + pos.avgCost.toFixed(2) : "—" },
+                                { label: "CURRENT", value: pos.currentPrice ? "$" + pos.currentPrice.toFixed(2) : "—" },
+                                { label: "MARKET VALUE", value: pos.currentValue ? "$" + pos.currentValue.toFixed(2) : "—" },
                               ].map((f, j) => (
                                 <div key={j} style={{ background: "rgba(0,0,0,0.2)", borderRadius: 3, padding: "5px 8px" }}>
                                   <div style={{ fontSize: 7, color: "#4a6d8c" }}>{f.label}</div>
@@ -4458,7 +4408,7 @@ export default function NexusDashboard({ user, onLogout }) {
                             {/* Analyze button */}
                             {!analysis && (
                               <button onClick={() => analyzePosition(pos)} disabled={isAnalyzing} style={{ width: "100%", background: isAnalyzing ? "#1a2d47" : "linear-gradient(135deg,rgba(0,212,255,0.15),rgba(57,255,20,0.08))", border: "1px solid rgba(0,212,255,0.3)", color: isAnalyzing ? "#4a6d8c" : "#00d4ff", borderRadius: 3, padding: "8px 0", fontSize: 10, fontWeight: 700, cursor: isAnalyzing ? "not-allowed" : "pointer", fontFamily: "monospace", letterSpacing: 2 }}>
-                                {isAnalyzing ? "Ã¢ÂÂ³ RUNNING DEEP ANALYSIS..." : "Ã°ÂÂÂ¬ DEEP ANALYSIS Ã¢ÂÂ 7 / 14 / 21 DAY PREDICTION"}
+                                {isAnalyzing ? "⏳ RUNNING DEEP ANALYSIS..." : "🔬 DEEP ANALYSIS — 7 / 14 / 21 DAY PREDICTION"}
                               </button>
                             )}
 
@@ -4470,8 +4420,8 @@ export default function NexusDashboard({ user, onLogout }) {
                                   <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
                                     <span style={{ fontFamily: "monospace", fontSize: 9, color: "#00d4ff" }}>Live: ${analysis.liveData.currentPrice}</span>
                                     <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>IV: {analysis.liveData.iv}</span>
-                                    {analysis.liveData.delta && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#9d7fff" }}>ÃÂ {analysis.liveData.delta?.toFixed(2)}</span>}
-                                    {analysis.liveData.theta && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55" }}>ÃÂ¸ {analysis.liveData.theta?.toFixed(3)}/day</span>}
+                                    {analysis.liveData.delta && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#9d7fff" }}>Δ {analysis.liveData.delta?.toFixed(2)}</span>}
+                                    {analysis.liveData.theta && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55" }}>θ {analysis.liveData.theta?.toFixed(3)}/day</span>}
                                     {analysis.liveData.openInterest && <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>OI: {analysis.liveData.openInterest?.toLocaleString()}</span>}
                                   </div>
                                 )}
@@ -4485,12 +4435,12 @@ export default function NexusDashboard({ user, onLogout }) {
                                     </span>
                                   </div>
                                   {analysis.nexusSignals?.signalFactors?.map((f, j) => (
-                                    <div key={j} style={{ fontSize: 8, color: "#8aabb8", marginBottom: 1 }}>Ã¢ÂÂ¢ {f}</div>
+                                    <div key={j} style={{ fontSize: 8, color: "#8aabb8", marginBottom: 1 }}>• {f}</div>
                                   ))}
                                 </div>
 
                                 {/* 7 / 14 / 21 day horizons */}
-                                <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff", marginBottom: 6 }}>PREDICTION HORIZONS Ã¢ÂÂ PROBABILITY OF PROFIT</div>
+                                <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff", marginBottom: 6 }}>PREDICTION HORIZONS — PROBABILITY OF PROFIT</div>
                                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 10 }}>
                                   {analysis.horizons?.map((h, j) => (
                                     <div key={j} style={{ background: h.probProfit >= 60 ? "rgba(57,255,20,0.05)" : h.probProfit >= 40 ? "rgba(255,184,0,0.05)" : "rgba(255,45,85,0.05)", border: `1px solid ${h.probProfit >= 60 ? "rgba(57,255,20,0.2)" : h.probProfit >= 40 ? "rgba(255,184,0,0.2)" : "rgba(255,45,85,0.2)"}`, borderRadius: 4, padding: "8px 10px" }}>
@@ -4513,10 +4463,10 @@ export default function NexusDashboard({ user, onLogout }) {
                                           <div style={{ fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>ITM: <span style={{ color: "#e8f4ff" }}>{h.probITM}%</span></div>
                                           {/* Price scenarios */}
                                           <div style={{ fontSize: 7, color: "#2a3d57", marginBottom: 3 }}>
-                                            Bear ${h.priceScenarios?.bear} ÃÂ· Base ${h.priceScenarios?.base} ÃÂ· Bull ${h.priceScenarios?.bull}
+                                            Bear ${h.priceScenarios?.bear} · Base ${h.priceScenarios?.base} · Bull ${h.priceScenarios?.bull}
                                           </div>
                                           {/* Theta decay */}
-                                          <div style={{ fontSize: 7, color: "#ff2d55" }}>ÃÂ¸ decay: -${h.thetaLoss}</div>
+                                          <div style={{ fontSize: 7, color: "#ff2d55" }}>θ decay: -${h.thetaLoss}</div>
                                           {/* Recommendation */}
                                           <div style={{ fontFamily: "monospace", fontSize: 7, color: h.recColor || "#ffb800", marginTop: 4, borderTop: "1px solid rgba(74,109,140,0.2)", paddingTop: 3 }}>{h.recommendation}</div>
                                         </>
@@ -4536,7 +4486,7 @@ export default function NexusDashboard({ user, onLogout }) {
                                 {/* ANALYST INTEL */}
                                 {analysis.analystIntel && (
                                   <div style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 3, padding: "6px 10px", marginBottom: 8 }}>
-                                    <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff", marginBottom: 4 }}>Ã°ÂÂÂ ANALYST CONSENSUS</div>
+                                    <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff", marginBottom: 4 }}>📊 ANALYST CONSENSUS</div>
                                     <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 4 }}>
                                       <span style={{ fontFamily: "monospace", fontSize: 9, color: "#ffd700" }}>Target: ${analysis.analystIntel.targetMean?.toFixed(0)} (high: ${analysis.analystIntel.targetHigh?.toFixed(0)})</span>
                                       <span style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14" }}>{analysis.analystIntel.recommendation?.toUpperCase()}</span>
@@ -4548,21 +4498,21 @@ export default function NexusDashboard({ user, onLogout }) {
                                       {analysis.analystIntel.holds > 0 && <span style={{ fontSize: 7, color: "#ffb800" }}>Hold: {analysis.analystIntel.holds}</span>}
                                     </div>
                                     {analysis.analystIntel.recentUpgrades?.slice(0,2).map((u, j) => (
-                                      <div key={j} style={{ fontSize: 8, color: "#9d7fff" }}>Ã¢ÂÂ {u.firm}: {u.toGrade} ÃÂ· {u.date}</div>
+                                      <div key={j} style={{ fontSize: 8, color: "#9d7fff" }}>↑ {u.firm}: {u.toGrade} · {u.date}</div>
                                     ))}
-                                    {analysis.analystIntel.shortPct && <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 2 }}>Short float: {analysis.analystIntel.shortPct} ÃÂ· Beta: {analysis.analystIntel.beta?.toFixed(2)}</div>}
+                                    {analysis.analystIntel.shortPct && <div style={{ fontSize: 8, color: "#4a6d8c", marginTop: 2 }}>Short float: {analysis.analystIntel.shortPct} · Beta: {analysis.analystIntel.beta?.toFixed(2)}</div>}
                                   </div>
                                 )}
 
                                 {/* EARNINGS SETUP */}
                                 {analysis.earningsIntel?.daysToEarnings > 0 && analysis.earningsIntel?.daysToEarnings <= 30 && (
                                   <div style={{ background: "rgba(255,184,0,0.06)", border: "1px solid rgba(255,184,0,0.25)", borderRadius: 3, padding: "6px 10px", marginBottom: 8 }}>
-                                    <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 4 }}>Ã¢ÂÂ¡ EARNINGS CATALYST Ã¢ÂÂ {analysis.earningsIntel.daysToEarnings} DAYS</div>
-                                    <div style={{ fontSize: 9, color: "#ffd700", marginBottom: 3 }}>Earnings: {analysis.earningsIntel.earningsDate} ÃÂ· Beat rate: {analysis.earningsIntel.beatRate}% (last 4 quarters)</div>
+                                    <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 4 }}>⚡ EARNINGS CATALYST — {analysis.earningsIntel.daysToEarnings} DAYS</div>
+                                    <div style={{ fontSize: 9, color: "#ffd700", marginBottom: 3 }}>Earnings: {analysis.earningsIntel.earningsDate} · Beat rate: {analysis.earningsIntel.beatRate}% (last 4 quarters)</div>
                                     {analysis.earningsIntel.recentSurprises?.slice(0,3).map((q, j) => (
-                                      <div key={j} style={{ fontSize: 7, color: "#4a6d8c" }}>{q.quarter}: est ${q.estimate?.toFixed(2)} Ã¢ÂÂ actual ${q.actual?.toFixed(2)} <span style={{ color: parseFloat(q.surprise) > 0 ? "#39ff14" : "#ff2d55" }}>{q.surprise}</span></div>
+                                      <div key={j} style={{ fontSize: 7, color: "#4a6d8c" }}>{q.quarter}: est ${q.estimate?.toFixed(2)} → actual ${q.actual?.toFixed(2)} <span style={{ color: parseFloat(q.surprise) > 0 ? "#39ff14" : "#ff2d55" }}>{q.surprise}</span></div>
                                     ))}
-                                    {analysis.earningsIntel.ivCrushRisk && <div style={{ fontSize: 8, color: "#ff6b35", marginTop: 4 }}>Ã¢ÂÂ  {analysis.earningsIntel.ivCrushRisk}</div>}
+                                    {analysis.earningsIntel.ivCrushRisk && <div style={{ fontSize: 8, color: "#ff6b35", marginTop: 4 }}>⚠ {analysis.earningsIntel.ivCrushRisk}</div>}
                                   </div>
                                 )}
 
@@ -4570,15 +4520,15 @@ export default function NexusDashboard({ user, onLogout }) {
                                 {analysis.recentNews?.length > 0 && (
                                   <div style={{ background: "rgba(0,0,0,0.2)", borderRadius: 3, padding: "6px 10px", marginBottom: 8 }}>
                                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                                      <span style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff" }}>Ã°ÂÂÂ° RECENT NEWS SENTIMENT</span>
+                                      <span style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff" }}>📰 RECENT NEWS SENTIMENT</span>
                                       <span style={{ fontSize: 8, color: analysis.newsSentiment?.overall === "BULLISH" ? "#39ff14" : analysis.newsSentiment?.overall === "BEARISH" ? "#ff2d55" : "#ffb800" }}>
-                                        {analysis.newsSentiment?.bullish}Ã°ÂÂÂ¢ {analysis.newsSentiment?.bearish}Ã°ÂÂÂ´ {analysis.newsSentiment?.neutral}Ã¢ÂÂª
+                                        {analysis.newsSentiment?.bullish}🟢 {analysis.newsSentiment?.bearish}🔴 {analysis.newsSentiment?.neutral}⚪
                                       </span>
                                     </div>
                                     {analysis.recentNews.slice(0,4).map((n, j) => (
                                       <div key={j} style={{ marginBottom: 2 }}>
                                         <span style={{ fontSize: 7, color: n.sentiment === "BULLISH" ? "#39ff14" : n.sentiment === "BEARISH" ? "#ff2d55" : "#4a6d8c" }}>
-                                          {n.sentiment === "BULLISH" ? "Ã¢ÂÂ" : n.sentiment === "BEARISH" ? "Ã¢ÂÂ" : "ÃÂ·"}
+                                          {n.sentiment === "BULLISH" ? "↑" : n.sentiment === "BEARISH" ? "↓" : "·"}
                                         </span>
                                         <span style={{ fontSize: 7, color: "#8aabb8", marginLeft: 4 }}>{n.title?.slice(0,65)}</span>
                                       </div>
@@ -4597,11 +4547,11 @@ export default function NexusDashboard({ user, onLogout }) {
 
                                 {/* Action plan */}
                                 <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "6px 10px", marginBottom: 8 }}>
-                                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 4 }}>Ã¢ÂÂ¡ ACTION PLAN</div>
-                                  <div style={{ fontSize: 8, color: "#8aabb8", marginBottom: 2 }}>Ã¢ÂÂ {analysis.actionPlan?.hold}</div>
-                                  <div style={{ fontSize: 8, color: "#ffb800", marginBottom: 2 }}>Ã¢ÂÂ  {analysis.actionPlan?.defend}</div>
-                                  <div style={{ fontSize: 8, color: "#ff2d55", marginBottom: analysis.actionPlan?.earningsNote ? 4 : 0 }}>Ã¢ÂÂ {analysis.actionPlan?.exit}</div>
-                                  {analysis.actionPlan?.earningsNote && <div style={{ fontSize: 8, color: "#ff6b35", borderTop: "1px solid rgba(74,109,140,0.2)", paddingTop: 4, marginTop: 4 }}>Ã¢ÂÂ¡ {analysis.actionPlan.earningsNote}</div>}
+                                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#39ff14", marginBottom: 4 }}>⚡ ACTION PLAN</div>
+                                  <div style={{ fontSize: 8, color: "#8aabb8", marginBottom: 2 }}>✓ {analysis.actionPlan?.hold}</div>
+                                  <div style={{ fontSize: 8, color: "#ffb800", marginBottom: 2 }}>⚠ {analysis.actionPlan?.defend}</div>
+                                  <div style={{ fontSize: 8, color: "#ff2d55", marginBottom: analysis.actionPlan?.earningsNote ? 4 : 0 }}>✗ {analysis.actionPlan?.exit}</div>
+                                  {analysis.actionPlan?.earningsNote && <div style={{ fontSize: 8, color: "#ff6b35", borderTop: "1px solid rgba(74,109,140,0.2)", paddingTop: 4, marginTop: 4 }}>⚡ {analysis.actionPlan.earningsNote}</div>}
                                 </div>
 
                                 {/* Overall outlook */}
@@ -4609,7 +4559,7 @@ export default function NexusDashboard({ user, onLogout }) {
                                   Overall: <span style={{ color: analysis.overallOutlook?.includes("FAVORABLE") && !analysis.overallOutlook?.includes("UN") ? "#39ff14" : analysis.overallOutlook?.includes("UNFAVORABLE") ? "#ff2d55" : "#ffb800" }}>{analysis.overallOutlook}</span>
                                 </div>
 
-                                <button onClick={() => analyzePosition(pos)} disabled={isAnalyzing} style={{ marginTop: 8, background: "none", border: "1px solid rgba(74,109,140,0.3)", color: "#4a6d8c", borderRadius: 2, padding: "3px 10px", fontSize: 8, cursor: "pointer", fontFamily: "monospace" }}>Ã¢ÂÂ³ RE-ANALYZE</button>
+                                <button onClick={() => analyzePosition(pos)} disabled={isAnalyzing} style={{ marginTop: 8, background: "none", border: "1px solid rgba(74,109,140,0.3)", color: "#4a6d8c", borderRadius: 2, padding: "3px 10px", fontSize: 8, cursor: "pointer", fontFamily: "monospace" }}>⟳ RE-ANALYZE</button>
                               </div>
                             )}
                           </div>
@@ -4621,16 +4571,16 @@ export default function NexusDashboard({ user, onLogout }) {
               </div>
             )}
 
-            {/* RESEARCH TAB Ã¢ÂÂ Earnings + Ripple + Pattern + Paper */}
+            {/* RESEARCH TAB — Earnings + Ripple + Pattern + Paper */}
             {tab === "research" && (
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
 
-                {/* BACKTESTER Ã¢ÂÂ HYPER ACCELERATE TO 90% */}
+                {/* BACKTESTER — HYPER ACCELERATE TO 90% */}
                 <div style={{ background: "linear-gradient(135deg,rgba(255,45,85,0.08),rgba(157,127,255,0.04))", border: "2px solid rgba(255,45,85,0.4)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                     <div>
-                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff2d55", letterSpacing: 2 }}>Ã¢ÂÂ¡ NEXUS BACKTESTER Ã¢ÂÂ HYPER-ACCELERATE TO 90%</div>
-                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Compresses 60 days of market history into hours of learning ÃÂ· Activates weight adjuster immediately ÃÂ· Jumps accuracy by ~10-15%</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ff2d55", letterSpacing: 2 }}>⚡ NEXUS BACKTESTER — HYPER-ACCELERATE TO 90%</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Compresses 60 days of market history into hours of learning · Activates weight adjuster immediately · Jumps accuracy by ~10-15%</div>
                     </div>
                     {backtestData && <span style={{ fontFamily: "monospace", fontSize: 11, padding: "3px 10px", borderRadius: 10, background: backtestData.accuracy >= 80 ? "rgba(57,255,20,0.15)" : "rgba(255,184,0,0.15)", color: backtestData.accuracy >= 80 ? "#39ff14" : "#ffb800" }}>{backtestData.accuracy}% backtest accuracy</span>}
                   </div>
@@ -4638,7 +4588,7 @@ export default function NexusDashboard({ user, onLogout }) {
                   {!backtestData ? (
                     <div>
                       <div style={{ fontSize: 10, color: "#8aabb8", marginBottom: 10, lineHeight: 1.6 }}>
-                        Runs the conflict resolver against <strong style={{ color: "#e8f4ff" }}>30 historical trading days ÃÂ 10 tickers = 300 picks</strong>, checks actual outcomes, feeds results into the weight auto-adjuster. This is months of learning in one click.
+                        Runs the conflict resolver against <strong style={{ color: "#e8f4ff" }}>30 historical trading days × 10 tickers = 300 picks</strong>, checks actual outcomes, feeds results into the weight auto-adjuster. This is months of learning in one click.
                       </div>
                       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                         <select value={backtestDays} onChange={e => setBacktestDays(Number(e.target.value))} style={{ background: "#0a1628", border: "1px solid rgba(255,45,85,0.3)", color: "#e8f4ff", borderRadius: 3, padding: "5px 8px", fontFamily: "monospace", fontSize: 10 }}>
@@ -4647,11 +4597,11 @@ export default function NexusDashboard({ user, onLogout }) {
                           <option value={20}>20 days (~200 picks)</option>
                         </select>
                         <button onClick={() => runBacktest(backtestDays)} disabled={loadingBacktest} style={{ background: loadingBacktest ? "#1a2d47" : "linear-gradient(135deg,#8b0000,#ff2d55)", color: loadingBacktest ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "7px 20px", fontSize: 11, fontWeight: 700, cursor: loadingBacktest ? "not-allowed" : "pointer", fontFamily: "monospace", letterSpacing: 2 }}>
-                          {loadingBacktest ? "Ã¢ÂÂ³ BACKTESTING..." : "Ã¢ÂÂ¡ RUN BACKTEST"}
+                          {loadingBacktest ? "⏳ BACKTESTING..." : "⚡ RUN BACKTEST"}
                         </button>
                         <button onClick={loadBacktestResults} style={{ background: "none", border: "1px solid rgba(255,45,85,0.3)", color: "#ff2d55", borderRadius: 3, padding: "6px 12px", fontSize: 10, cursor: "pointer", fontFamily: "monospace" }}>LOAD PREVIOUS</button>
                       </div>
-                      {loadingBacktest && <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 8, fontFamily: "monospace" }}>Fetching {backtestDays} days of price history for 10 tickers ÃÂ· Running conflict resolver ÃÂ· Checking outcomes ÃÂ· Calibrating weights...</div>}
+                      {loadingBacktest && <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 8, fontFamily: "monospace" }}>Fetching {backtestDays} days of price history for 10 tickers · Running conflict resolver · Checking outcomes · Calibrating weights...</div>}
                     </div>
                   ) : (
                     <div>
@@ -4712,23 +4662,23 @@ export default function NexusDashboard({ user, onLogout }) {
                         <div style={{ background: "rgba(57,255,20,0.04)", borderRadius: 3, padding: "6px 8px" }}>
                           <div style={{ fontFamily: "monospace", fontSize: 7, color: "#39ff14", marginBottom: 3 }}>TOP SUCCESS PATTERNS</div>
                           {backtestData.topSuccessPatterns?.slice(0,3).map((p, i) => (
-                            <div key={i} style={{ fontSize: 8, color: "#8aabb8", marginBottom: 2 }}>Ã¢ÂÂ {p.reason?.slice(0,55)} ({p.count}ÃÂ)</div>
+                            <div key={i} style={{ fontSize: 8, color: "#8aabb8", marginBottom: 2 }}>✓ {p.reason?.slice(0,55)} ({p.count}×)</div>
                           ))}
                         </div>
                         <div style={{ background: "rgba(255,45,85,0.04)", borderRadius: 3, padding: "6px 8px" }}>
                           <div style={{ fontFamily: "monospace", fontSize: 7, color: "#ff2d55", marginBottom: 3 }}>TOP FAILURE PATTERNS</div>
                           {backtestData.topFailurePatterns?.slice(0,3).map((p, i) => (
-                            <div key={i} style={{ fontSize: 8, color: "#8aabb8", marginBottom: 2 }}>Ã¢ÂÂ {p.reason?.slice(0,55)} ({p.count}ÃÂ)</div>
+                            <div key={i} style={{ fontSize: 8, color: "#8aabb8", marginBottom: 2 }}>✗ {p.reason?.slice(0,55)} ({p.count}×)</div>
                           ))}
                         </div>
                       </div>
 
                       {/* Rerun option */}
                       <div style={{ display: "flex", gap: 8 }}>
-                        <button onClick={() => runBacktest(backtestDays)} disabled={loadingBacktest} style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", color: "#ff2d55", borderRadius: 3, padding: "5px 12px", fontSize: 9, cursor: "pointer", fontFamily: "monospace" }}>Ã¢ÂÂ³ RE-RUN BACKTEST</button>
+                        <button onClick={() => runBacktest(backtestDays)} disabled={loadingBacktest} style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", color: "#ff2d55", borderRadius: 3, padding: "5px 12px", fontSize: 9, cursor: "pointer", fontFamily: "monospace" }}>⟳ RE-RUN BACKTEST</button>
                         <button onClick={() => setBacktestData(null)} style={{ background: "none", border: "1px solid rgba(74,109,140,0.3)", color: "#4a6d8c", borderRadius: 3, padding: "5px 10px", fontSize: 9, cursor: "pointer", fontFamily: "monospace" }}>RESET</button>
                         {backtestData.weightUpdateResult?.updatesApplied > 0 && (
-                          <span style={{ fontSize: 9, color: "#39ff14", padding: "5px 0" }}>Ã¢ÂÂ Weights calibrated Ã¢ÂÂ run pipeline for improved accuracy</span>
+                          <span style={{ fontSize: 9, color: "#39ff14", padding: "5px 0" }}>✓ Weights calibrated — run pipeline for improved accuracy</span>
                         )}
                       </div>
                     </div>
@@ -4740,12 +4690,12 @@ export default function NexusDashboard({ user, onLogout }) {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <div>
                       <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>
-                        Ã°ÂÂ§Â  NEXUS AUTONOMOUS INTELLIGENCE Ã¢ÂÂ ALWAYS RUNNING
+                        🧠 NEXUS AUTONOMOUS INTELLIGENCE — ALWAYS RUNNING
                       </div>
-                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Harvests every 15min ÃÂ· Patterns every hour ÃÂ· Simulates at 9:30am ET ÃÂ· Checks outcomes at 4:30pm ET ÃÂ· Synthesizes weekly ÃÂ· Target: 90%</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Harvests every 15min · Patterns every hour · Simulates at 9:30am ET · Checks outcomes at 4:30pm ET · Synthesizes weekly · Target: 90%</div>
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>
-                      <div style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 8px", borderRadius: 10, background: "rgba(57,255,20,0.15)", color: "#39ff14" }}>Ã¢ÂÂ RUNNING</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 9, padding: "2px 8px", borderRadius: 10, background: "rgba(57,255,20,0.15)", color: "#39ff14" }}>● RUNNING</div>
                     </div>
                   </div>
 
@@ -4756,16 +4706,16 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* 5 component status */}
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 4, marginBottom: 10 }}>
                         {[
-                          { name: "HARVESTER", icon: "Ã°ÂÂÂ¡", comp: autonomousData.components?.harvester, detail: autonomousData.components?.harvester?.harvests24h + " harvests/24h" },
-                          { name: "PATTERNS", icon: "Ã°ÂÂÂ", comp: autonomousData.components?.patternEngine, detail: autonomousData.components?.patternEngine?.patternsFound + " patterns found" },
-                          { name: "SIMULATOR", icon: "Ã°ÂÂÂ¯", comp: autonomousData.components?.simulationEngine, detail: autonomousData.components?.simulationEngine?.totalSimulations + " sims total" },
-                          { name: "OUTCOMES", icon: "Ã¢ÂÂ", comp: autonomousData.components?.outcomeChecker, detail: autonomousData.components?.simulationEngine?.resolved + " resolved" },
-                          { name: "SYNTHESIZER", icon: "Ã°ÂÂ§Â¬", comp: autonomousData.components?.insightSynthesizer, detail: autonomousData.components?.insightSynthesizer?.overallWinRate ? autonomousData.components.insightSynthesizer.overallWinRate + "% win rate" : "Awaiting data" },
+                          { name: "HARVESTER", icon: "📡", comp: autonomousData.components?.harvester, detail: autonomousData.components?.harvester?.harvests24h + " harvests/24h" },
+                          { name: "PATTERNS", icon: "🔍", comp: autonomousData.components?.patternEngine, detail: autonomousData.components?.patternEngine?.patternsFound + " patterns found" },
+                          { name: "SIMULATOR", icon: "🎯", comp: autonomousData.components?.simulationEngine, detail: autonomousData.components?.simulationEngine?.totalSimulations + " sims total" },
+                          { name: "OUTCOMES", icon: "✓", comp: autonomousData.components?.outcomeChecker, detail: autonomousData.components?.simulationEngine?.resolved + " resolved" },
+                          { name: "SYNTHESIZER", icon: "🧬", comp: autonomousData.components?.insightSynthesizer, detail: autonomousData.components?.insightSynthesizer?.overallWinRate ? autonomousData.components.insightSynthesizer.overallWinRate + "% win rate" : "Awaiting data" },
                         ].map((c, i) => (
                           <div key={i} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "6px 8px", textAlign: "center" }}>
                             <div style={{ fontSize: 14, marginBottom: 2 }}>{c.icon}</div>
                             <div style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", marginBottom: 2 }}>{c.name}</div>
-                            <div style={{ fontFamily: "monospace", fontSize: 7, color: "#39ff14" }}>Ã¢ÂÂ ACTIVE</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 7, color: "#39ff14" }}>● ACTIVE</div>
                             <div style={{ fontSize: 7, color: "#2a3d57", marginTop: 2 }}>{c.detail}</div>
                           </div>
                         ))}
@@ -4776,7 +4726,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
                           <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>CURRENT WIN RATE</div>
                           <div style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 700, color: autonomousData.performance?.winRate?.includes("%") && parseInt(autonomousData.performance.winRate) >= 80 ? "#39ff14" : "#ffb800" }}>
-                            {autonomousData.performance?.winRate || "Ã¢ÂÂ"}
+                            {autonomousData.performance?.winRate || "—"}
                           </div>
                           <div style={{ fontSize: 7, color: "#4a6d8c" }}>Target: 90%</div>
                         </div>
@@ -4798,7 +4748,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* Recent simulations with WHY */}
                       {autonomousData.performance?.recentSims?.length > 0 && (
                         <div style={{ marginBottom: 10 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 4 }}>RECENT SIMULATIONS Ã¢ÂÂ WITH OUTCOME ANALYSIS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 4 }}>RECENT SIMULATIONS — WITH OUTCOME ANALYSIS</div>
                           {autonomousData.performance.recentSims.map((s, i) => (
                             <div key={i} style={{ padding: "5px 8px", marginBottom: 3, background: "rgba(0,0,0,0.3)", borderRadius: 3, border: `1px solid ${s.correct === true ? "rgba(57,255,20,0.15)" : s.correct === false ? "rgba(255,45,85,0.15)" : "rgba(74,109,140,0.1)"}` }}>
                               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
@@ -4810,13 +4760,13 @@ export default function NexusDashboard({ user, onLogout }) {
                                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                                   {s.pnlPct !== null && <span style={{ fontFamily: "monospace", fontSize: 9, color: s.pnlPct >= 0 ? "#39ff14" : "#ff2d55" }}>{s.pnlPct >= 0 ? "+" : ""}{s.pnlPct}%</span>}
                                   <span style={{ fontFamily: "monospace", fontSize: 8, color: s.correct === true ? "#39ff14" : s.correct === false ? "#ff2d55" : "#4a6d8c" }}>
-                                    {s.correct === true ? "Ã¢ÂÂ WIN" : s.correct === false ? "Ã¢ÂÂ LOSS" : "Ã¢ÂÂ³ PENDING"}
+                                    {s.correct === true ? "✓ WIN" : s.correct === false ? "✗ LOSS" : "⏳ PENDING"}
                                   </span>
                                 </div>
                               </div>
                               {(s.whyWorked || s.whyFailed) && (
                                 <div style={{ fontSize: 8, color: s.correct ? "#39ff14" : "#ff2d55", opacity: 0.7 }}>
-                                  {s.correct ? "Ã¢ÂÂ " + s.whyWorked : "Ã¢ÂÂ " + s.whyFailed}
+                                  {s.correct ? "✓ " + s.whyWorked : "✗ " + s.whyFailed}
                                 </div>
                               )}
                             </div>
@@ -4827,13 +4777,13 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* Weekly insights */}
                       {autonomousData.weeklyInsights && (
                         <div style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 4, padding: "8px 10px" }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff", marginBottom: 4 }}>WEEKLY INSIGHT Ã¢ÂÂ {autonomousData.weeklyInsights.timestamp?.slice(0,10)}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#00d4ff", marginBottom: 4 }}>WEEKLY INSIGHT — {autonomousData.weeklyInsights.timestamp?.slice(0,10)}</div>
                           <div style={{ fontSize: 10, color: "#c8dce8", marginBottom: 4 }}>{autonomousData.weeklyInsights.recommendation}</div>
                           {autonomousData.weeklyInsights.topSuccessFactors?.slice(0,2).map((f, i) => (
-                            <div key={i} style={{ fontSize: 8, color: "#39ff14" }}>Ã¢ÂÂ {f.reason} ({f.count}x)</div>
+                            <div key={i} style={{ fontSize: 8, color: "#39ff14" }}>✓ {f.reason} ({f.count}x)</div>
                           ))}
                           {autonomousData.weeklyInsights.topFailureFactors?.slice(0,2).map((f, i) => (
-                            <div key={i} style={{ fontSize: 8, color: "#ff2d55" }}>Ã¢ÂÂ {f.reason} ({f.count}x)</div>
+                            <div key={i} style={{ fontSize: 8, color: "#ff2d55" }}>✗ {f.reason} ({f.count}x)</div>
                           ))}
                         </div>
                       )}
@@ -4841,7 +4791,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* Harvest anomalies */}
                       {autonomousData.components?.harvester?.lastAnomalies?.length > 0 && (
                         <div style={{ marginTop: 8, padding: "6px 8px", background: "rgba(255,184,0,0.05)", borderRadius: 3, border: "1px solid rgba(255,184,0,0.15)" }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 3 }}>Ã¢ÂÂ¡ LATEST HARVEST ANOMALIES</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ffb800", marginBottom: 3 }}>⚡ LATEST HARVEST ANOMALIES</div>
                           {autonomousData.components.harvester.lastAnomalies.map((a, i) => (
                             <div key={i} style={{ fontSize: 9, color: "#8aabb8" }}>{a.type}: {a.current || a.to || JSON.stringify(a).slice(0,40)}</div>
                           ))}
@@ -4855,10 +4805,10 @@ export default function NexusDashboard({ user, onLogout }) {
                 <div style={{ background: "#080f1a", border: "1px solid rgba(0,212,255,0.25)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <div>
-                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>Ã°ÂÂÂ NEXUS LEARNING ENGINE Ã¢ÂÂ CONTINUOUS ACCURACY IMPROVEMENT</div>
-                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Logs every pick Ã¢ÂÂ checks outcomes after 24h Ã¢ÂÂ ranks signals by accuracy Ã¢ÂÂ self-improves</div>
+                      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>📊 NEXUS LEARNING ENGINE — CONTINUOUS ACCURACY IMPROVEMENT</div>
+                      <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 2 }}>Logs every pick → checks outcomes after 24h → ranks signals by accuracy → self-improves</div>
                     </div>
-                    <button onClick={loadLearningStats} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "4px 10px", fontSize: 9, cursor: "pointer", fontFamily: "monospace" }}>Ã°ÂÂÂ LOAD</button>
+                    <button onClick={loadLearningStats} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", borderRadius: 3, padding: "4px 10px", fontSize: 9, cursor: "pointer", fontFamily: "monospace" }}>📊 LOAD</button>
                   </div>
                   {!learningData ? (
                     <div style={{ fontSize: 10, color: "#4a6d8c" }}>Click LOAD to see accuracy tracking and improvement suggestions</div>
@@ -4866,7 +4816,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6, marginBottom: 10 }}>
                         {[
-                          { label: "ACCURACY", value: (learningData.stats?.accuracy || "Ã¢ÂÂ") + "%", color: learningData.stats?.accuracy >= 80 ? "#39ff14" : "#ffb800", sub: "TARGET: 80%+" },
+                          { label: "ACCURACY", value: (learningData.stats?.accuracy || "—") + "%", color: learningData.stats?.accuracy >= 80 ? "#39ff14" : "#ffb800", sub: "TARGET: 80%+" },
                           { label: "PREDICTIONS", value: learningData.totalPredictions || 0, color: "#e8f4ff", sub: "total logged" },
                           { label: "RESOLVED", value: learningData.stats?.total || 0, color: "#e8f4ff", sub: "24h+ checked" },
                           { label: "CORRECT", value: learningData.stats?.correct || 0, color: "#39ff14", sub: "winning" },
@@ -4897,7 +4847,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "3px 8px", marginBottom: 2, background: "rgba(0,0,0,0.2)", borderRadius: 3 }}>
                           <span style={{ fontFamily: "monospace", fontSize: 8, color: "#8aabb8" }}>{e.date} {e.picks}</span>
                           <span style={{ fontFamily: "monospace", fontSize: 8, color: e.correct === true ? "#39ff14" : e.correct === false ? "#ff2d55" : "#4a6d8c" }}>
-                            {e.correct === true ? "Ã¢ÂÂ " + e.outcome?.winRate + "%" : e.correct === false ? "Ã¢ÂÂ" : "Ã¢ÂÂ³"}
+                            {e.correct === true ? "✓ " + e.outcome?.winRate + "%" : e.correct === false ? "✗" : "⏳"}
                           </span>
                         </div>
                       ))}
@@ -4908,14 +4858,14 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* SIGNAL WEIGHT AUTO-ADJUSTER */}
                 {weightsData && (
                   <div style={{ background: "#080f1a", border: "1px solid rgba(157,127,255,0.25)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#9d7fff", letterSpacing: 2, marginBottom: 6 }}>Ã¢ÂÂÃ¯Â¸Â SIGNAL WEIGHT AUTO-ADJUSTER</div>
-                    <div style={{ fontSize: 9, color: "#4a6d8c", marginBottom: 10 }}>Conditional per-scenario ÃÂ· ÃÂ±20% max drift ÃÂ· 10+ samples minimum ÃÂ· weekly decay ÃÂ· self-improves over time</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#9d7fff", letterSpacing: 2, marginBottom: 6 }}>⚖️ SIGNAL WEIGHT AUTO-ADJUSTER</div>
+                    <div style={{ fontSize: 9, color: "#4a6d8c", marginBottom: 10 }}>Conditional per-scenario · ±20% max drift · 10+ samples minimum · weekly decay · self-improves over time</div>
 
                     {/* Progress to learning */}
                     <div style={{ marginBottom: 10 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
                         <span style={{ fontFamily: "monospace", fontSize: 9, color: weightsData.readyToLearn ? "#39ff14" : "#ffb800" }}>
-                          {weightsData.readyToLearn ? "Ã¢ÂÂ LEARNING ACTIVE" : "Ã¢ÂÂ³ BUILDING DATA"}
+                          {weightsData.readyToLearn ? "✓ LEARNING ACTIVE" : "⏳ BUILDING DATA"}
                         </span>
                         <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{weightsData.resolvedPredictions}/30 resolved</span>
                       </div>
@@ -4935,19 +4885,19 @@ export default function NexusDashboard({ user, onLogout }) {
                     {/* Weight table for selected scenario */}
                     {weightsData.effectiveWeights?.[weightsScenario] && (
                       <div>
-                        <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 6 }}>SIGNAL WEIGHTS Ã¢ÂÂ {weightsScenario} SCENARIO</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 6 }}>SIGNAL WEIGHTS — {weightsScenario} SCENARIO</div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 4 }}>
                           {Object.entries(weightsData.effectiveWeights[weightsScenario]).map(([signal, w]) => (
-                            <div key={signal} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "4px 6px", border: `1px solid ${w.direction === "Ã¢ÂÂBOOSTED" ? "rgba(57,255,20,0.2)" : w.direction === "Ã¢ÂÂREDUCED" ? "rgba(255,45,85,0.2)" : "rgba(74,109,140,0.1)"}` }}>
+                            <div key={signal} style={{ background: "rgba(0,0,0,0.3)", borderRadius: 3, padding: "4px 6px", border: `1px solid ${w.direction === "↑BOOSTED" ? "rgba(57,255,20,0.2)" : w.direction === "↓REDUCED" ? "rgba(255,45,85,0.2)" : "rgba(74,109,140,0.1)"}` }}>
                               <div style={{ fontFamily: "monospace", fontSize: 7, color: "#4a6d8c", marginBottom: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{signal}</div>
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span style={{ fontFamily: "monospace", fontSize: 9, fontWeight: 700, color: w.direction === "Ã¢ÂÂBOOSTED" ? "#39ff14" : w.direction === "Ã¢ÂÂREDUCED" ? "#ff2d55" : "#8aabb8" }}>{w.effective}</span>
-                                <span style={{ fontFamily: "monospace", fontSize: 7, color: w.direction === "Ã¢ÂÂBOOSTED" ? "#39ff14" : w.direction === "Ã¢ÂÂREDUCED" ? "#ff2d55" : "#2a3d57" }}>{w.direction.slice(0,2)}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 9, fontWeight: 700, color: w.direction === "↑BOOSTED" ? "#39ff14" : w.direction === "↓REDUCED" ? "#ff2d55" : "#8aabb8" }}>{w.effective}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 7, color: w.direction === "↑BOOSTED" ? "#39ff14" : w.direction === "↓REDUCED" ? "#ff2d55" : "#2a3d57" }}>{w.direction.slice(0,2)}</span>
                               </div>
                               {w.samples > 0 && <div style={{ fontSize: 6, color: "#2a3d57" }}>n={w.samples} {w.accuracy ? Math.round(w.accuracy*100)+"%" : ""}</div>}
                               {/* Weight bar */}
                               <div style={{ height: 2, background: "rgba(74,109,140,0.15)", borderRadius: 1, marginTop: 2 }}>
-                                <div style={{ height: "100%", width: (w.effective * 100) + "%", background: w.direction === "Ã¢ÂÂBOOSTED" ? "#39ff14" : w.direction === "Ã¢ÂÂREDUCED" ? "#ff2d55" : "#4a6d8c", borderRadius: 1 }}/>
+                                <div style={{ height: "100%", width: (w.effective * 100) + "%", background: w.direction === "↑BOOSTED" ? "#39ff14" : w.direction === "↓REDUCED" ? "#ff2d55" : "#4a6d8c", borderRadius: 1 }}/>
                               </div>
                             </div>
                           ))}
@@ -4959,7 +4909,7 @@ export default function NexusDashboard({ user, onLogout }) {
                             <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 4 }}>LARGEST WEIGHT ADJUSTMENTS (all scenarios)</div>
                             {weightsData.topAdjustments.slice(0,5).map((a, i) => (
                               <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-                                <span style={{ fontFamily: "monospace", fontSize: 8, color: "#e8f4ff" }}>{a.signal} ÃÂ· {a.scenario}</span>
+                                <span style={{ fontFamily: "monospace", fontSize: 8, color: "#e8f4ff" }}>{a.signal} · {a.scenario}</span>
                                 <div style={{ display: "flex", gap: 8 }}>
                                   <span style={{ fontFamily: "monospace", fontSize: 8, color: a.adjustment > 0 ? "#39ff14" : "#ff2d55" }}>{a.adjustment > 0 ? "+" : ""}{a.adjustment} ({a.direction})</span>
                                   <span style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>n={a.samples}</span>
@@ -4976,7 +4926,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* IMPROVEMENT SUGGESTIONS */}
                 {suggestionsData && (
                   <div style={{ background: "#080f1a", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2, marginBottom: 8 }}>Ã°ÂÂ§Â  AI SELF-IMPROVEMENT SUGGESTIONS</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 2, marginBottom: 8 }}>🧠 AI SELF-IMPROVEMENT SUGGESTIONS</div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 10 }}>
                       {[
                         { label: "BEST FREE ADDITION", value: suggestionsData.aiSuggestions?.highestImpactFree, color: "#39ff14" },
@@ -4998,7 +4948,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     )}
                     {Object.entries(suggestionsData.tabImprovements || {}).slice(0,2).map(([tab, items]) => (
                       <div key={tab} style={{ marginBottom: 8 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 3 }}>{tab} Ã¢ÂÂ IMPROVEMENTS</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 8, color: "#9d7fff", marginBottom: 3 }}>{tab} — IMPROVEMENTS</div>
                         {items.filter(i => i.priority === "HIGH").map((item, i) => (
                           <div key={i} style={{ display: "flex", gap: 6, marginBottom: 3, padding: "3px 6px", background: "rgba(255,45,85,0.04)", borderRadius: 3, border: "1px solid rgba(255,45,85,0.1)" }}>
                             <span style={{ fontFamily: "monospace", fontSize: 7, color: "#ff2d55", flexShrink: 0 }}>HIGH</span>
@@ -5014,9 +4964,9 @@ export default function NexusDashboard({ user, onLogout }) {
                 )}
 
                 <div style={{ background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 4, padding: "12px 16px", marginBottom: 14 }}>
-                  <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00d4ff", letterSpacing: 3, marginBottom: 2 }}>Ã°ÂÂÂ¬ RESEARCH TOOLS</div>
+                  <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00d4ff", letterSpacing: 3, marginBottom: 2 }}>🔬 RESEARCH TOOLS</div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
-                    {[["Ã°ÂÂÂ Earnings Deep Dive","earnings"],["Ã°ÂÂÂ Ripple Chain","ripple"],["Ã°ÂÂ§Â  Pattern Memory","pattern"],["Ã°ÂÂÂ Paper Trading","paper"]].map(([label,t])=>(
+                    {[["📊 Earnings Deep Dive","earnings"],["🌊 Ripple Chain","ripple"],["🧠 Pattern Memory","pattern"],["📋 Paper Trading","paper"]].map(([label,t])=>(
                       <button key={t} onClick={() => handleTab(t)} style={{ fontFamily:"monospace",fontSize:10,padding:"4px 12px",borderRadius:3,background:"rgba(0,212,255,0.08)",border:"1px solid rgba(0,212,255,0.2)",color:"#00d4ff",cursor:"pointer" }}>{label}</button>
                     ))}
                   </div>
@@ -5030,22 +4980,22 @@ export default function NexusDashboard({ user, onLogout }) {
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(178,79,255,0.1),rgba(178,79,255,0.03))", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#b24fff", letterSpacing: 3, marginBottom: 4 }}>Ã¢ÂÂ¡ UNUSUAL OPTIONS FLOW</div>
-                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Smart money detector Ã¢ÂÂ Vol/OI ratio spikes signal institutional positioning</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#b24fff", letterSpacing: 3, marginBottom: 4 }}>⚡ UNUSUAL OPTIONS FLOW</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Smart money detector — Vol/OI ratio spikes signal institutional positioning</div>
                   </div>
                   <button onClick={() => loadUnusualFlow(true)} disabled={loadingFlow} style={{ background: loadingFlow ? "#1a2d47" : "rgba(178,79,255,0.15)", border: "1px solid rgba(178,79,255,0.4)", color: loadingFlow ? "#4a6d8c" : "#b24fff", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingFlow ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                    {loadingFlow ? "SCANNING..." : "Ã¢ÂÂ¡ SCAN FLOW"}
+                    {loadingFlow ? "SCANNING..." : "⚡ SCAN FLOW"}
                   </button>
                 </div>
 
-                {flowError && <div style={{ padding: 12, background: "rgba(178,79,255,0.1)", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 4, color: "#b24fff", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>Ã¢ÂÂ  {flowError}</div>}
+                {flowError && <div style={{ padding: 12, background: "rgba(178,79,255,0.1)", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 4, color: "#b24fff", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>⚠ {flowError}</div>}
 
                 {!unusualFlow && !loadingFlow && (
                   <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>Ã¢ÂÂ¡</div>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>⚡</div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, color: "#b24fff", letterSpacing: 3, marginBottom: 8 }}>NO FLOW DATA</div>
                     <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Scan for unusual options activity across your watchlist and core tickers</div>
-                    <button onClick={() => loadUnusualFlow(true)} style={{ background: "rgba(178,79,255,0.15)", border: "1px solid rgba(178,79,255,0.4)", color: "#b24fff", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>Ã¢ÂÂ¡ SCAN NOW</button>
+                    <button onClick={() => loadUnusualFlow(true)} style={{ background: "rgba(178,79,255,0.15)", border: "1px solid rgba(178,79,255,0.4)", color: "#b24fff", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>⚡ SCAN NOW</button>
                   </div>
                 )}
 
@@ -5107,7 +5057,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     )}
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 12, fontFamily: "monospace" }}>
-                      Scanned: {new Date(unusualFlow.timestamp).toLocaleString()} ÃÂ· Vol/OI threshold: 3x+ ÃÂ· Min premium: $10K ÃÂ· {unusualFlow.qtPowered ? "Powered by Questrade live data" : "Powered by GDELT signals (connect Questrade for live data)"}
+                      Scanned: {new Date(unusualFlow.timestamp).toLocaleString()} · Vol/OI threshold: 3x+ · Min premium: $10K · {unusualFlow.qtPowered ? "Powered by Questrade live data" : "Powered by GDELT signals (connect Questrade for live data)"}
                     </div>
                   </div>
                 )}
@@ -5119,20 +5069,20 @@ export default function NexusDashboard({ user, onLogout }) {
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(255,140,0,0.08),rgba(255,140,0,0.02))", border: "1px solid rgba(255,140,0,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff8c00", letterSpacing: 3, marginBottom: 4 }}>Ã°ÂÂÂ SEC FORM 4 INSIDER DETECTOR</div>
-                    <div style={{ fontSize: 11, color: "#8aabb8" }}>When CEOs and CFOs buy their own stock Ã¢ÂÂ the strongest signal in the market. SEC Form 4 filings analyzed in real time.</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff8c00", letterSpacing: 3, marginBottom: 4 }}>🔎 SEC FORM 4 INSIDER DETECTOR</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>When CEOs and CFOs buy their own stock — the strongest signal in the market. SEC Form 4 filings analyzed in real time.</div>
                   </div>
                   <button onClick={() => loadInsiderFilings(true)} disabled={loadingInsider} style={{ background: loadingInsider ? "#1a2d47" : "rgba(255,140,0,0.15)", border: "1px solid rgba(255,140,0,0.4)", color: loadingInsider ? "#4a6d8c" : "#ff8c00", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingInsider ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                    {loadingInsider ? "SCANNING..." : "Ã°ÂÂÂ SCAN INSIDERS"}
+                    {loadingInsider ? "SCANNING..." : "🔎 SCAN INSIDERS"}
                   </button>
                 </div>
 
                 {!insiderData && !loadingInsider && (
                   <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>Ã°ÂÂÂ</div>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>🔎</div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ff8c00", letterSpacing: 3, marginBottom: 8 }}>SEC FORM 4 INSIDER TRACKER</div>
                     <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Scans SEC EDGAR and Yahoo Finance for insider buying and selling activity across your watchlist and key tickers</div>
-                    <button onClick={() => loadInsiderFilings(true)} style={{ background: "rgba(255,140,0,0.15)", border: "1px solid rgba(255,140,0,0.4)", color: "#ff8c00", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>Ã°ÂÂÂ SCAN NOW</button>
+                    <button onClick={() => loadInsiderFilings(true)} style={{ background: "rgba(255,140,0,0.15)", border: "1px solid rgba(255,140,0,0.4)", color: "#ff8c00", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>🔎 SCAN NOW</button>
                   </div>
                 )}
 
@@ -5144,7 +5094,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         ["TICKERS SCANNED", insiderData.tickersScanned, "#ff8c00"],
                         ["STRONG BUYS", insiderData.strongBuys?.length || 0, "#39ff14"],
                         ["INSIDER SELLS", insiderData.sells?.length || 0, "#ff2d55"],
-                        ["OVERALL SENTIMENT", insiderData.interpretation?.overallSentiment || "Ã¢ÂÂ", insiderData.interpretation?.overallSentiment === "BULLISH" ? "#39ff14" : insiderData.interpretation?.overallSentiment === "BEARISH" ? "#ff2d55" : "#ffb800"],
+                        ["OVERALL SENTIMENT", insiderData.interpretation?.overallSentiment || "—", insiderData.interpretation?.overallSentiment === "BULLISH" ? "#39ff14" : insiderData.interpretation?.overallSentiment === "BEARISH" ? "#ff2d55" : "#ffb800"],
                       ].map(([label, val, color]) => (
                         <div key={label} style={{ background: "#080f1a", border: "1px solid rgba(255,140,0,0.15)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
                           <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
@@ -5200,7 +5150,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     {/* Strong buy signals */}
                     {insiderData.strongBuys?.length > 0 && (
                       <div style={{ marginBottom: 14 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 8 }}>INSIDER BUY SIGNALS Ã¢ÂÂ PIPELINE (3x boost)</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 8 }}>INSIDER BUY SIGNALS → PIPELINE (3x boost)</div>
                         {insiderData.strongBuys.map((d, i) => (
                           <div key={i} style={{ background: "rgba(57,255,20,0.04)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 12, marginBottom: 8 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
@@ -5215,7 +5165,7 @@ export default function NexusDashboard({ user, onLogout }) {
                             </div>
                             {d.biggestBuy && (
                               <div style={{ fontSize: 11, color: "#8aabb8" }}>
-                                Biggest: {d.biggestBuy.name} ({d.biggestBuy.relation}) Ã¢ÂÂ {d.biggestBuy.shares?.toLocaleString()} shares
+                                Biggest: {d.biggestBuy.name} ({d.biggestBuy.relation}) — {d.biggestBuy.shares?.toLocaleString()} shares
                                 {d.biggestBuy.value > 0 && " ($" + Math.round(d.biggestBuy.value / 1000) + "K)"}
                                 {d.biggestBuy.date && " on " + d.biggestBuy.date}
                               </div>
@@ -5256,8 +5206,8 @@ export default function NexusDashboard({ user, onLogout }) {
                     ))}
 
                     <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginTop: 8 }}>
-                      Scanned: {new Date(insiderData.timestamp).toLocaleString()} ÃÂ· Sources: SEC EDGAR + Yahoo Finance ÃÂ· Insider buy signals injected into pipeline (3x boost)
-                      <button onClick={() => loadInsiderFilings(true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³ refresh</button>
+                      Scanned: {new Date(insiderData.timestamp).toLocaleString()} · Sources: SEC EDGAR + Yahoo Finance · Insider buy signals injected into pipeline (3x boost)
+                      <button onClick={() => loadInsiderFilings(true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳ refresh</button>
                     </div>
                   </div>
                 )}
@@ -5269,21 +5219,21 @@ export default function NexusDashboard({ user, onLogout }) {
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(0,255,200,0.08),rgba(0,255,200,0.02))", border: "1px solid rgba(0,255,200,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00ffc8", letterSpacing: 3, marginBottom: 4 }}>Ã°ÂÂÂ PAPER TRADING SIMULATION</div>
-                    <div style={{ fontSize: 11, color: "#8aabb8" }}>3-tier track record Ã¢ÂÂ Tier 1: Final 3 picks ÃÂ· Tier 2: Top 9 ÃÂ· Tier 3: All 27 candidates ÃÂ· Auto-logged every pipeline run</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00ffc8", letterSpacing: 3, marginBottom: 4 }}>📋 PAPER TRADING SIMULATION</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>3-tier track record — Tier 1: Final 3 picks · Tier 2: Top 9 · Tier 3: All 27 candidates · Auto-logged every pipeline run</div>
                   </div>
                   <button onClick={loadPaperBook} disabled={loadingPaper} style={{ background: loadingPaper ? "#1a2d47" : "rgba(0,255,200,0.15)", border: "1px solid rgba(0,255,200,0.4)", color: loadingPaper ? "#4a6d8c" : "#00ffc8", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingPaper ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                    {loadingPaper ? "LOADING..." : "Ã¢ÂÂ³ REFRESH"}
+                    {loadingPaper ? "LOADING..." : "⟳ REFRESH"}
                   </button>
                 </div>
 
                 {!paperBook && !loadingPaper && (
                   <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>Ã°ÂÂÂ</div>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>📋</div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, color: "#00ffc8", letterSpacing: 3, marginBottom: 8 }}>PAPER TRADING BOOK</div>
                     <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 8 }}>Automatically logs all 27 pipeline candidates after every run</div>
                     <div style={{ fontSize: 11, color: "#4a6d8c", marginBottom: 24 }}>Run the pipeline to start building your verified track record</div>
-                    <button onClick={loadPaperBook} style={{ background: "rgba(0,255,200,0.15)", border: "1px solid rgba(0,255,200,0.4)", color: "#00ffc8", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>Ã°ÂÂÂ LOAD BOOK</button>
+                    <button onClick={loadPaperBook} style={{ background: "rgba(0,255,200,0.15)", border: "1px solid rgba(0,255,200,0.4)", color: "#00ffc8", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>📋 LOAD BOOK</button>
                   </div>
                 )}
 
@@ -5297,7 +5247,7 @@ export default function NexusDashboard({ user, onLogout }) {
                             ["TOTAL TRADES", paperBook.stats.totalTrades, "#00ffc8"],
                             ["OPEN", paperBook.stats.openTrades, "#ffb800"],
                             ["CLOSED", paperBook.stats.closedTrades, "#8aabb8"],
-                            ["OVERALL WIN%", paperBook.stats.overallWinRate !== null ? paperBook.stats.overallWinRate + "%" : "Ã¢ÂÂ", paperBook.stats.overallWinRate >= 70 ? "#39ff14" : paperBook.stats.overallWinRate >= 50 ? "#ffb800" : "#ff2d55"],
+                            ["OVERALL WIN%", paperBook.stats.overallWinRate !== null ? paperBook.stats.overallWinRate + "%" : "—", paperBook.stats.overallWinRate >= 70 ? "#39ff14" : paperBook.stats.overallWinRate >= 50 ? "#ffb800" : "#ff2d55"],
                           ].map(([label, val, color]) => (
                             <div key={label} style={{ background: "#080f1a", border: "1px solid rgba(0,255,200,0.15)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
                               <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
@@ -5311,7 +5261,7 @@ export default function NexusDashboard({ user, onLogout }) {
                           {[["TIER 1 WIN% (Final 3)", paperBook.stats.tier1WinRate, "#39ff14"], ["TIER 2 WIN% (Top 9)", paperBook.stats.tier2WinRate, "#00ffc8"], ["TIER 3 WIN% (All 27)", paperBook.stats.tier3WinRate, "#8aabb8"]].map(([label, val, color]) => (
                             <div key={label} style={{ background: "#080f1a", border: "1px solid rgba(0,255,200,0.1)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
                               <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
-                              <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: color }}>{val !== null ? val + "%" : "Ã¢ÂÂ"}</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: color }}>{val !== null ? val + "%" : "—"}</div>
                             </div>
                           ))}
                         </div>
@@ -5331,7 +5281,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         {/* Signal performance */}
                         {paperBook.stats.signalPerformance?.length > 0 && (
                           <div style={{ background: "#080f1a", border: "1px solid rgba(0,255,200,0.15)", borderRadius: 4, padding: 12, marginBottom: 12 }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00ffc8", letterSpacing: 2, marginBottom: 8 }}>SIGNAL WIN RATES Ã¢ÂÂ WHAT'S ACTUALLY WORKING</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#00ffc8", letterSpacing: 2, marginBottom: 8 }}>SIGNAL WIN RATES — WHAT'S ACTUALLY WORKING</div>
                             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                               {paperBook.stats.signalPerformance.map(s => (
                                 <div key={s.signal} style={{ background: s.winRate >= 70 ? "rgba(57,255,20,0.08)" : s.winRate >= 50 ? "rgba(255,184,0,0.08)" : "rgba(255,45,85,0.08)", border: `1px solid ${s.winRate >= 70 ? "rgba(57,255,20,0.2)" : s.winRate >= 50 ? "rgba(255,184,0,0.2)" : "rgba(255,45,85,0.2)"}`, borderRadius: 3, padding: "4px 10px", textAlign: "center" }}>
@@ -5388,7 +5338,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     )}
 
                     <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginTop: 8 }}>
-                      {paperBook.trades?.length} total trades in book ÃÂ· Auto-logged every pipeline run ÃÂ· Auto-outcome checked on refresh
+                      {paperBook.trades?.length} total trades in book · Auto-logged every pipeline run · Auto-outcome checked on refresh
                     </div>
                   </div>
                 )}
@@ -5399,22 +5349,22 @@ export default function NexusDashboard({ user, onLogout }) {
             {tab === "chart" && (
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(100,200,255,0.08),rgba(100,200,255,0.02))", border: "1px solid rgba(100,200,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16 }}>
-                  <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#64c8ff", letterSpacing: 3, marginBottom: 4 }}>Ã°ÂÂÂ CHART PATTERN RECOGNITION</div>
-                  <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 12 }}>RSI ÃÂ· MACD ÃÂ· Double Bottom/Top ÃÂ· Bull/Bear Flag ÃÂ· Volume Spike ÃÂ· Moving Average signals</div>
+                  <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#64c8ff", letterSpacing: 3, marginBottom: 4 }}>📈 CHART PATTERN RECOGNITION</div>
+                  <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 12 }}>RSI · MACD · Double Bottom/Top · Bull/Bear Flag · Volume Spike · Moving Average signals</div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <input value={patternTicker} onChange={e => setPatternTicker(e.target.value.toUpperCase())} placeholder="Tickers (e.g. NVDA,AAPL,TSLA) or leave blank for auto" style={{ background: "#0d1829", border: "1px solid rgba(100,200,255,0.3)", color: "#e8f4ff", borderRadius: 3, padding: "8px 12px", fontSize: 12, fontFamily: "monospace", flex: 1, outline: "none" }} onKeyDown={e => { if (e.key === "Enter") loadChartPatterns(patternTicker, true); }} />
                     <button onClick={() => loadChartPatterns(patternTicker, true)} disabled={loadingPatterns} style={{ background: loadingPatterns ? "#1a2d47" : "rgba(100,200,255,0.15)", border: "1px solid rgba(100,200,255,0.4)", color: loadingPatterns ? "#4a6d8c" : "#64c8ff", borderRadius: 3, padding: "8px 18px", fontSize: 11, fontWeight: 700, cursor: loadingPatterns ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                      {loadingPatterns ? "SCANNING..." : "Ã°ÂÂÂ SCAN"}
+                      {loadingPatterns ? "SCANNING..." : "📈 SCAN"}
                     </button>
                   </div>
                 </div>
 
                 {!chartPatterns && !loadingPatterns && (
                   <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>Ã°ÂÂÂ</div>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>📈</div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, color: "#64c8ff", letterSpacing: 3, marginBottom: 8 }}>CHART PATTERN SCANNER</div>
                     <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Auto-scans your watchlist + earnings stocks + today's movers for classical technical patterns</div>
-                    <button onClick={() => loadChartPatterns("", true)} style={{ background: "rgba(100,200,255,0.15)", border: "1px solid rgba(100,200,255,0.4)", color: "#64c8ff", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>Ã°ÂÂÂ AUTO-SCAN NOW</button>
+                    <button onClick={() => loadChartPatterns("", true)} style={{ background: "rgba(100,200,255,0.15)", border: "1px solid rgba(100,200,255,0.4)", color: "#64c8ff", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>📈 AUTO-SCAN NOW</button>
                   </div>
                 )}
 
@@ -5443,7 +5393,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     {/* High conviction signals */}
                     {chartPatterns.patternSignals?.filter(s => s.strength === "HIGH").length > 0 && (
                       <div style={{ marginBottom: 14 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#64c8ff", letterSpacing: 3, marginBottom: 8 }}>HIGH CONVICTION TECHNICAL SIGNALS Ã¢ÂÂ PIPELINE</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#64c8ff", letterSpacing: 3, marginBottom: 8 }}>HIGH CONVICTION TECHNICAL SIGNALS → PIPELINE</div>
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                           {chartPatterns.patternSignals.filter(s => s.strength === "HIGH").map((s, i) => (
                             <div key={i} style={{ background: s.direction === "CALL" ? "rgba(57,255,20,0.08)" : "rgba(255,45,85,0.08)", border: `1px solid ${s.direction === "CALL" ? "rgba(57,255,20,0.3)" : "rgba(255,45,85,0.3)"}`, borderRadius: 4, padding: "8px 12px" }}>
@@ -5477,7 +5427,7 @@ export default function NexusDashboard({ user, onLogout }) {
                           <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                             {t.patterns.map((p, j) => (
                               <div key={j} style={{ fontSize: 9, fontFamily: "monospace", padding: "2px 7px", borderRadius: 2, background: p.signal === "BULLISH" ? "rgba(57,255,20,0.08)" : p.signal === "BEARISH" ? "rgba(255,45,85,0.08)" : "rgba(74,109,140,0.1)", color: p.signal === "BULLISH" ? "#39ff14" : p.signal === "BEARISH" ? "#ff2d55" : "#64c8ff", border: `1px solid ${p.signal === "BULLISH" ? "rgba(57,255,20,0.2)" : p.signal === "BEARISH" ? "rgba(255,45,85,0.2)" : "rgba(74,109,140,0.2)"}` }} title={p.description}>
-                                {p.pattern} {p.strength === "HIGH" ? "Ã¢ÂÂ" : ""}
+                                {p.pattern} {p.strength === "HIGH" ? "★" : ""}
                               </div>
                             ))}
                           </div>
@@ -5487,8 +5437,8 @@ export default function NexusDashboard({ user, onLogout }) {
                     ))}
 
                     <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginTop: 8 }}>
-                      Scanned: {new Date(chartPatterns.timestamp).toLocaleString()} ÃÂ· Pattern signals injected into pipeline (2x boost for HIGH strength)
-                      <button onClick={() => loadChartPatterns(patternTicker, true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³ refresh</button>
+                      Scanned: {new Date(chartPatterns.timestamp).toLocaleString()} · Pattern signals injected into pipeline (2x boost for HIGH strength)
+                      <button onClick={() => loadChartPatterns(patternTicker, true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳ refresh</button>
                     </div>
                   </div>
                 )}
@@ -5500,20 +5450,20 @@ export default function NexusDashboard({ user, onLogout }) {
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(255,100,0,0.08),rgba(255,100,0,0.02))", border: "1px solid rgba(255,100,0,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff6400", letterSpacing: 3, marginBottom: 4 }}>Ã°ÂÂÂµ ALLIANCE DETECTION</div>
-                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Identifies coordinated moves between hedge funds, brokers, analysts Ã¢ÂÂ detects manufactured consensus and real institutional conviction</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff6400", letterSpacing: 3, marginBottom: 4 }}>🕵 ALLIANCE DETECTION</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Identifies coordinated moves between hedge funds, brokers, analysts — detects manufactured consensus and real institutional conviction</div>
                   </div>
                   <button onClick={() => loadAlliance(true)} disabled={loadingAlliance} style={{ background: loadingAlliance ? "#1a2d47" : "rgba(255,100,0,0.15)", border: "1px solid rgba(255,100,0,0.4)", color: loadingAlliance ? "#4a6d8c" : "#ff6400", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingAlliance ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                    {loadingAlliance ? "SCANNING..." : "Ã°ÂÂÂµ DETECT ALLIANCES"}
+                    {loadingAlliance ? "SCANNING..." : "🕵 DETECT ALLIANCES"}
                   </button>
                 </div>
 
                 {!allianceData && !loadingAlliance && (
                   <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>Ã°ÂÂÂµ</div>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>🕵</div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ff6400", letterSpacing: 3, marginBottom: 8 }}>ALLIANCE DETECTOR</div>
                     <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Scans for coordinated institutional moves, manufactured consensus, short squeezes, and frontrun opportunities</div>
-                    <button onClick={() => loadAlliance(true)} style={{ background: "rgba(255,100,0,0.15)", border: "1px solid rgba(255,100,0,0.4)", color: "#ff6400", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>Ã°ÂÂÂµ SCAN NOW</button>
+                    <button onClick={() => loadAlliance(true)} style={{ background: "rgba(255,100,0,0.15)", border: "1px solid rgba(255,100,0,0.4)", color: "#ff6400", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>🕵 SCAN NOW</button>
                   </div>
                 )}
 
@@ -5521,7 +5471,7 @@ export default function NexusDashboard({ user, onLogout }) {
                   <div>
                     {/* Risk banner */}
                     <div style={{ background: allianceData.allianceRiskLevel === "CRITICAL" ? "rgba(255,45,85,0.1)" : allianceData.allianceRiskLevel === "HIGH" ? "rgba(255,100,0,0.1)" : "rgba(255,184,0,0.05)", border: `1px solid ${allianceData.allianceRiskLevel === "CRITICAL" ? "rgba(255,45,85,0.4)" : allianceData.allianceRiskLevel === "HIGH" ? "rgba(255,100,0,0.4)" : "rgba(255,184,0,0.2)"}`, borderRadius: 4, padding: "10px 14px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontFamily: "monospace", fontSize: 11, color: "#8aabb8" }}>ALLIANCE RISK LEVEL Ã¢ÂÂ {allianceData.headlinesAnalyzed} headlines scanned</span>
+                      <span style={{ fontFamily: "monospace", fontSize: 11, color: "#8aabb8" }}>ALLIANCE RISK LEVEL — {allianceData.headlinesAnalyzed} headlines scanned</span>
                       <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: allianceData.allianceRiskLevel === "CRITICAL" ? "#ff2d55" : allianceData.allianceRiskLevel === "HIGH" ? "#ff6400" : "#ffb800" }}>{allianceData.allianceRiskLevel}</span>
                     </div>
 
@@ -5534,7 +5484,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         <div key={label} style={{ background: "#080f1a", border: `1px solid ${data?.detected ? color + "30" : "rgba(74,109,140,0.2)"}`, borderRadius: 4, padding: 10 }}>
                           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                             <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{label}</span>
-                            <span style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: data?.detected ? color : "#39ff14" }}>{data?.detected ? "DETECTED Ã¢ÂÂ " : "NONE Ã¢ÂÂ"}</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: data?.detected ? color : "#39ff14" }}>{data?.detected ? "DETECTED ⚠" : "NONE ✓"}</span>
                           </div>
                           {data?.tickers?.length > 0 && <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 4 }}>{data.tickers.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: color + "15", color }}>{t}</span>)}</div>}
                           {data?.firms && <div style={{ fontSize: 10, color: "#8aabb8", marginBottom: 3 }}>{data.firms}</div>}
@@ -5547,7 +5497,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
                       {allianceData.hedgeFundAlliance?.detected && (
                         <div style={{ background: "#080f1a", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 4, padding: 10 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#b24fff", marginBottom: 6 }}>HEDGE FUND ALLIANCE Ã¢ÂÂ </div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#b24fff", marginBottom: 6 }}>HEDGE FUND ALLIANCE ⚠</div>
                           <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#e8f4ff", marginBottom: 4 }}>{allianceData.hedgeFundAlliance.targetTicker}</div>
                           <div style={{ fontSize: 9, fontFamily: "monospace", color: "#b24fff", marginBottom: 3 }}>STRATEGY: {allianceData.hedgeFundAlliance.strategy?.toUpperCase()}</div>
                           <div style={{ fontSize: 10, color: "#8aabb8" }}>{allianceData.hedgeFundAlliance.parties}</div>
@@ -5555,7 +5505,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       )}
                       {allianceData.shortSellerCoordination?.detected && (
                         <div style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: 10 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 6 }}>SHORT SELLER COORDINATION Ã¢ÂÂ </div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 6 }}>SHORT SELLER COORDINATION ⚠</div>
                           <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55", marginBottom: 4 }}>{allianceData.shortSellerCoordination.target}</div>
                           <div style={{ fontSize: 10, color: "#8aabb8" }}>{allianceData.shortSellerCoordination.parties}</div>
                         </div>
@@ -5566,14 +5516,14 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
                       {allianceData.manufacturedConsensus?.detected && (
                         <div style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: 10 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 6 }}>Ã¢ÂÂ  MANUFACTURED CONSENSUS</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 6 }}>⚠ MANUFACTURED CONSENSUS</div>
                           <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ff2d55", marginBottom: 4 }}>{allianceData.manufacturedConsensus.ticker}</div>
                           <div style={{ fontSize: 10, color: "#8aabb8" }}>{allianceData.manufacturedConsensus.evidence}</div>
                         </div>
                       )}
                       {allianceData.realConviction?.ticker && (
                         <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 10 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 6 }}>Ã¢ÂÂ REAL INSTITUTIONAL CONVICTION</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 6 }}>✓ REAL INSTITUTIONAL CONVICTION</div>
                           <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#39ff14", marginBottom: 4 }}>{allianceData.realConviction.ticker}</div>
                           <div style={{ fontSize: 10, color: "#8aabb8" }}>{allianceData.realConviction.evidence}</div>
                         </div>
@@ -5584,9 +5534,9 @@ export default function NexusDashboard({ user, onLogout }) {
                     {(allianceData.darkPoolSignal || allianceData.activistSignal || allianceData.mergerArbitrageSignal) && (
                       <div style={{ background: "#080f1a", border: "1px solid rgba(255,100,0,0.2)", borderRadius: 4, padding: 12, marginBottom: 14 }}>
                         <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff6400", letterSpacing: 2, marginBottom: 8 }}>SPECIAL SITUATION SIGNALS</div>
-                        {allianceData.darkPoolSignal && <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 6 }}>Ã°ÂÂÂ DARK POOL: {allianceData.darkPoolSignal}</div>}
-                        {allianceData.activistSignal && <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 6 }}>Ã¢ÂÂ¡ ACTIVIST: {allianceData.activistSignal}</div>}
-                        {allianceData.mergerArbitrageSignal && <div style={{ fontSize: 11, color: "#8aabb8" }}>Ã°ÂÂ¤Â M&A: {allianceData.mergerArbitrageSignal}</div>}
+                        {allianceData.darkPoolSignal && <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 6 }}>🌑 DARK POOL: {allianceData.darkPoolSignal}</div>}
+                        {allianceData.activistSignal && <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 6 }}>⚡ ACTIVIST: {allianceData.activistSignal}</div>}
+                        {allianceData.mergerArbitrageSignal && <div style={{ fontSize: 11, color: "#8aabb8" }}>🤝 M&A: {allianceData.mergerArbitrageSignal}</div>}
                       </div>
                     )}
 
@@ -5595,7 +5545,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
                     {allianceData.frontrunOpportunity?.ticker && (
                       <div style={{ background: "rgba(57,255,20,0.05)", border: "2px solid rgba(57,255,20,0.3)", borderRadius: 6, padding: 12, marginBottom: 10 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 2, marginBottom: 6 }}>Ã°ÂÂÂ FRONTRUN OPPORTUNITY</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 2, marginBottom: 6 }}>🚀 FRONTRUN OPPORTUNITY</div>
                         <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
                           <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: allianceData.frontrunOpportunity.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{allianceData.frontrunOpportunity.ticker}</span>
                           <span style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 2, background: allianceData.frontrunOpportunity.direction === "CALL" ? "rgba(57,255,20,0.1)" : "rgba(255,45,85,0.1)", color: allianceData.frontrunOpportunity.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{allianceData.frontrunOpportunity.direction}</span>
@@ -5608,7 +5558,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
                     {allianceData.squeezeSetup?.ticker && (
                       <div style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: 12, marginBottom: 10 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff2d55", letterSpacing: 2, marginBottom: 6 }}>Ã¢ÂÂ¡ SHORT SQUEEZE SETUP</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff2d55", letterSpacing: 2, marginBottom: 6 }}>⚡ SHORT SQUEEZE SETUP</div>
                         <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
                           <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#ff2d55" }}>{allianceData.squeezeSetup.ticker}</span>
                           <span style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800" }}>{allianceData.squeezeSetup.probability} probability</span>
@@ -5619,7 +5569,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
                     {allianceData.pumpDumpCycle?.detected && (
                       <div style={{ background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 4, padding: 12, marginBottom: 10 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 2, marginBottom: 6 }}>Ã¢ÂÂ  PUMP & DUMP CYCLE DETECTED</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 2, marginBottom: 6 }}>⚠ PUMP & DUMP CYCLE DETECTED</div>
                         <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
                           <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#ffb800" }}>{allianceData.pumpDumpCycle.ticker}</span>
                           <span style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "rgba(255,184,0,0.1)", color: "#ffb800" }}>STAGE: {allianceData.pumpDumpCycle.stage?.toUpperCase()}</span>
@@ -5630,7 +5580,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
                     {allianceData.insiderPattern?.ticker && (
                       <div style={{ background: "rgba(178,79,255,0.05)", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 4, padding: 12, marginBottom: 10 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 2, marginBottom: 6 }}>Ã°ÂÂÂ INSIDER PATTERN</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 2, marginBottom: 6 }}>🔍 INSIDER PATTERN</div>
                         <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#b24fff", marginBottom: 4 }}>{allianceData.insiderPattern.ticker}</div>
                         <div style={{ fontSize: 11, color: "#c8dce8", marginBottom: 4 }}>{allianceData.insiderPattern.description}</div>
                         <div style={{ fontSize: 10, color: "#8aabb8" }}>{allianceData.insiderPattern.evidence}</div>
@@ -5668,8 +5618,8 @@ export default function NexusDashboard({ user, onLogout }) {
                     )}
 
                     <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>
-                      Scanned: {new Date(allianceData.timestamp).toLocaleString()} ÃÂ· Alliance signals injected into pipeline scoring
-                      <button onClick={() => loadAlliance(true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³ refresh</button>
+                      Scanned: {new Date(allianceData.timestamp).toLocaleString()} · Alliance signals injected into pipeline scoring
+                      <button onClick={() => loadAlliance(true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳ refresh</button>
                     </div>
                   </div>
                 )}
@@ -5681,21 +5631,21 @@ export default function NexusDashboard({ user, onLogout }) {
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02))", border: "1px solid rgba(255,215,0,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffd700", letterSpacing: 3, marginBottom: 4 }}>Ã°ÂÂ§Â  PATTERN MEMORY</div>
-                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Learns from YOUR win/loss history Ã¢ÂÂ identifies recurring setups, feeds patterns back into pipeline scoring</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffd700", letterSpacing: 3, marginBottom: 4 }}>🧠 PATTERN MEMORY</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Learns from YOUR win/loss history — identifies recurring setups, feeds patterns back into pipeline scoring</div>
                   </div>
                   <button onClick={() => loadPatternMemory(true)} disabled={loadingPattern} style={{ background: loadingPattern ? "#1a2d47" : "rgba(255,215,0,0.15)", border: "1px solid rgba(255,215,0,0.4)", color: loadingPattern ? "#4a6d8c" : "#ffd700", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingPattern ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                    {loadingPattern ? "ANALYZING..." : "Ã°ÂÂ§Â  ANALYZE PATTERNS"}
+                    {loadingPattern ? "ANALYZING..." : "🧠 ANALYZE PATTERNS"}
                   </button>
                 </div>
 
                 {!patternMemory && !loadingPattern && (
                   <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>Ã°ÂÂ§Â </div>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>🧠</div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ffd700", letterSpacing: 3, marginBottom: 8 }}>PATTERN MEMORY ENGINE</div>
                     <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 8 }}>Analyzes your complete pick history to find recurring winning setups</div>
                     <div style={{ fontSize: 11, color: "#4a6d8c", marginBottom: 24 }}>Needs 5+ logged picks. Run the pipeline daily and log outcomes to build memory.</div>
-                    <button onClick={() => loadPatternMemory(true)} style={{ background: "rgba(255,215,0,0.15)", border: "1px solid rgba(255,215,0,0.4)", color: "#ffd700", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>Ã°ÂÂ§Â  ANALYZE NOW</button>
+                    <button onClick={() => loadPatternMemory(true)} style={{ background: "rgba(255,215,0,0.15)", border: "1px solid rgba(255,215,0,0.4)", color: "#ffd700", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>🧠 ANALYZE NOW</button>
                   </div>
                 )}
 
@@ -5714,10 +5664,10 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 14 }}>
                           {[
-                            ["OVERALL WIN RATE", patternMemory.summary.overallWinRate !== null ? patternMemory.summary.overallWinRate + "%" : "Ã¢ÂÂ", patternMemory.summary.overallWinRate >= 60 ? "#39ff14" : patternMemory.summary.overallWinRate >= 40 ? "#ffb800" : "#ff2d55"],
-                            ["RECENT WIN RATE", patternMemory.summary.recentWinRate !== null ? patternMemory.summary.recentWinRate + "%" : "Ã¢ÂÂ", patternMemory.summary.recentWinRate >= 60 ? "#39ff14" : "#ffb800"],
-                            ["CALL WIN RATE", patternMemory.summary.callWinRate !== null ? patternMemory.summary.callWinRate + "%" : "Ã¢ÂÂ", "#39ff14"],
-                            ["PUT WIN RATE", patternMemory.summary.putWinRate !== null ? patternMemory.summary.putWinRate + "%" : "Ã¢ÂÂ", "#ff2d55"],
+                            ["OVERALL WIN RATE", patternMemory.summary.overallWinRate !== null ? patternMemory.summary.overallWinRate + "%" : "—", patternMemory.summary.overallWinRate >= 60 ? "#39ff14" : patternMemory.summary.overallWinRate >= 40 ? "#ffb800" : "#ff2d55"],
+                            ["RECENT WIN RATE", patternMemory.summary.recentWinRate !== null ? patternMemory.summary.recentWinRate + "%" : "—", patternMemory.summary.recentWinRate >= 60 ? "#39ff14" : "#ffb800"],
+                            ["CALL WIN RATE", patternMemory.summary.callWinRate !== null ? patternMemory.summary.callWinRate + "%" : "—", "#39ff14"],
+                            ["PUT WIN RATE", patternMemory.summary.putWinRate !== null ? patternMemory.summary.putWinRate + "%" : "—", "#ff2d55"],
                           ].map(([label, val, color]) => (
                             <div key={label} style={{ background: "#080f1a", border: "1px solid rgba(255,215,0,0.15)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
                               <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 4 }}>{label}</div>
@@ -5789,7 +5739,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         {/* Recommendations */}
                         {patternMemory.recommendations && (
                           <div style={{ background: "rgba(255,215,0,0.05)", border: "1px solid rgba(255,215,0,0.2)", borderRadius: 6, padding: 14, marginBottom: 14 }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffd700", letterSpacing: 2, marginBottom: 12 }}>Ã°ÂÂ§Â  PIPELINE FEEDBACK ACTIVE Ã¢ÂÂ PATTERN WEIGHTS</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffd700", letterSpacing: 2, marginBottom: 12 }}>🧠 PIPELINE FEEDBACK ACTIVE — PATTERN WEIGHTS</div>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 10 }}>
                               {[["BEST SECTOR", patternMemory.recommendations.bestSector], ["BEST DIRECTION", patternMemory.recommendations.bestDirection], ["BEST URGENCY", patternMemory.recommendations.bestUrgency]].map(([label, val]) => val && (
                                 <div key={label} style={{ textAlign: "center" }}>
@@ -5816,7 +5766,7 @@ export default function NexusDashboard({ user, onLogout }) {
                               <div style={{ fontFamily: "monospace", fontSize: 11, color: "#39ff14", marginBottom: 6 }}>ACCURACY ESTIMATE: {patternMemory.recommendations.accuracyEstimate}</div>
                             )}
                             {patternMemory.recommendations.improvementSuggestion && (
-                              <div style={{ fontSize: 11, color: "#ffb800" }}>Ã°ÂÂÂ¡ {patternMemory.recommendations.improvementSuggestion}</div>
+                              <div style={{ fontSize: 11, color: "#ffb800" }}>💡 {patternMemory.recommendations.improvementSuggestion}</div>
                             )}
                           </div>
                         )}
@@ -5840,8 +5790,8 @@ export default function NexusDashboard({ user, onLogout }) {
                         )}
 
                         <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>
-                          Analyzed: {new Date(patternMemory.timestamp).toLocaleString()} ÃÂ· Pattern weights injected into pipeline (4x boost for matching setups)
-                          <button onClick={() => loadPatternMemory(true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³ refresh</button>
+                          Analyzed: {new Date(patternMemory.timestamp).toLocaleString()} · Pattern weights injected into pipeline (4x boost for matching setups)
+                          <button onClick={() => loadPatternMemory(true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳ refresh</button>
                         </div>
                       </div>
                     )}
@@ -5854,22 +5804,22 @@ export default function NexusDashboard({ user, onLogout }) {
             {tab === "ripple" && (
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(0,255,136,0.08),rgba(0,255,136,0.02))", border: "1px solid rgba(0,255,136,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16 }}>
-                  <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00ff88", letterSpacing: 3, marginBottom: 4 }}>Ã°ÂÂÂ RIPPLE CHAIN ENGINE</div>
-                  <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 12 }}>Any event Ã¢ÂÂ full domino chain Ã¢ÂÂ historical pattern matching Ã¢ÂÂ 7/14/21 day predictions Ã¢ÂÂ contrarian plays</div>
+                  <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00ff88", letterSpacing: 3, marginBottom: 4 }}>🌊 RIPPLE CHAIN ENGINE</div>
+                  <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 12 }}>Any event → full domino chain → historical pattern matching → 7/14/21 day predictions → contrarian plays</div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <input value={rippleInput} onChange={e => setRippleInput(e.target.value)} placeholder="Enter event (e.g. 'Fed raises rates') or leave blank for auto-detect" style={{ background: "#0d1829", border: "1px solid rgba(0,255,136,0.3)", color: "#e8f4ff", borderRadius: 3, padding: "8px 12px", fontSize: 12, fontFamily: "monospace", flex: 1, outline: "none" }} onKeyDown={e => { if (e.key === "Enter") loadRippleChain(rippleInput, true); }} />
                     <button onClick={() => loadRippleChain(rippleInput, true)} disabled={loadingRipple} style={{ background: loadingRipple ? "#1a2d47" : "rgba(0,255,136,0.15)", border: "1px solid rgba(0,255,136,0.4)", color: loadingRipple ? "#4a6d8c" : "#00ff88", borderRadius: 3, padding: "8px 18px", fontSize: 11, fontWeight: 700, cursor: loadingRipple ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                      {loadingRipple ? "MAPPING..." : "Ã°ÂÂÂ MAP CHAIN"}
+                      {loadingRipple ? "MAPPING..." : "🌊 MAP CHAIN"}
                     </button>
                   </div>
                 </div>
 
                 {!rippleChain && !loadingRipple && (
                   <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>Ã°ÂÂÂ</div>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>🌊</div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, color: "#00ff88", letterSpacing: 3, marginBottom: 8 }}>DOMINO CHAIN MAPPER</div>
                     <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Enter any event or click below for auto-detect from today's headlines</div>
-                    <button onClick={() => loadRippleChain("", true)} style={{ background: "rgba(0,255,136,0.15)", border: "1px solid rgba(0,255,136,0.4)", color: "#00ff88", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>Ã°ÂÂÂ AUTO-DETECT & MAP</button>
+                    <button onClick={() => loadRippleChain("", true)} style={{ background: "rgba(0,255,136,0.15)", border: "1px solid rgba(0,255,136,0.4)", color: "#00ff88", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>🌊 AUTO-DETECT & MAP</button>
                   </div>
                 )}
 
@@ -5885,14 +5835,14 @@ export default function NexusDashboard({ user, onLogout }) {
                     </div>
 
                     {/* Domino chain */}
-                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00ff88", letterSpacing: 3, marginBottom: 10 }}>DOMINO CHAIN Ã¢ÂÂ TIMEFRAME BY TIMEFRAME</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00ff88", letterSpacing: 3, marginBottom: 10 }}>DOMINO CHAIN — TIMEFRAME BY TIMEFRAME</div>
                     {rippleChain.chain?.map((c, i) => (
                       <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(0,255,136,0.1)", borderRadius: 4, padding: 12, marginBottom: 8, borderLeft: "3px solid " + (i === 0 ? "#ff2d55" : i === 1 ? "#ffb800" : i === 2 ? "#00d4ff" : "#00ff88") }}>
                         <div style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: i === 0 ? "#ff2d55" : i === 1 ? "#ffb800" : i === 2 ? "#00d4ff" : "#00ff88", marginBottom: 6 }}>{c.timeframe}</div>
                         <div style={{ fontSize: 11, color: "#c8dce8", lineHeight: 1.6, marginBottom: 8 }}>{c.description}</div>
                         <div style={{ display: "flex", gap: 16 }}>
-                          {c.stocksUp?.length > 0 && <div><div style={{ fontSize: 9, fontFamily: "monospace", color: "#39ff14", marginBottom: 3 }}>CALLS Ã¢ÂÂ</div><div style={{ display: "flex", gap: 4 }}>{c.stocksUp.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>{t}</span>)}</div></div>}
-                          {c.stocksDown?.length > 0 && <div><div style={{ fontSize: 9, fontFamily: "monospace", color: "#ff2d55", marginBottom: 3 }}>PUTS Ã¢ÂÂ</div><div style={{ display: "flex", gap: 4 }}>{c.stocksDown.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>{t}</span>)}</div></div>}
+                          {c.stocksUp?.length > 0 && <div><div style={{ fontSize: 9, fontFamily: "monospace", color: "#39ff14", marginBottom: 3 }}>CALLS →</div><div style={{ display: "flex", gap: 4 }}>{c.stocksUp.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>{t}</span>)}</div></div>}
+                          {c.stocksDown?.length > 0 && <div><div style={{ fontSize: 9, fontFamily: "monospace", color: "#ff2d55", marginBottom: 3 }}>PUTS →</div><div style={{ display: "flex", gap: 4 }}>{c.stocksDown.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>{t}</span>)}</div></div>}
                         </div>
                       </div>
                     ))}
@@ -5914,7 +5864,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     {/* Highest conviction */}
                     {rippleChain.highestConvictionPlay && (
                       <div style={{ background: "rgba(0,255,136,0.05)", border: "2px solid rgba(0,255,136,0.3)", borderRadius: 6, padding: 12, marginBottom: 14 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00ff88", letterSpacing: 2, marginBottom: 6 }}>Ã°ÂÂÂ HIGHEST CONVICTION RIPPLE PLAY</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00ff88", letterSpacing: 2, marginBottom: 6 }}>🌊 HIGHEST CONVICTION RIPPLE PLAY</div>
                         <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#00ff88" }}>{rippleChain.highestConvictionPlay}</div>
                       </div>
                     )}
@@ -5951,8 +5901,8 @@ export default function NexusDashboard({ user, onLogout }) {
                     )}
 
                     <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace" }}>
-                      Generated: {new Date(rippleChain.timestamp).toLocaleString()} ÃÂ· Ripple signals injected into pipeline scoring (1.5x boost)
-                      <button onClick={() => loadRippleChain(rippleInput, true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³ refresh</button>
+                      Generated: {new Date(rippleChain.timestamp).toLocaleString()} · Ripple signals injected into pipeline scoring (1.5x boost)
+                      <button onClick={() => loadRippleChain(rippleInput, true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳ refresh</button>
                     </div>
                   </div>
                 )}
@@ -5963,12 +5913,12 @@ export default function NexusDashboard({ user, onLogout }) {
             {tab === "earnings" && (
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(0,212,255,0.1),rgba(0,212,255,0.03))", border: "1px solid rgba(0,212,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16 }}>
-                  <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00d4ff", letterSpacing: 3, marginBottom: 4 }}>Ã°ÂÂÂ EARNINGS DEEP DIVE</div>
-                  <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 12 }}>4-week pre-earnings research Ã¢ÂÂ analyst consensus, Reddit sentiment, historical patterns, 7/14/21 day predictions</div>
+                  <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#00d4ff", letterSpacing: 3, marginBottom: 4 }}>📊 EARNINGS DEEP DIVE</div>
+                  <div style={{ fontSize: 11, color: "#8aabb8", marginBottom: 12 }}>4-week pre-earnings research — analyst consensus, Reddit sentiment, historical patterns, 7/14/21 day predictions</div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <input value={diveSearch} onChange={e => setDiveSearch(e.target.value.toUpperCase())} placeholder="Enter ticker (e.g. NVDA)" style={{ background: "#0d1829", border: "1px solid rgba(0,212,255,0.3)", color: "#e8f4ff", borderRadius: 3, padding: "8px 12px", fontSize: 12, fontFamily: "monospace", flex: 1, outline: "none" }} onKeyDown={e => { if (e.key === "Enter" && diveSearch) loadEarningsDive(diveSearch, true); }} />
                     <button onClick={() => diveSearch && loadEarningsDive(diveSearch, true)} disabled={!diveSearch || loadingDive[diveSearch]} style={{ background: "rgba(0,212,255,0.15)", border: "1px solid rgba(0,212,255,0.4)", color: "#00d4ff", borderRadius: 3, padding: "8px 18px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>
-                      {loadingDive[diveSearch] ? "ANALYZING..." : "Ã°ÂÂÂ DIVE"}
+                      {loadingDive[diveSearch] ? "ANALYZING..." : "📊 DIVE"}
                     </button>
                   </div>
                   {/* Quick access buttons for earnings calendar stocks */}
@@ -6008,7 +5958,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       ].map(([label, val, color]) => (
                         <div key={label} style={{ background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.1)", borderRadius: 3, padding: "6px 8px", textAlign: "center" }}>
                           <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
-                          <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: color || "#e8f4ff" }}>{val || "Ã¢ÂÂ"}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: color || "#e8f4ff" }}>{val || "—"}</div>
                         </div>
                       ))}
                     </div>
@@ -6035,7 +5985,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         ].map(([label, val, color]) => (
                           <div key={label} style={{ background: "#080f1a", border: "1px solid #1a2d47", borderRadius: 3, padding: "6px 8px", textAlign: "center" }}>
                             <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
-                            <div style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: color || "#8aabb8" }}>{val || "Ã¢ÂÂ"}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: color || "#8aabb8" }}>{val || "—"}</div>
                           </div>
                         ))}
                       </div>
@@ -6047,7 +5997,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         {[["7 DAYS", dive.predictions.day7], ["14 DAYS", dive.predictions.day14], ["21 DAYS", dive.predictions.day21]].map(([label, pred]) => (
                           <div key={label} style={{ background: "rgba(0,212,255,0.03)", border: "1px solid rgba(0,212,255,0.1)", borderRadius: 3, padding: "6px 8px", textAlign: "center" }}>
                             <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
-                            <div style={{ fontSize: 10, color: "#e8f4ff" }}>{pred || "Ã¢ÂÂ"}</div>
+                            <div style={{ fontSize: 10, color: "#e8f4ff" }}>{pred || "—"}</div>
                           </div>
                         ))}
                       </div>
@@ -6063,7 +6013,7 @@ export default function NexusDashboard({ user, onLogout }) {
                           <span style={{ fontFamily: "monospace", fontSize: 10, padding: "2px 8px", borderRadius: 2, background: dive.trade.confidence === "HIGH" ? "rgba(57,255,20,0.1)" : "rgba(255,184,0,0.1)", color: dive.trade.confidence === "HIGH" ? "#39ff14" : "#ffb800" }}>{dive.trade.confidence}</span>
                         </div>
                         <div style={{ fontSize: 11, color: "#c8dce8", lineHeight: 1.6, marginBottom: 6 }}>{dive.trade.thesis}</div>
-                        {dive.trade.risk && <div style={{ fontSize: 10, color: "#ff2d55", fontFamily: "monospace" }}>Ã¢ÂÂ  RISK: {dive.trade.risk}</div>}
+                        {dive.trade.risk && <div style={{ fontSize: 10, color: "#ff2d55", fontFamily: "monospace" }}>⚠ RISK: {dive.trade.risk}</div>}
                       </div>
                     )}
 
@@ -6076,7 +6026,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
                     <div style={{ fontSize: 9, color: "#4a6d8c", marginTop: 8, fontFamily: "monospace" }}>
                       Generated: {new Date(dive.timestamp).toLocaleString()}
-                      <button onClick={() => loadEarningsDive(ticker, true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>Ã¢ÂÂ³ refresh</button>
+                      <button onClick={() => loadEarningsDive(ticker, true)} style={{ marginLeft: 8, background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳ refresh</button>
                     </div>
                   </div>
                 ))}
@@ -6092,22 +6042,22 @@ export default function NexusDashboard({ user, onLogout }) {
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(255,184,0,0.1),rgba(255,184,0,0.03))", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffb800", letterSpacing: 3, marginBottom: 4 }}>Ã°ÂÂÂ NEWS BIAS FILTER</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ffb800", letterSpacing: 3, marginBottom: 4 }}>🔍 NEWS BIAS FILTER</div>
                     <div style={{ fontSize: 11, color: "#8aabb8" }}>Detects pumping, coordinated narratives, arms-length relationships, staged alliances</div>
                   </div>
                   <button onClick={() => loadNewsBias(true)} disabled={loadingBias} style={{ background: loadingBias ? "#1a2d47" : "rgba(255,184,0,0.15)", border: "1px solid rgba(255,184,0,0.4)", color: loadingBias ? "#4a6d8c" : "#ffb800", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingBias ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                    {loadingBias ? "SCANNING..." : "Ã°ÂÂÂ SCAN BIAS"}
+                    {loadingBias ? "SCANNING..." : "🔍 SCAN BIAS"}
                   </button>
                 </div>
 
-                {biasError && <div style={{ padding: 12, background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 4, color: "#ffb800", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>Ã¢ÂÂ  {biasError}</div>}
+                {biasError && <div style={{ padding: 12, background: "rgba(255,184,0,0.1)", border: "1px solid rgba(255,184,0,0.3)", borderRadius: 4, color: "#ffb800", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>⚠ {biasError}</div>}
 
                 {!newsBias && !loadingBias && (
                   <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>Ã°ÂÂÂ</div>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ffb800", letterSpacing: 3, marginBottom: 8 }}>NEWS BIAS DETECTOR</div>
                     <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Analyzes headlines from CNN, BBC, CNBC, Bloomberg, Reddit to detect manipulation, pumping, coordinated narratives, and staged alliances</div>
-                    <button onClick={() => loadNewsBias(true)} style={{ background: "rgba(255,184,0,0.15)", border: "1px solid rgba(255,184,0,0.4)", color: "#ffb800", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>Ã°ÂÂÂ SCAN NOW</button>
+                    <button onClick={() => loadNewsBias(true)} style={{ background: "rgba(255,184,0,0.15)", border: "1px solid rgba(255,184,0,0.4)", color: "#ffb800", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>🔍 SCAN NOW</button>
                   </div>
                 )}
 
@@ -6115,7 +6065,7 @@ export default function NexusDashboard({ user, onLogout }) {
                   <div>
                     {/* Manipulation risk banner */}
                     <div style={{ background: newsBias.manipulationRisk === "CRITICAL" ? "rgba(255,45,85,0.1)" : newsBias.manipulationRisk === "HIGH" ? "rgba(255,60,0,0.1)" : newsBias.manipulationRisk === "MEDIUM" ? "rgba(255,184,0,0.1)" : "rgba(57,255,20,0.05)", border: `1px solid ${newsBias.manipulationRisk === "CRITICAL" ? "rgba(255,45,85,0.4)" : newsBias.manipulationRisk === "HIGH" ? "rgba(255,60,0,0.4)" : newsBias.manipulationRisk === "MEDIUM" ? "rgba(255,184,0,0.4)" : "rgba(57,255,20,0.2)"}`, borderRadius: 4, padding: "10px 14px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontFamily: "monospace", fontSize: 11, color: "#8aabb8" }}>MANIPULATION RISK Ã¢ÂÂ {newsBias.headlinesAnalyzed} headlines scanned</span>
+                      <span style={{ fontFamily: "monospace", fontSize: 11, color: "#8aabb8" }}>MANIPULATION RISK — {newsBias.headlinesAnalyzed} headlines scanned</span>
                       <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: newsBias.manipulationRisk === "CRITICAL" ? "#ff2d55" : newsBias.manipulationRisk === "HIGH" ? "#ff3c00" : newsBias.manipulationRisk === "MEDIUM" ? "#ffb800" : "#39ff14" }}>{newsBias.manipulationRisk}</span>
                     </div>
 
@@ -6130,7 +6080,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         <div key={label} style={{ background: "#080f1a", border: `1px solid ${value ? color + "40" : "rgba(74,109,140,0.2)"}`, borderRadius: 4, padding: 10 }}>
                           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                             <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{label}</span>
-                            <span style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: value ? color : "#39ff14" }}>{value ? "YES Ã¢ÂÂ " : "NO Ã¢ÂÂ"}</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 700, color: value ? color : "#39ff14" }}>{value ? "YES ⚠" : "NO ✓"}</span>
                           </div>
                           {tickers?.length > 0 && <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 4 }}>{tickers.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 9, padding: "1px 5px", borderRadius: 2, background: color + "15", color }}>{t}</span>)}</div>}
                           {(detail || evidence) && <div style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.5 }}>{detail || evidence}</div>}
@@ -6157,14 +6107,14 @@ export default function NexusDashboard({ user, onLogout }) {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
                       {newsBias.realSignal?.ticker && (
                         <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 10 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 6 }}>Ã¢ÂÂ GENUINE SIGNAL</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14", marginBottom: 6 }}>✓ GENUINE SIGNAL</div>
                           <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#39ff14", marginBottom: 4 }}>{newsBias.realSignal.ticker}</div>
                           <div style={{ fontSize: 10, color: "#8aabb8" }}>{newsBias.realSignal.reason}</div>
                         </div>
                       )}
                       {newsBias.fakeSignal?.ticker && (
                         <div style={{ background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 4, padding: 10 }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 6 }}>Ã¢ÂÂ  MANUFACTURED SIGNAL</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff2d55", marginBottom: 6 }}>⚠ MANUFACTURED SIGNAL</div>
                           <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#ff2d55", marginBottom: 4 }}>{newsBias.fakeSignal.ticker}</div>
                           <div style={{ fontSize: 10, color: "#8aabb8" }}>{newsBias.fakeSignal.reason}</div>
                         </div>
@@ -6175,9 +6125,9 @@ export default function NexusDashboard({ user, onLogout }) {
                     {(newsBias.analystConflict || newsBias.brokerPump || newsBias.socialManipulation) && (
                       <div style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.2)", borderRadius: 4, padding: 12, marginBottom: 12 }}>
                         <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", letterSpacing: 2, marginBottom: 8 }}>CONFLICT OF INTEREST FLAGS</div>
-                        {newsBias.analystConflict && <div style={{ fontSize: 11, color: "#ffb800", marginBottom: 4 }}>Ã¢ÂÂ  ANALYST CONFLICT: {newsBias.analystConflictDetail}</div>}
-                        {newsBias.brokerPump && <div style={{ fontSize: 11, color: "#ffb800", marginBottom: 4 }}>Ã¢ÂÂ  BROKER PUMP: {newsBias.brokerPumpDetail}</div>}
-                        {newsBias.socialManipulation && <div style={{ fontSize: 11, color: "#ffb800", marginBottom: 4 }}>Ã¢ÂÂ  SOCIAL MANIPULATION: {newsBias.socialManipulationDetail}</div>}
+                        {newsBias.analystConflict && <div style={{ fontSize: 11, color: "#ffb800", marginBottom: 4 }}>⚠ ANALYST CONFLICT: {newsBias.analystConflictDetail}</div>}
+                        {newsBias.brokerPump && <div style={{ fontSize: 11, color: "#ffb800", marginBottom: 4 }}>⚠ BROKER PUMP: {newsBias.brokerPumpDetail}</div>}
+                        {newsBias.socialManipulation && <div style={{ fontSize: 11, color: "#ffb800", marginBottom: 4 }}>⚠ SOCIAL MANIPULATION: {newsBias.socialManipulationDetail}</div>}
                         {newsBias.hedgeFundSignal && <div style={{ fontSize: 11, color: "#8aabb8" }}>HF SIGNAL: {newsBias.hedgeFundSignal}</div>}
                       </div>
                     )}
@@ -6201,7 +6151,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     )}
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>
-                      Scanned: {new Date(newsBias.timestamp).toLocaleString()} ÃÂ· Bias signals injected into pipeline (pumped tickers -50% score, genuine signals +boost)
+                      Scanned: {new Date(newsBias.timestamp).toLocaleString()} · Bias signals injected into pipeline (pumped tickers -50% score, genuine signals +boost)
                     </div>
                   </div>
                 )}
@@ -6213,22 +6163,22 @@ export default function NexusDashboard({ user, onLogout }) {
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(255,60,0,0.1),rgba(255,60,0,0.03))", border: "1px solid rgba(255,60,0,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff3c00", letterSpacing: 3, marginBottom: 4 }}>Ã¢ÂÂ¢ WAR RIPPLE ENGINE</div>
-                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Iran-Israel-US conflict Ã¢ÂÂ full economic cascade Ã¢ÂÂ 7/14/21 day predictions</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff3c00", letterSpacing: 3, marginBottom: 4 }}>☢ WAR RIPPLE ENGINE</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Iran-Israel-US conflict → full economic cascade → 7/14/21 day predictions</div>
                   </div>
                   <button onClick={() => loadWarRipple(true)} disabled={loadingWar} style={{ background: loadingWar ? "#1a2d47" : "rgba(255,60,0,0.15)", border: "1px solid rgba(255,60,0,0.4)", color: loadingWar ? "#4a6d8c" : "#ff3c00", borderRadius: 3, padding: "9px 18px", fontSize: 11, fontWeight: 700, cursor: loadingWar ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                    {loadingWar ? "ANALYZING..." : "Ã¢ÂÂ¢ ANALYZE NOW"}
+                    {loadingWar ? "ANALYZING..." : "☢ ANALYZE NOW"}
                   </button>
                 </div>
 
-                {warError && <div style={{ padding: 12, background: "rgba(255,60,0,0.1)", border: "1px solid rgba(255,60,0,0.3)", borderRadius: 4, color: "#ff6b35", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>Ã¢ÂÂ  {warError}</div>}
+                {warError && <div style={{ padding: 12, background: "rgba(255,60,0,0.1)", border: "1px solid rgba(255,60,0,0.3)", borderRadius: 4, color: "#ff6b35", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>⚠ {warError}</div>}
 
                 {!warRipple && !loadingWar && (
                   <div style={{ textAlign: "center", padding: 60 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16 }}>Ã¢ÂÂ¢</div>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>☢</div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ff3c00", letterSpacing: 3, marginBottom: 8 }}>WAR RIPPLE ANALYSIS</div>
                     <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Maps the full economic cascade from the Iran-Israel-US conflict to specific stocks with 7/14/21 day predictions</div>
-                    <button onClick={() => loadWarRipple(true)} style={{ background: "rgba(255,60,0,0.15)", border: "1px solid rgba(255,60,0,0.4)", color: "#ff3c00", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>Ã¢ÂÂ¢ ANALYZE WAR RIPPLE</button>
+                    <button onClick={() => loadWarRipple(true)} style={{ background: "rgba(255,60,0,0.15)", border: "1px solid rgba(255,60,0,0.4)", color: "#ff3c00", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>☢ ANALYZE WAR RIPPLE</button>
                   </div>
                 )}
 
@@ -6244,7 +6194,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       ].map(([label, val, color]) => (
                         <div key={label} style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.2)", borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
                           <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 4 }}>{label}</div>
-                          <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color }}>{val || "Ã¢ÂÂ"}</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color }}>{val || "—"}</div>
                         </div>
                       ))}
                     </div>
@@ -6252,7 +6202,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     {/* Who needs this war */}
                     {warRipple.warGoodForPower && (
                       <div style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.3)", borderRadius: 4, padding: 14, marginBottom: 14 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", letterSpacing: 2, marginBottom: 8 }}>Ã¢ÂÂ¢ WHO NEEDS THIS WAR</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", letterSpacing: 2, marginBottom: 8 }}>☢ WHO NEEDS THIS WAR</div>
                         <div style={{ fontSize: 13, fontWeight: 500, color: "#e8f4ff", marginBottom: 6 }}>{warRipple.warGoodForPower}</div>
                         <div style={{ fontSize: 11, color: "#8aabb8", lineHeight: 1.6 }}>{warRipple.warSurvivalThesis}</div>
                       </div>
@@ -6261,7 +6211,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     {/* Objectives */}
                     {warRipple.objectives && (
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
-                        {[["Ã°ÂÂÂ®Ã°ÂÂÂ· IRAN", warRipple.objectives.iran], ["Ã°ÂÂÂ®Ã°ÂÂÂ± ISRAEL", warRipple.objectives.israel], ["Ã°ÂÂÂºÃ°ÂÂÂ¸ US", warRipple.objectives.us], ["Ã°ÂÂÂ·Ã°ÂÂÂº RUSSIA", warRipple.objectives.russia]].filter(([,v]) => v).map(([label, val]) => (
+                        {[["🇮🇷 IRAN", warRipple.objectives.iran], ["🇮🇱 ISRAEL", warRipple.objectives.israel], ["🇺🇸 US", warRipple.objectives.us], ["🇷🇺 RUSSIA", warRipple.objectives.russia]].filter(([,v]) => v).map(([label, val]) => (
                           <div key={label} style={{ background: "#080f1a", border: "1px solid #1a2d47", borderRadius: 4, padding: "8px 12px" }}>
                             <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 4 }}>{label} OBJECTIVE</div>
                             <div style={{ fontSize: 11, color: "#c8dce8", lineHeight: 1.5 }}>{val}</div>
@@ -6283,17 +6233,17 @@ export default function NexusDashboard({ user, onLogout }) {
                     {/* Ripple layers */}
                     {warRipple.rippleLayers?.length > 0 && (
                       <div style={{ marginBottom: 16 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", letterSpacing: 3, marginBottom: 10 }}>ECONOMIC CASCADE Ã¢ÂÂ LAYER BY LAYER</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", letterSpacing: 3, marginBottom: 10 }}>ECONOMIC CASCADE — LAYER BY LAYER</div>
                         {warRipple.rippleLayers.map((layer, i) => (
                           <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.15)", borderRadius: 4, padding: 12, marginBottom: 8 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                              <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ff3c00" }}>LAYER {layer.layer} Ã¢ÂÂ {layer.event}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ff3c00" }}>LAYER {layer.layer} — {layer.event}</span>
                               <span style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c" }}>{layer.timing}</span>
                             </div>
                             <div style={{ display: "flex", gap: 12 }}>
                               {layer.stocksUp?.length > 0 && (
                                 <div>
-                                  <div style={{ fontSize: 9, fontFamily: "monospace", color: "#39ff14", marginBottom: 3 }}>CALLS Ã¢ÂÂ</div>
+                                  <div style={{ fontSize: 9, fontFamily: "monospace", color: "#39ff14", marginBottom: 3 }}>CALLS →</div>
                                   <div style={{ display: "flex", gap: 4, flexWrap: "nowrap", overflowX: "auto", paddingBottom: 4, scrollbarWidth: "thin", scrollbarColor: "#1a2d47 transparent" }}>
                                     {layer.stocksUp.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(57,255,20,0.1)", color: "#39ff14" }}>{t}</span>)}
                                   </div>
@@ -6301,7 +6251,7 @@ export default function NexusDashboard({ user, onLogout }) {
                               )}
                               {layer.stocksDown?.length > 0 && (
                                 <div>
-                                  <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ff2d55", marginBottom: 3 }}>PUTS Ã¢ÂÂ</div>
+                                  <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ff2d55", marginBottom: 3 }}>PUTS →</div>
                                   <div style={{ display: "flex", gap: 4, flexWrap: "nowrap", overflowX: "auto", paddingBottom: 4, scrollbarWidth: "thin", scrollbarColor: "#1a2d47 transparent" }}>
                                     {layer.stocksDown.map(t => <span key={t} style={{ fontFamily: "monospace", fontSize: 10, padding: "1px 6px", borderRadius: 2, background: "rgba(255,45,85,0.1)", color: "#ff2d55" }}>{t}</span>)}
                                   </div>
@@ -6316,7 +6266,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     {/* Highest conviction */}
                     {warRipple.highestConviction?.ticker && (
                       <div style={{ background: "rgba(255,60,0,0.08)", border: "2px solid rgba(255,60,0,0.4)", borderRadius: 6, padding: 14, marginBottom: 16 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", letterSpacing: 2, marginBottom: 8 }}>Ã¢ÂÂ¢ HIGHEST CONVICTION WAR PLAY</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", letterSpacing: 2, marginBottom: 8 }}>☢ HIGHEST CONVICTION WAR PLAY</div>
                         <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 8 }}>
                           <span style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 700, color: warRipple.highestConviction.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{warRipple.highestConviction.ticker}</span>
                           <span style={{ fontFamily: "monospace", fontSize: 11, padding: "3px 10px", borderRadius: 3, background: warRipple.highestConviction.direction === "CALL" ? "rgba(57,255,20,0.1)" : "rgba(255,45,85,0.1)", color: warRipple.highestConviction.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{warRipple.highestConviction.direction}</span>
@@ -6334,11 +6284,11 @@ export default function NexusDashboard({ user, onLogout }) {
                             <div key={label} style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.2)", borderRadius: 4, padding: 10 }}>
                               <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ff3c00", marginBottom: 8 }}>{label}</div>
                               <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 2 }}>OIL</div>
-                              <div style={{ fontSize: 13, fontWeight: 700, color: "#ffb800", marginBottom: 6 }}>{pred?.oilPrice || "Ã¢ÂÂ"}</div>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: "#ffb800", marginBottom: 6 }}>{pred?.oilPrice || "—"}</div>
                               <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 2 }}>SPY</div>
                               <div style={{ fontSize: 12, fontWeight: 700, color: pred?.spyDirection === "up" ? "#39ff14" : pred?.spyDirection === "down" ? "#ff2d55" : "#ffb800", marginBottom: 6 }}>{pred?.spyDirection?.toUpperCase()} {pred?.spyTarget}</div>
                               <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 2 }}>BEST PLAY</div>
-                              <div style={{ fontSize: 11, color: "#e8f4ff", marginBottom: 4 }}>{pred?.bestPlay || "Ã¢ÂÂ"}</div>
+                              <div style={{ fontSize: 11, color: "#e8f4ff", marginBottom: 4 }}>{pred?.bestPlay || "—"}</div>
                               <div style={{ fontSize: 9, fontFamily: "monospace", color: pred?.confidence === "HIGH" ? "#39ff14" : pred?.confidence === "MEDIUM" ? "#ffb800" : "#4a6d8c" }}>{pred?.confidence}</div>
                             </div>
                           ))}
@@ -6349,7 +6299,7 @@ export default function NexusDashboard({ user, onLogout }) {
                           {[["ESCALATION", warRipple.predictions.scenarioProbabilities?.escalation, "#ff2d55"], ["DE-ESCALATION", warRipple.predictions.scenarioProbabilities?.deescalation, "#39ff14"], ["BLACK SWAN", warRipple.predictions.scenarioProbabilities?.blackSwan, "#b24fff"]].map(([label, prob, color]) => (
                             <div key={label} style={{ flex: 1, background: "#080f1a", border: `1px solid ${color}30`, borderRadius: 4, padding: "8px 10px", textAlign: "center" }}>
                               <div style={{ fontFamily: "monospace", fontSize: 9, color: "#4a6d8c", marginBottom: 4 }}>{label}</div>
-                              <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color }}>{prob || "Ã¢ÂÂ"}</div>
+                              <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color }}>{prob || "—"}</div>
                             </div>
                           ))}
                         </div>
@@ -6357,7 +6307,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         {/* Domino chain */}
                         {warRipple.predictions.dominoChain && (
                           <div style={{ background: "#080f1a", border: "1px solid rgba(255,60,0,0.2)", borderRadius: 4, padding: 12 }}>
-                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff3c00", letterSpacing: 2, marginBottom: 6 }}>DOMINO CHAIN Ã¢ÂÂ IF ESCALATION</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 9, color: "#ff3c00", letterSpacing: 2, marginBottom: 6 }}>DOMINO CHAIN — IF ESCALATION</div>
                             <div style={{ fontSize: 11, color: "#c8dce8", lineHeight: 1.7 }}>{warRipple.predictions.dominoChain}</div>
                           </div>
                         )}
@@ -6367,14 +6317,14 @@ export default function NexusDashboard({ user, onLogout }) {
                     {/* Wildcard */}
                     {warRipple.wildcard?.event && (
                       <div style={{ marginTop: 12, background: "rgba(178,79,255,0.05)", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 4, padding: 12 }}>
-                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#b24fff", letterSpacing: 2, marginBottom: 6 }}>Ã¢ÂÂ¡ WILDCARD EVENT</div>
+                        <div style={{ fontFamily: "monospace", fontSize: 9, color: "#b24fff", letterSpacing: 2, marginBottom: 6 }}>⚡ WILDCARD EVENT</div>
                         <div style={{ fontSize: 12, color: "#e8f4ff", marginBottom: 4 }}>{warRipple.wildcard.event}</div>
                         <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff" }}>Probability: {warRipple.wildcard.probability}</div>
                       </div>
                     )}
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 12, fontFamily: "monospace" }}>
-                      Generated: {new Date(warRipple.timestamp).toLocaleString()} ÃÂ· War signals injected into pipeline scoring (2x boost)
+                      Generated: {new Date(warRipple.timestamp).toLocaleString()} · War signals injected into pipeline scoring (2x boost)
                     </div>
                   </div>
                 )}
@@ -6389,12 +6339,12 @@ export default function NexusDashboard({ user, onLogout }) {
                   <div>
                     <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#00d4ff", letterSpacing: 3, marginBottom: 4 }}>
                       <span className="signal-live" style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#00d4ff",marginRight:8,verticalAlign:"middle"}}/>
-                      MASTER WATCHLIST Ã¢ÂÂ 89 TICKERS ÃÂ 16 THEMES
+                      MASTER WATCHLIST — 89 TICKERS × 16 THEMES
                     </div>
-                    <div style={{ fontSize: 11, color: "#4a6d8c" }}>AI ÃÂ· Quantum ÃÂ· Space ÃÂ· Nuclear ÃÂ· Defense ÃÂ· Crypto ÃÂ· Biotech ÃÂ· Energy ÃÂ· Transport ÃÂ· Macro ÃÂ· Oil/Gas ÃÂ· Solar ÃÂ· Helium ÃÂ· Utilities + 15 smart money operators</div>
+                    <div style={{ fontSize: 11, color: "#4a6d8c" }}>AI · Quantum · Space · Nuclear · Defense · Crypto · Biotech · Energy · Transport · Macro · Oil/Gas · Solar · Helium · Utilities + 15 smart money operators</div>
                   </div>
                   <button onClick={scanWatchlist} disabled={loadingWatch} style={{ background: loadingWatch ? "#1a2d47" : "linear-gradient(135deg,#0a3d5c,#00d4ff)", color: loadingWatch ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 18px", fontSize: 12, fontWeight: 700, letterSpacing: 2, cursor: loadingWatch ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                    {loadingWatch ? "SCANNING..." : "Ã°ÂÂÂ SCAN NOW"}
+                    {loadingWatch ? "SCANNING..." : "👁 SCAN NOW"}
                   </button>
                 </div>
 
@@ -6416,7 +6366,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
                   {/* Individuals */}
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 3, marginBottom: 10 }}>Ã°ÂÂÂ¤ INDIVIDUALS ({(watchlist.individuals||[]).length})</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 3, marginBottom: 10 }}>👤 INDIVIDUALS ({(watchlist.individuals||[]).length})</div>
                     {(watchlist.individuals || []).length === 0 && <div style={{ fontSize: 11, color: "#4a6d8c", fontStyle: "italic" }}>No individuals added yet</div>}
                     {(watchlist.individuals || []).map(item => {
                       const result = watchResults.find(r => r.id === item.id);
@@ -6427,7 +6377,7 @@ export default function NexusDashboard({ user, onLogout }) {
                               <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 500, color: "#e8f4ff" }}>{item.name}</span>
                               {result && <span style={{ marginLeft: 8, fontSize: 9, fontFamily: "monospace", color: result.signal === "ACTIVE" ? "#ff2d55" : result.signal === "MENTION" ? "#ffb800" : "#4a6d8c", padding: "1px 6px", background: result.signal === "ACTIVE" ? "rgba(255,45,85,0.1)" : "transparent", borderRadius: 2 }}>{result.signal}</span>}
                             </div>
-                            <button onClick={() => removeFromWatchlist(item.id, "individual")} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 14, padding: "0 4px" }}>ÃÂ</button>
+                            <button onClick={() => removeFromWatchlist(item.id, "individual")} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 14, padding: "0 4px" }}>×</button>
                           </div>
                           {result?.articles?.map((a, i) => <div key={i} style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.4, marginBottom: 3, paddingLeft: 8, borderLeft: "2px solid rgba(178,79,255,0.3)" }}>{a}</div>)}
                         </div>
@@ -6437,7 +6387,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
                   {/* Stocks */}
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 10 }}>Ã°ÂÂÂ STOCKS ({(watchlist.stocks||[]).length})</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 10 }}>📈 STOCKS ({(watchlist.stocks||[]).length})</div>
                     {(watchlist.stocks || []).length === 0 && <div style={{ fontSize: 11, color: "#4a6d8c", fontStyle: "italic" }}>No stocks added yet</div>}
                     {(watchlist.stocks || []).map(item => {
                       const result = watchResults.find(r => r.id === item.id);
@@ -6449,7 +6399,7 @@ export default function NexusDashboard({ user, onLogout }) {
                               <span style={{ fontSize: 12, color: "#8aabb8" }}>{item.name}</span>
                               {result && <span style={{ marginLeft: 8, fontSize: 9, fontFamily: "monospace", color: result.signal === "ACTIVE" ? "#ff2d55" : result.signal === "MENTION" ? "#ffb800" : "#4a6d8c", padding: "1px 6px", background: result.signal === "ACTIVE" ? "rgba(255,45,85,0.1)" : "transparent", borderRadius: 2 }}>{result.signal}</span>}
                             </div>
-                            <button onClick={() => removeFromWatchlist(item.id, "stock")} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 14, padding: "0 4px" }}>ÃÂ</button>
+                            <button onClick={() => removeFromWatchlist(item.id, "stock")} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 14, padding: "0 4px" }}>×</button>
                           </div>
                           {result?.articles?.map((a, i) => <div key={i} style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.4, marginBottom: 3, paddingLeft: 8, borderLeft: "2px solid rgba(57,255,20,0.3)" }}>{a}</div>)}
                         </div>
@@ -6459,23 +6409,23 @@ export default function NexusDashboard({ user, onLogout }) {
                 </div>
 
                 <div style={{ padding: "10px 14px", background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 3, fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
-                  <span style={{ color: "#00d4ff" }}>Ã°ÂÂÂ HOW IT WORKS:</span> Every item here is automatically injected into Power Intel and Intel Picks scans. Watched individuals trigger psychographic analysis. Watched stocks get priority signal detection. Click Scan Now for live news feed per item.
+                  <span style={{ color: "#00d4ff" }}>👁 HOW IT WORKS:</span> Every item here is automatically injected into Power Intel and Intel Picks scans. Watched individuals trigger psychographic analysis. Watched stocks get priority signal detection. Click Scan Now for live news feed per item.
                 </div>
               </div>
             )}
 
-        {/* AI INTELLIGENCE BRIEF Ã¢ÂÂ slide-over drawer (replaces permanent right column) */}
+        {/* AI INTELLIGENCE BRIEF — slide-over drawer (replaces permanent right column) */}
         {(analysisHtml || loading || apiError) && (
           <div style={{ position: "fixed", top: 0, right: 0, width: "520px", height: "100vh", background: "#080f1a", borderLeft: "2px solid rgba(0,212,255,0.4)", zIndex: 200, display: "flex", flexDirection: "column", boxShadow: "-8px 0 32px rgba(0,0,0,0.6)", animation: "slideInRight 0.25s ease-out" }}>
             <style>{`@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }`}</style>
             <div style={{ padding: "12px 16px", background: "#0a1628", borderBottom: "1px solid rgba(0,212,255,0.2)", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
-              <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 3 }}>Ã¢Â¬Â¡ AI INTELLIGENCE BRIEF</div>
-              <button onClick={() => setAnalysisHtml(null)} style={{ background: "none", border: "1px solid rgba(74,109,140,0.3)", color: "#4a6d8c", borderRadius: 2, padding: "2px 8px", cursor: "pointer", fontFamily: "monospace", fontSize: 10 }}>Ã¢ÂÂ CLOSE</button>
+              <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 3 }}>⬡ AI INTELLIGENCE BRIEF</div>
+              <button onClick={() => setAnalysisHtml(null)} style={{ background: "none", border: "1px solid rgba(74,109,140,0.3)", color: "#4a6d8c", borderRadius: 2, padding: "2px 8px", cursor: "pointer", fontFamily: "monospace", fontSize: 10 }}>✕ CLOSE</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "14px 16px" }}>
               {apiError && (
                 <div style={{ padding: 12, background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#ff2d55", marginBottom: 12 }}>
-                  Ã¢ÂÂ  {apiError}
+                  ⚠ {apiError}
                   {!API_KEY && <div style={{ marginTop: 8, color: "#ffb800" }}>Set VITE_ANTHROPIC_API_KEY in Vercel environment variables.</div>}
                 </div>
               )}
