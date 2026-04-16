@@ -1221,36 +1221,48 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   const enrichPicksWithLiveData = async (picks) => {
-    if (!qtConnected || !picks?.length) return;
+    if (!picks?.length) return;
+    // Use Yahoo Finance directly — no Questrade dependency
     try {
-      // Step 1: Get live stock prices for all picks
-      const tickers = picks.map(p => p.ticker).join(",");
-      const data = await qtFetch("enrich", { picks: tickers });
-      const quoteMap = {};
-      data.quotes.forEach(q => { if (q.quote) quoteMap[q.ticker] = q.quote; });
-      setQtQuotes(prev => ({ ...prev, ...quoteMap }));
+      // Step 1: Get live stock prices via Yahoo
+      const tickers = picks.slice(0,3).map(p => p.ticker).join(",");
+      const quotesRes = await fetch(`${nexusUrl}/api/yahoo-quote?tickers=${tickers}`, { headers: { "x-nexus-key": nexusKey } });
+      if (quotesRes.ok) {
+        const qData = await quotesRes.json();
+        const quoteMap = {};
+        qData.quotes?.forEach(q => { if (q.price) quoteMap[q.ticker] = { lastTradePrice: q.price, prevClose: q.prev, chgPct: q.change }; });
+        setQtQuotes(prev => ({ ...prev, ...quoteMap }));
+      }
 
-      // Step 2: Fetch real options chain for each pick
-      for (const pick of picks.slice(0, 3)) { // top 3 to save API calls
+      // Step 2: Fetch options chain via Yahoo for each pick
+      for (const pick of picks.slice(0, 3)) {
         if (!pick.ticker || !pick.direction) continue;
         setLoadingChain(prev => ({ ...prev, [pick.ticker]: true }));
         try {
-          const chainData = await qtFetch("chain", {
-            symbol: pick.ticker,
-            direction: pick.direction === "PUT" ? "PUT" : "CALL",
-          });
-          if (chainData?.strikes?.length > 0) {
-            setQtChains(prev => ({ ...prev, [pick.ticker]: chainData }));
+          const chainRes = await fetch(`${nexusUrl}/api/yahoo-chain?ticker=${pick.ticker}&direction=${pick.direction}&expiry=${pick.expiry || ""}`, { headers: { "x-nexus-key": nexusKey } });
+          if (chainRes.ok) {
+            const chainData = await chainRes.json();
+            if (chainData.success && chainData.currentPrice) {
+              // Normalize to same format as QT chain
+              setQtChains(prev => ({ ...prev, [pick.ticker]: {
+                currentPrice: chainData.currentPrice,
+                strikes: chainData.allStrikes || [],
+                bestStrike: { strike: chainData.strike, bid: chainData.bid, ask: chainData.ask, iv: chainData.iv, delta: chainData.delta, theta: chainData.theta },
+                iv: chainData.iv,
+                bid: chainData.bid,
+                ask: chainData.ask,
+                mid: chainData.bid && chainData.ask ? ((chainData.bid + chainData.ask) / 2) : null,
+                delta: chainData.delta,
+                theta: chainData.theta,
+                openInterest: chainData.openInterest,
+                source: "Yahoo Finance",
+              }}));
+            }
           }
-        } catch (err) {
-          console.error("Chain error for", pick.ticker, err.message);
-        } finally {
-          setLoadingChain(prev => ({ ...prev, [pick.ticker]: false }));
-        }
+        } catch (err) { console.error("Yahoo chain error:", pick.ticker, err.message); }
+        finally { setLoadingChain(prev => ({ ...prev, [pick.ticker]: false })); }
       }
-    } catch (err) {
-      console.error("Enrich error:", err.message);
-    }
+    } catch (err) { console.error("Enrich error:", err.message); }
   };
 
   // Fetch chain for a single ticker on demand
@@ -2818,26 +2830,35 @@ export default function NexusDashboard({ user, onLogout }) {
                           </div>
                         </div>
 
-                        {/* Live QT data */}
-                        {trade.qtValidated ? (
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: 14, background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 4, padding: 12 }}>
-                            {[["CURRENT", "$" + (trade.currentPrice?.toFixed(2) || "—")], ["STRIKE", "$" + (trade.strike?.toFixed(0) || "—")], ["BID", "$" + (trade.bid?.toFixed(2) || "—")], ["ASK", "$" + (trade.ask?.toFixed(2) || "—")], ["MID", "$" + (trade.mid?.toFixed(2) || "—")]].map(([label, val]) => (
-                              <div key={label} style={{ textAlign: "center" }}>
-                                <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
-                                <div style={{ fontSize: 13, fontFamily: "monospace", color: "#00d4ff", fontWeight: 700 }}>{val}</div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 14 }}>⚠ Live QT data unavailable — connect Questrade to see real strikes</div>
-                        )}
+                        {/* Live options data — Yahoo Finance (no QT dependency) */}
+                        {(() => {
+                          const yc = qtChains?.[trade.ticker];
+                          const sp = qtQuotes?.[trade.ticker]?.lastTradePrice || yc?.currentPrice;
+                          return (
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: 14, background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 4, padding: 12 }}>
+                              {[
+                                ["STOCK", sp ? "$" + Number(sp).toFixed(2) : "—"],
+                                ["STRIKE", yc?.bestStrike?.strike ? "$" + Number(yc.bestStrike.strike).toFixed(0) : (trade.strike || "ATM")],
+                                ["BID", yc?.bid ? "$" + Number(yc.bid).toFixed(2) : "—"],
+                                ["ASK", yc?.ask ? "$" + Number(yc.ask).toFixed(2) : "—"],
+                                ["MID", yc?.mid ? "$" + Number(yc.mid).toFixed(2) : yc?.bid && yc?.ask ? "$" + (( Number(yc.bid) + Number(yc.ask)) / 2).toFixed(2) : "—"],
+                              ].map(([label, val]) => (
+                                <div key={label} style={{ textAlign: "center" }}>
+                                  <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
+                                  <div style={{ fontSize: 13, fontFamily: "monospace", color: val === "—" ? "#2a3d57" : "#00d4ff", fontWeight: 700 }}>{val}</div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
 
                         {/* Expiry + timing */}
                         <div style={{ display: "flex", gap: 16, marginBottom: 12, fontSize: 11, fontFamily: "monospace" }}>
                           <span style={{ color: "#8aabb8" }}>EXPIRY: <span style={{ color: "#e8f4ff" }}>{trade.expiry && !trade.expiry.includes("00:00:00") ? trade.expiry : trade.expiry?.slice(0,10) || "—"}</span></span>
                           <span style={{ color: "#8aabb8" }}>TIMING: <span style={{ color: "#e8f4ff" }}>{trade.urgency || (trade.timing && !trade.timing.includes("*") ? trade.timing : "—")}</span></span>
-                          {trade.iv && trade.iv < 5 ? <span style={{ color: "#8aabb8" }}>IV: <span style={{ color: "#ffb800" }}>{(trade.iv * 100).toFixed(0)}%</span></span> : null}
-                          {trade.delta ? <span style={{ color: "#8aabb8" }}>DELTA: <span style={{ color: "#e8f4ff" }}>{trade.delta?.toFixed(2)}</span></span> : null}
+                          {qtChains?.[trade.ticker]?.iv && qtChains[trade.ticker].iv < 5 ? <span style={{ color: "#8aabb8" }}>IV: <span style={{ color: "#ffb800" }}>{(qtChains[trade.ticker].iv * 100).toFixed(0)}%</span></span> : null}
+                          {qtChains?.[trade.ticker]?.delta ? <span style={{ color: "#8aabb8" }}>Δ: <span style={{ color: "#e8f4ff" }}>{Number(qtChains[trade.ticker].delta).toFixed(2)}</span></span> : null}
+                          <span style={{ color: "#2a3d57", fontSize: 9 }}>via Yahoo Finance</span>
                         </div>
 
                         {/* Thesis */}
