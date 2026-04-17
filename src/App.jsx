@@ -743,7 +743,7 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingResolver(false);
   };
 
-  const runOracle=async()=>{if(!oracleQuery.trim())return;setOracleLoading(true);setOracleError(null);setOracleResult(null);try{const res=await fetch(nexusUrl+"/api/oracle",{method:"POST",headers:{"x-nexus-key":nexusKey,"Content-Type":"application/json"},body:JSON.stringify({query:oracleQuery,targetDate:oracleDate||null})});const data=await res.json();if(data.success)setOracleResult(data);else setOracleError(data.error||"Oracle failed");}catch(e){setOracleError(e.message);}setOracleLoading(false);}; const fetchSimPrice = async (ticker) => {
+  const runOracle=async()=>{if(!oracleQuery.trim())return;setOracleLoading(true);setOracleError(null);setOracleResult(null);try{const res=await fetch(nexusUrl+"/api/oracle",{method:"POST",headers:{"x-nexus-key":nexusKey,"Content-Type":"application/json"},body:JSON.stringify({query:oracleQuery,targetDate:oracleDate||null})});const text=await res.text();let data;try{data=JSON.parse(text);}catch(e){throw new Error("Server error: "+text.slice(0,150));}if(data.success)setOracleResult(data);else setOracleError(data.error||"Oracle failed");}catch(e){setOracleError(e.message);}setOracleLoading(false);}; const fetchSimPrice = async (ticker) => {
     if (simPrices[ticker]) return simPrices[ticker];
     try {
       const res = await fetch(nexusUrl + "/api/yahoo-quote?symbol=" + ticker, { headers: { "x-nexus-key": nexusKey } });
