@@ -802,18 +802,24 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   const loadLearningStats = async () => {
-    try {
-      const [lr, sg, wt, au] = await Promise.all([
-        fetch(nexusUrl + "/api/learning-stats", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
-        fetch(nexusUrl + "/api/improvement-suggestions", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
-        fetch(nexusUrl + "/api/learned-weights", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
-        fetch(nexusUrl + "/api/autonomous-status", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
-      ]);
-      if (lr.success) setLearningData(lr);
-      if (sg.success) setSuggestionsData(sg);
-      if (wt.success) setWeightsData(wt);
-      if (au.success) setAutonomousData(au);
-    } catch {}
+    // Each fetch is independent — one failure doesn't block others
+    const safe = async (url) => {
+      try {
+        const r = await fetch(nexusUrl + url, { headers: { "x-nexus-key": nexusKey } });
+        const d = await r.json();
+        return d.success ? d : null;
+      } catch { return null; }
+    };
+    const [lr, sg, wt, au] = await Promise.all([
+      safe("/api/learning-stats"),
+      safe("/api/improvement-suggestions"),
+      safe("/api/learned-weights"),
+      safe("/api/autonomous-status"),
+    ]);
+    if (lr) setLearningData(lr);
+    if (sg) setSuggestionsData(sg);
+    if (wt) setWeightsData(wt);
+    if (au) setAutonomousData(au);
   };
 
   const loadSpikeDetector = async (force = false, sector = "alerts") => {
