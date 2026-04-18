@@ -3252,7 +3252,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* View switcher */}
                       <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
                         {["alerts","fda","metals","penny","patterns"].map(v => (
-                          <button key={v} onClick={() => setSpikeView(v)} style={{ fontFamily: "monospace", fontSize: 8, padding: "3px 8px", borderRadius: 2, border: `1px solid ${spikeView === v ? "#ffb800" : "rgba(74,109,140,0.3)"}`, background: spikeView === v ? "rgba(255,184,0,0.1)" : "transparent", color: spikeView === v ? "#ffb800" : "#4a6d8c", cursor: "pointer" }}>{v.toUpperCase()}</button>
+                          <button key={v} onClick={() => { setSpikeView(v); loadSpikeDetector(true, v); }} style={{ fontFamily: "monospace", fontSize: 8, padding: "3px 8px", borderRadius: 2, border: `1px solid ${spikeView === v ? "#ffb800" : "rgba(74,109,140,0.3)"}`, background: spikeView === v ? "rgba(255,184,0,0.1)" : "transparent", color: spikeView === v ? "#ffb800" : "#4a6d8c", cursor: "pointer" }}>{v.toUpperCase()}</button>
                         ))}
                       </div>
 
