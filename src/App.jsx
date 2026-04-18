@@ -816,8 +816,8 @@ export default function NexusDashboard({ user, onLogout }) {
     } catch {}
   };
 
-  const loadSpikeDetector = async (force = false, sector) => {
-    const activeSector = sector || spikeView || "alerts";
+  const loadSpikeDetector = async (force = false, sector = "alerts") => {
+    const activeSector = sector;
     setLoadingSpike(true);
     try {
       const res = await fetch(nexusUrl + "/api/spike-detector?sector=" + activeSector + (force ? "&force=true" : ""), {
@@ -1402,7 +1402,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
   // NEXUS ACTION SHORTCUTS — replaces generic quick queries
   const NEXUS_ACTIONS = [
-    { label: "⚡ MORNING SCAN", color: "#39ff14", desc: "Seed + Pipeline + WSB", action: async () => { await Promise.all([loadOptionsOI(true), loadSpikeDetector(true), loadRedditWSB(true)]); runFullPipeline(); } },
+    { label: "⚡ MORNING SCAN", color: "#39ff14", desc: "Seed + Pipeline + WSB", action: async () => { await Promise.all([loadOptionsOI(true), loadSpikeDetector(true, spikeView||"alerts"), loadRedditWSB(true)]); runFullPipeline(); } },
     { label: "🔥 RUN PIPELINE", color: "#b24fff", desc: "Full intelligence run", action: () => runFullPipeline() },
     { label: "📊 OI OVERNIGHT", color: "#00ff9d", desc: "Smart money positioning", action: () => loadOptionsOI(true) },
     { label: "🌍 GEO UPDATE", color: "#ffb800", desc: "Scenarios + Polymarket", action: () => loadGeoScenarios(true) },
