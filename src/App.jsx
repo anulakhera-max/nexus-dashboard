@@ -816,13 +816,16 @@ export default function NexusDashboard({ user, onLogout }) {
     } catch {}
   };
 
-  const loadSpikeDetector = async (force = false, sector = spikeView || "alerts") => {
+  const loadSpikeDetector = async (force = false, sector) => {
+    const activeSector = sector || spikeView || "alerts";
     setLoadingSpike(true);
     try {
-      const res = await fetch(nexusUrl + "/api/spike-detector?sector=" + sector + (force ? "&force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
+      const res = await fetch(nexusUrl + "/api/spike-detector?sector=" + activeSector + (force ? "&force=true" : ""), {
+        headers: { "x-nexus-key": nexusKey }
+      });
       const data = await res.json();
       if (data.success) setSpikeData(data);
-    } catch {}
+    } catch(e) {}
     setLoadingSpike(false);
   };
 
