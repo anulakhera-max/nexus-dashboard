@@ -1574,251 +1574,7 @@ export default function NexusDashboard({ user, onLogout }) {
             {analysisHtml && <button onClick={() => setAnalysisHtml(null)} style={{ ...S.btnSecondary, fontSize: 10, padding: "6px 10px", color: "#4a6d8c" }}>✕ CLEAR</button>}
           </div>
 
-          {/* ══════════════════════════════════════════════════════ */}
-          {/* ◎ NEXUS INTELLIGENCE ENGINE */}
-          {/* The entire signal stack exists to produce these 3 picks */}
-          {/* ══════════════════════════════════════════════════════ */}
-          {intelPicks && intelPicks.length > 0 ? (
-            <div style={{ padding: "8px 12px 0", borderBottom: "1px solid rgba(26,45,71,0.6)" }}>
-              {/* Header row */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3 }}>◎ TOP 3 NEXUS PICKS</div>
-                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#2a3d57" }}>PIPELINE · PICKS · SCENARIOS · TRACKER</div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>TARGET ACCURACY</div>
-                  <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffb800" }}>90%</div>
-                  <div style={{ width: 60, height: 4, background: "rgba(74,109,140,0.2)", borderRadius: 2 }}>
-                    <div style={{ height: "100%", width: "82%", background: "linear-gradient(90deg,#ffb800,#39ff14)", borderRadius: 2 }}/>
-                  </div>
-                  <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14" }}>~82%</div>
-                </div>
-              </div>
-
-              {/* Top 3 picks row */}
-              {/* ══ NEXUS PREDICTION PLATFORM — SCENARIO SIMULATION ══ */}
-              {/* Selector tabs for pick 1/2/3 */}
-              <div style={{ display:"flex", gap:6, marginBottom:8 }}>
-                {intelPicks.slice(0,3).map((pick,i) => {
-                  const isCall = pick.direction !== "PUT";
-                  const rankColors = ["#ffd700","#c0c0c0","#cd7f32"];
-                  const rc = rankColors[i];
-                  return (
-                    <button key={i} onClick={() => setActiveSim(i)}
-                      className="nexus-pick"
-                      style={{ flex:1, padding:"10px 8px", borderRadius:5, cursor:"pointer", border:`2px solid ${activeSim===i ? rc : rc+"33"}`, background: activeSim===i ? rc+"11" : "rgba(0,0,0,0.3)", transition:"all 0.15s", textAlign:"left" }}>
-                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:3 }}>
-                        <span style={{ fontFamily:"monospace", fontSize:18, fontWeight:900, color: activeSim===i ? rc : "#8aabb8" }}>{pick.ticker}</span>
-                        <span style={{ fontFamily:"monospace", fontSize:9, padding:"2px 6px", borderRadius:2, background: isCall?"rgba(57,255,20,0.12)":"rgba(255,45,85,0.12)", color: isCall?"#39ff14":"#ff2d55", fontWeight:700 }}>{pick.direction}</span>
-                      </div>
-                      <div style={{ fontFamily:"monospace", fontSize:13, color: isCall?"#39ff14":"#ff2d55", fontWeight:700, marginBottom:2 }}>{pick.targetReturn||pick.estimatedMove?.split(" ")[0]||"—"}</div>
-                      <div style={{ display:"flex", gap:6, alignItems:"center" }}>
-                        <div style={{ flex:1, height:3, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
-                          <div style={{ height:"100%", width: Math.min(pick.score||0,100)+"%", background: activeSim===i?rc:"#2a3d57", borderRadius:2 }}/>
-                        </div>
-                        <span style={{ fontFamily:"monospace", fontSize:9, color:"#4a6d8c" }}>{pick.score}/100</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* ── ACTIVE SIMULATION PANEL ── */}
-              {(() => {
-                const pick = intelPicks[activeSim];
-                if (!pick) return null;
-                const isCall = pick.direction !== "PUT";
-                const rankColors = ["#ffd700","#c0c0c0","#cd7f32"];
-                const rc = rankColors[activeSim];
-                const dir = pick.direction;
-
-                // Known prices from last pipeline run (fallback to estimates)
-                const PRICES = { GLD:303.8, PLTR:91.2, GDX:55.4, NVDA:110.0, AMD:105.0, IONQ:36.5, QQQ:460.0, SPY:520.0, GDX:55.4, TLT:90.0, USO:72.0 };
-                const curPrice = PRICES[pick.ticker] || 100;
-
-                // Parse target % into price
-                const tgtPct = parseFloat((pick.targetReturn||"30").replace(/[^0-9.-]/g,"")) / 100;
-                const stopPct = parseFloat((pick.stopPct||"-20").replace(/[^0-9.-]/g,"")) / 100;
-                const tgtPrice = curPrice * (1 + (isCall ? tgtPct : -Math.abs(tgtPct)));
-                const stopPrice = curPrice * (1 + (isCall ? stopPct : Math.abs(Math.abs(stopPct))));
-
-                // Parse expiry days
-                const expStr = pick.expiry || "";
-                const expDate = new Date(expStr);
-                const daysLeft = isNaN(expDate) ? 35 : Math.max(1, Math.round((expDate - new Date()) / 86400000));
-
-                // Black-Scholes simplified probability
-                const IV = 0.45;
-                const T = daysLeft / 365;
-                const ln = Math.log(curPrice / tgtPrice);
-                const d2 = (ln + (-0.053 - 0.5 * IV * IV) * T) / (IV * Math.sqrt(T));
-                function normCDF(x) {
-                  const a = [0.254829592,-0.284496736,1.421413741,-1.453152027,1.061405429];
-                  const p = 0.3275911;
-                  const s = x < 0 ? -1 : 1;
-                  x = Math.abs(x) / Math.sqrt(2);
-                  const t2 = 1/(1+p*x);
-                  const y = 1 - ((((a[4]*t2+a[3])*t2+a[2])*t2+a[1])*t2+a[0])*t2*Math.exp(-x*x);
-                  return 0.5*(1+s*y);
-                }
-                const bsProb = isCall ? normCDF(d2) : normCDF(-d2);
-
-                // Scenario probabilities — BS + catalyst adjustment
-                const catalystBoost = (pick.confidence === "HIGH" ? 0.12 : 0.06);
-                const probA = Math.min(0.68, Math.max(0.08, bsProb + catalystBoost));
-                const probB = Math.min(0.42, Math.max(0.05, bsProb + catalystBoost * 0.4));
-                const probBear = Math.max(0.1, 1 - probA - 0.12);
-
-                // Scenario price targets
-                const scA_price = isCall ? curPrice * (1 + Math.abs(tgtPct) * 0.75) : curPrice * (1 - Math.abs(tgtPct) * 0.75);
-                const scB_price = isCall ? curPrice * (1 + Math.abs(tgtPct)) : curPrice * (1 - Math.abs(tgtPct));
-                const scBear_price = isCall ? curPrice * (1 + stopPct) : curPrice * (1 - stopPct);
-
-                // Option P&L estimates (simplified — assume 30-delta, $2 avg premium)
-                const optPremium = 2.50;
-                const contracts = 5;
-                const costBasis = optPremium * contracts * 100;
-                const scA_optVal = Math.max(0, Math.abs(scA_price - (isCall ? curPrice * 1.05 : curPrice * 0.95)) * 0.5 + optPremium * 0.6);
-                const scB_optVal = Math.max(0, Math.abs(scB_price - (isCall ? curPrice * 1.05 : curPrice * 0.95)) * 0.8 + optPremium * 0.3);
-                const scA_pnl = Math.round((scA_optVal - optPremium) * contracts * 100);
-                const scB_pnl = Math.round((scB_optVal - optPremium) * contracts * 100);
-                const bear_pnl = Math.round(-optPremium * 0.7 * contracts * 100);
-                const scA_ret = Math.round(scA_pnl / costBasis * 100);
-                const scB_ret = Math.round(scB_pnl / costBasis * 100);
-
-                const dLabel = daysLeft <= 14 ? "this week" : daysLeft <= 21 ? "2 weeks" : daysLeft <= 35 ? "~1 month" : "~6 weeks";
-
-                return (
-                  <div className="slide-up" style={{ background:"rgba(0,0,0,0.45)", border:`1px solid ${rc}22`, borderRadius:6, padding:"12px 14px", marginBottom:6 }}>
-                    {/* Pick header */}
-                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
-                      <div>
-                        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
-                          <span style={{ fontFamily:"monospace", fontSize:22, fontWeight:900, color:rc }}>{pick.ticker}</span>
-                          <span style={{ fontFamily:"monospace", fontSize:11, padding:"2px 8px", borderRadius:2, background: isCall?"rgba(57,255,20,0.12)":"rgba(255,45,85,0.12)", color: isCall?"#39ff14":"#ff2d55", fontWeight:700 }}>{dir} · {pick.urgency||"THIS WEEK"}</span>
-                          <span style={{ fontFamily:"monospace", fontSize:9, color:"#4a6d8c" }}>exp {pick.expiry?.slice(0,12)||"—"}</span>
-                        </div>
-                        <div style={{ fontSize:11, color:"#8aabb8", maxWidth:520, lineHeight:1.6 }}>{pick.catalyst?.slice(0,120)}{pick.catalyst?.length>120?"...":""}</div>
-                      </div>
-                      <div style={{ textAlign:"right", flexShrink:0 }}>
-                        <div style={{ fontFamily:"monospace", fontSize:11, color:"#4a6d8c", marginBottom:2 }}>NEXUS SCORE</div>
-                        <div style={{ fontFamily:"monospace", fontSize:24, fontWeight:900, color:rc }}>{pick.score}</div>
-                        <div style={{ fontFamily:"monospace", fontSize:8, color:"#2a3d57" }}>/100</div>
-                      </div>
-                    </div>
-
-                    {/* ── 3-SCENARIO GRID ── */}
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:10 }}>
-                      {/* Scenario A — base case */}
-                      <div style={{ background:"rgba(57,255,20,0.06)", border:"1px solid rgba(57,255,20,0.2)", borderRadius:5, padding:"10px 12px" }}>
-                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#39ff14", letterSpacing:1, marginBottom:6 }}>SCENARIO A — BASE</div>
-                        <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scA_price)}</div>
-                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>from ${Math.round(curPrice)} · {dLabel}</div>
-                        <div style={{ marginBottom:6 }}>
-                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#39ff14", fontWeight:700 }}>{Math.round(probA*100)}%</span></div>
-                          <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
-                            <div style={{ height:"100%", width:Math.round(probA*100)+"%", background:"#39ff14", borderRadius:2 }}/>
-                          </div>
-                        </div>
-                        <div style={{ borderTop:"1px solid rgba(57,255,20,0.15)", paddingTop:6 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:11, color:"#39ff14", fontWeight:700 }}>{scA_pnl >= 0 ? "+" : ""}${scA_pnl.toLocaleString()}</div>
-                          <div style={{ fontSize:9, color:"#4a6d8c" }}>{scA_ret >= 0 ? "+" : ""}{scA_ret}% on 5 contracts</div>
-                        </div>
-                      </div>
-
-                      {/* Scenario B — bull case */}
-                      <div style={{ background:"rgba(0,212,255,0.04)", border:"1px solid rgba(0,212,255,0.2)", borderRadius:5, padding:"10px 12px" }}>
-                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#00d4ff", letterSpacing:1, marginBottom:6 }}>SCENARIO B — BULL</div>
-                        <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scB_price)}</div>
-                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>full {pick.targetReturn||"target"} realized</div>
-                        <div style={{ marginBottom:6 }}>
-                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#00d4ff", fontWeight:700 }}>{Math.round(probB*100)}%</span></div>
-                          <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
-                            <div style={{ height:"100%", width:Math.round(probB*100)+"%", background:"#00d4ff", borderRadius:2 }}/>
-                          </div>
-                        </div>
-                        <div style={{ borderTop:"1px solid rgba(0,212,255,0.15)", paddingTop:6 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:11, color:"#00d4ff", fontWeight:700 }}>{scB_pnl >= 0 ? "+" : ""}${scB_pnl.toLocaleString()}</div>
-                          <div style={{ fontSize:9, color:"#4a6d8c" }}>{scB_ret >= 0 ? "+" : ""}{scB_ret}% full target hit</div>
-                        </div>
-                      </div>
-
-                      {/* Scenario C — bear */}
-                      <div style={{ background:"rgba(255,45,85,0.04)", border:"1px solid rgba(255,45,85,0.18)", borderRadius:5, padding:"10px 12px" }}>
-                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#ff2d55", letterSpacing:1, marginBottom:6 }}>SCENARIO C — BEAR</div>
-                        <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scBear_price)}</div>
-                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>stop hit · {pick.stopPct||"-20%"} loss</div>
-                        <div style={{ marginBottom:6 }}>
-                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#ff2d55", fontWeight:700 }}>{Math.round(probBear*100)}%</span></div>
-                          <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
-                            <div style={{ height:"100%", width:Math.round(probBear*100)+"%", background:"#ff2d55", borderRadius:2 }}/>
-                          </div>
-                        </div>
-                        <div style={{ borderTop:"1px solid rgba(255,45,85,0.15)", paddingTop:6 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:11, color:"#ff2d55", fontWeight:700 }}>${bear_pnl.toLocaleString()}</div>
-                          <div style={{ fontSize:9, color:"#4a6d8c" }}>close immediately at stop</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* ── CRITICAL DECISION POINTS ── */}
-                    <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 12px", marginBottom:8 }}>
-                      <div style={{ fontFamily:"monospace", fontSize:9, color:"#ffb800", marginBottom:6, letterSpacing:1 }}>CRITICAL DECISION POINTS</div>
-                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
-                        <div style={{ borderLeft:"2px solid #39ff14", paddingLeft:8 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:10, color:"#39ff14", marginBottom:3 }}>IF SCENARIO A</div>
-                          <div style={{ fontSize:10, color:"#c8dff0" }}>Take 50% profit · Hold rest for Scenario B target · Trail stop up</div>
-                        </div>
-                        <div style={{ borderLeft:"2px solid #ffb800", paddingLeft:8 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:10, color:"#ffb800", marginBottom:3 }}>IF STALLING</div>
-                          <div style={{ fontSize:10, color:"#c8dff0" }}>Hold while above stop · Re-evaluate in {Math.round(daysLeft/2)} days · Watch IV</div>
-                        </div>
-                        <div style={{ borderLeft:"2px solid #ff2d55", paddingLeft:8 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:10, color:"#ff2d55", marginBottom:3 }}>IF SCENARIO C</div>
-                          <div style={{ fontSize:10, color:"#c8dff0" }}>Close immediately · Do not average down · Capital preservation</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* ── WHAT HAS TO HAPPEN ── */}
-                    <div style={{ display:"flex", gap:8, alignItems:"flex-start" }}>
-                      <div style={{ flex:1, background:"rgba(0,0,0,0.2)", borderRadius:4, padding:"8px 10px" }}>
-                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#9d7fff", marginBottom:4 }}>WHAT HAS TO HAPPEN</div>
-                        <div style={{ fontSize:10, color:"#8aabb8", lineHeight:1.7 }}>{pick.catalyst?.slice(0,200)||"—"}</div>
-                      </div>
-                      <div style={{ width:120, flexShrink:0 }}>
-                        <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px", marginBottom:6 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:2 }}>TARGET</div>
-                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#39ff14" }}>{pick.targetReturn||"—"}</div>
-                        </div>
-                        <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px" }}>
-                          <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:2 }}>STOP LOSS</div>
-                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#ff2d55" }}>{pick.stopPct||"—"}</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ marginTop:6, fontSize:9, color:"#2a3d57", textAlign:"center" }}>
-                      ⚠ Educational only · Probabilities are Black-Scholes estimates · Verify on Questrade · Options carry substantial risk of loss
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* No picks yet prompt */}
-            </div>
-          ) : (
-            <div style={{ padding: "10px 12px", borderBottom: "1px solid rgba(26,45,71,0.6)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#2a3d57", letterSpacing: 3 }}>◎ TOP 3 NEXUS PICKS</div>
-                <div style={{ fontSize: 9, color: "#2a3d57", marginTop: 2 }}>Run pipeline to generate high-conviction picks from all 20 signal layers</div>
-              </div>
-              <button onClick={runFullPipeline} disabled={pipelineRunning} style={{ background: pipelineRunning ? "#1a2d47" : "linear-gradient(135deg,#7b0000,#ff2d55)", color: pipelineRunning ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "7px 18px", fontSize: 10, fontWeight: 700, cursor: pipelineRunning ? "not-allowed" : "pointer", fontFamily: "monospace", letterSpacing: 2 }}>
-                {pipelineRunning ? "GENERATING..." : "◎ RUN PIPELINE"}
-              </button>
-            </div>
-          )}
+          
 
           <div style={S.tabs}>
             {/* CORE tabs */}
@@ -2065,7 +1821,254 @@ export default function NexusDashboard({ user, onLogout }) {
 
             
             {tab === "intel" && (
+              
+              {/* ══ PIPELINE + PICKS ══ */}
+              {/* ══════════════════════════════════════════════════════ */}
+          {/* ◎ NEXUS INTELLIGENCE ENGINE */}
+          {/* The entire signal stack exists to produce these 3 picks */}
+          {/* ══════════════════════════════════════════════════════ */}
+          {intelPicks && intelPicks.length > 0 ? (
+            <div style={{ padding: "8px 12px 0", borderBottom: "1px solid rgba(26,45,71,0.6)" }}>
+              {/* Header row */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3 }}>◎ TOP 3 NEXUS PICKS</div>
+                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#2a3d57" }}>PIPELINE · PICKS · SCENARIOS · TRACKER</div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>TARGET ACCURACY</div>
+                  <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffb800" }}>90%</div>
+                  <div style={{ width: 60, height: 4, background: "rgba(74,109,140,0.2)", borderRadius: 2 }}>
+                    <div style={{ height: "100%", width: "82%", background: "linear-gradient(90deg,#ffb800,#39ff14)", borderRadius: 2 }}/>
+                  </div>
+                  <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14" }}>~82%</div>
+                </div>
+              </div>
+
+              {/* Top 3 picks row */}
+              {/* ══ NEXUS PREDICTION PLATFORM — SCENARIO SIMULATION ══ */}
+              {/* Selector tabs for pick 1/2/3 */}
+              <div style={{ display:"flex", gap:6, marginBottom:8 }}>
+                {intelPicks.slice(0,3).map((pick,i) => {
+                  const isCall = pick.direction !== "PUT";
+                  const rankColors = ["#ffd700","#c0c0c0","#cd7f32"];
+                  const rc = rankColors[i];
+                  return (
+                    <button key={i} onClick={() => setActiveSim(i)}
+                      className="nexus-pick"
+                      style={{ flex:1, padding:"10px 8px", borderRadius:5, cursor:"pointer", border:`2px solid ${activeSim===i ? rc : rc+"33"}`, background: activeSim===i ? rc+"11" : "rgba(0,0,0,0.3)", transition:"all 0.15s", textAlign:"left" }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:3 }}>
+                        <span style={{ fontFamily:"monospace", fontSize:18, fontWeight:900, color: activeSim===i ? rc : "#8aabb8" }}>{pick.ticker}</span>
+                        <span style={{ fontFamily:"monospace", fontSize:9, padding:"2px 6px", borderRadius:2, background: isCall?"rgba(57,255,20,0.12)":"rgba(255,45,85,0.12)", color: isCall?"#39ff14":"#ff2d55", fontWeight:700 }}>{pick.direction}</span>
+                      </div>
+                      <div style={{ fontFamily:"monospace", fontSize:13, color: isCall?"#39ff14":"#ff2d55", fontWeight:700, marginBottom:2 }}>{pick.targetReturn||pick.estimatedMove?.split(" ")[0]||"—"}</div>
+                      <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+                        <div style={{ flex:1, height:3, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
+                          <div style={{ height:"100%", width: Math.min(pick.score||0,100)+"%", background: activeSim===i?rc:"#2a3d57", borderRadius:2 }}/>
+                        </div>
+                        <span style={{ fontFamily:"monospace", fontSize:9, color:"#4a6d8c" }}>{pick.score}/100</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* ── ACTIVE SIMULATION PANEL ── */}
+              {(() => {
+                const pick = intelPicks[activeSim];
+                if (!pick) return null;
+                const isCall = pick.direction !== "PUT";
+                const rankColors = ["#ffd700","#c0c0c0","#cd7f32"];
+                const rc = rankColors[activeSim];
+                const dir = pick.direction;
+
+                // Known prices from last pipeline run (fallback to estimates)
+                const PRICES = { GLD:303.8, PLTR:91.2, GDX:55.4, NVDA:110.0, AMD:105.0, IONQ:36.5, QQQ:460.0, SPY:520.0, GDX:55.4, TLT:90.0, USO:72.0 };
+                const curPrice = PRICES[pick.ticker] || 100;
+
+                // Parse target % into price
+                const tgtPct = parseFloat((pick.targetReturn||"30").replace(/[^0-9.-]/g,"")) / 100;
+                const stopPct = parseFloat((pick.stopPct||"-20").replace(/[^0-9.-]/g,"")) / 100;
+                const tgtPrice = curPrice * (1 + (isCall ? tgtPct : -Math.abs(tgtPct)));
+                const stopPrice = curPrice * (1 + (isCall ? stopPct : Math.abs(Math.abs(stopPct))));
+
+                // Parse expiry days
+                const expStr = pick.expiry || "";
+                const expDate = new Date(expStr);
+                const daysLeft = isNaN(expDate) ? 35 : Math.max(1, Math.round((expDate - new Date()) / 86400000));
+
+                // Black-Scholes simplified probability
+                const IV = 0.45;
+                const T = daysLeft / 365;
+                const ln = Math.log(curPrice / tgtPrice);
+                const d2 = (ln + (-0.053 - 0.5 * IV * IV) * T) / (IV * Math.sqrt(T));
+                function normCDF(x) {
+                  const a = [0.254829592,-0.284496736,1.421413741,-1.453152027,1.061405429];
+                  const p = 0.3275911;
+                  const s = x < 0 ? -1 : 1;
+                  x = Math.abs(x) / Math.sqrt(2);
+                  const t2 = 1/(1+p*x);
+                  const y = 1 - ((((a[4]*t2+a[3])*t2+a[2])*t2+a[1])*t2+a[0])*t2*Math.exp(-x*x);
+                  return 0.5*(1+s*y);
+                }
+                const bsProb = isCall ? normCDF(d2) : normCDF(-d2);
+
+                // Scenario probabilities — BS + catalyst adjustment
+                const catalystBoost = (pick.confidence === "HIGH" ? 0.12 : 0.06);
+                const probA = Math.min(0.68, Math.max(0.08, bsProb + catalystBoost));
+                const probB = Math.min(0.42, Math.max(0.05, bsProb + catalystBoost * 0.4));
+                const probBear = Math.max(0.1, 1 - probA - 0.12);
+
+                // Scenario price targets
+                const scA_price = isCall ? curPrice * (1 + Math.abs(tgtPct) * 0.75) : curPrice * (1 - Math.abs(tgtPct) * 0.75);
+                const scB_price = isCall ? curPrice * (1 + Math.abs(tgtPct)) : curPrice * (1 - Math.abs(tgtPct));
+                const scBear_price = isCall ? curPrice * (1 + stopPct) : curPrice * (1 - stopPct);
+
+                // Option P&L estimates (simplified — assume 30-delta, $2 avg premium)
+                const optPremium = 2.50;
+                const contracts = 5;
+                const costBasis = optPremium * contracts * 100;
+                const scA_optVal = Math.max(0, Math.abs(scA_price - (isCall ? curPrice * 1.05 : curPrice * 0.95)) * 0.5 + optPremium * 0.6);
+                const scB_optVal = Math.max(0, Math.abs(scB_price - (isCall ? curPrice * 1.05 : curPrice * 0.95)) * 0.8 + optPremium * 0.3);
+                const scA_pnl = Math.round((scA_optVal - optPremium) * contracts * 100);
+                const scB_pnl = Math.round((scB_optVal - optPremium) * contracts * 100);
+                const bear_pnl = Math.round(-optPremium * 0.7 * contracts * 100);
+                const scA_ret = Math.round(scA_pnl / costBasis * 100);
+                const scB_ret = Math.round(scB_pnl / costBasis * 100);
+
+                const dLabel = daysLeft <= 14 ? "this week" : daysLeft <= 21 ? "2 weeks" : daysLeft <= 35 ? "~1 month" : "~6 weeks";
+
+                return (
+                  <div className="slide-up" style={{ background:"rgba(0,0,0,0.45)", border:`1px solid ${rc}22`, borderRadius:6, padding:"12px 14px", marginBottom:6 }}>
+                    {/* Pick header */}
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
+                      <div>
+                        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
+                          <span style={{ fontFamily:"monospace", fontSize:22, fontWeight:900, color:rc }}>{pick.ticker}</span>
+                          <span style={{ fontFamily:"monospace", fontSize:11, padding:"2px 8px", borderRadius:2, background: isCall?"rgba(57,255,20,0.12)":"rgba(255,45,85,0.12)", color: isCall?"#39ff14":"#ff2d55", fontWeight:700 }}>{dir} · {pick.urgency||"THIS WEEK"}</span>
+                          <span style={{ fontFamily:"monospace", fontSize:9, color:"#4a6d8c" }}>exp {pick.expiry?.slice(0,12)||"—"}</span>
+                        </div>
+                        <div style={{ fontSize:11, color:"#8aabb8", maxWidth:520, lineHeight:1.6 }}>{pick.catalyst?.slice(0,120)}{pick.catalyst?.length>120?"...":""}</div>
+                      </div>
+                      <div style={{ textAlign:"right", flexShrink:0 }}>
+                        <div style={{ fontFamily:"monospace", fontSize:11, color:"#4a6d8c", marginBottom:2 }}>NEXUS SCORE</div>
+                        <div style={{ fontFamily:"monospace", fontSize:24, fontWeight:900, color:rc }}>{pick.score}</div>
+                        <div style={{ fontFamily:"monospace", fontSize:8, color:"#2a3d57" }}>/100</div>
+                      </div>
+                    </div>
+
+                    {/* ── 3-SCENARIO GRID ── */}
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:10 }}>
+                      {/* Scenario A — base case */}
+                      <div style={{ background:"rgba(57,255,20,0.06)", border:"1px solid rgba(57,255,20,0.2)", borderRadius:5, padding:"10px 12px" }}>
+                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#39ff14", letterSpacing:1, marginBottom:6 }}>SCENARIO A — BASE</div>
+                        <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scA_price)}</div>
+                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>from ${Math.round(curPrice)} · {dLabel}</div>
+                        <div style={{ marginBottom:6 }}>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#39ff14", fontWeight:700 }}>{Math.round(probA*100)}%</span></div>
+                          <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
+                            <div style={{ height:"100%", width:Math.round(probA*100)+"%", background:"#39ff14", borderRadius:2 }}/>
+                          </div>
+                        </div>
+                        <div style={{ borderTop:"1px solid rgba(57,255,20,0.15)", paddingTop:6 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:11, color:"#39ff14", fontWeight:700 }}>{scA_pnl >= 0 ? "+" : ""}${scA_pnl.toLocaleString()}</div>
+                          <div style={{ fontSize:9, color:"#4a6d8c" }}>{scA_ret >= 0 ? "+" : ""}{scA_ret}% on 5 contracts</div>
+                        </div>
+                      </div>
+
+                      {/* Scenario B — bull case */}
+                      <div style={{ background:"rgba(0,212,255,0.04)", border:"1px solid rgba(0,212,255,0.2)", borderRadius:5, padding:"10px 12px" }}>
+                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#00d4ff", letterSpacing:1, marginBottom:6 }}>SCENARIO B — BULL</div>
+                        <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scB_price)}</div>
+                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>full {pick.targetReturn||"target"} realized</div>
+                        <div style={{ marginBottom:6 }}>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#00d4ff", fontWeight:700 }}>{Math.round(probB*100)}%</span></div>
+                          <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
+                            <div style={{ height:"100%", width:Math.round(probB*100)+"%", background:"#00d4ff", borderRadius:2 }}/>
+                          </div>
+                        </div>
+                        <div style={{ borderTop:"1px solid rgba(0,212,255,0.15)", paddingTop:6 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:11, color:"#00d4ff", fontWeight:700 }}>{scB_pnl >= 0 ? "+" : ""}${scB_pnl.toLocaleString()}</div>
+                          <div style={{ fontSize:9, color:"#4a6d8c" }}>{scB_ret >= 0 ? "+" : ""}{scB_ret}% full target hit</div>
+                        </div>
+                      </div>
+
+                      {/* Scenario C — bear */}
+                      <div style={{ background:"rgba(255,45,85,0.04)", border:"1px solid rgba(255,45,85,0.18)", borderRadius:5, padding:"10px 12px" }}>
+                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#ff2d55", letterSpacing:1, marginBottom:6 }}>SCENARIO C — BEAR</div>
+                        <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scBear_price)}</div>
+                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>stop hit · {pick.stopPct||"-20%"} loss</div>
+                        <div style={{ marginBottom:6 }}>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#ff2d55", fontWeight:700 }}>{Math.round(probBear*100)}%</span></div>
+                          <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
+                            <div style={{ height:"100%", width:Math.round(probBear*100)+"%", background:"#ff2d55", borderRadius:2 }}/>
+                          </div>
+                        </div>
+                        <div style={{ borderTop:"1px solid rgba(255,45,85,0.15)", paddingTop:6 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:11, color:"#ff2d55", fontWeight:700 }}>${bear_pnl.toLocaleString()}</div>
+                          <div style={{ fontSize:9, color:"#4a6d8c" }}>close immediately at stop</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── CRITICAL DECISION POINTS ── */}
+                    <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 12px", marginBottom:8 }}>
+                      <div style={{ fontFamily:"monospace", fontSize:9, color:"#ffb800", marginBottom:6, letterSpacing:1 }}>CRITICAL DECISION POINTS</div>
+                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
+                        <div style={{ borderLeft:"2px solid #39ff14", paddingLeft:8 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:10, color:"#39ff14", marginBottom:3 }}>IF SCENARIO A</div>
+                          <div style={{ fontSize:10, color:"#c8dff0" }}>Take 50% profit · Hold rest for Scenario B target · Trail stop up</div>
+                        </div>
+                        <div style={{ borderLeft:"2px solid #ffb800", paddingLeft:8 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:10, color:"#ffb800", marginBottom:3 }}>IF STALLING</div>
+                          <div style={{ fontSize:10, color:"#c8dff0" }}>Hold while above stop · Re-evaluate in {Math.round(daysLeft/2)} days · Watch IV</div>
+                        </div>
+                        <div style={{ borderLeft:"2px solid #ff2d55", paddingLeft:8 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:10, color:"#ff2d55", marginBottom:3 }}>IF SCENARIO C</div>
+                          <div style={{ fontSize:10, color:"#c8dff0" }}>Close immediately · Do not average down · Capital preservation</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── WHAT HAS TO HAPPEN ── */}
+                    <div style={{ display:"flex", gap:8, alignItems:"flex-start" }}>
+                      <div style={{ flex:1, background:"rgba(0,0,0,0.2)", borderRadius:4, padding:"8px 10px" }}>
+                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#9d7fff", marginBottom:4 }}>WHAT HAS TO HAPPEN</div>
+                        <div style={{ fontSize:10, color:"#8aabb8", lineHeight:1.7 }}>{pick.catalyst?.slice(0,200)||"—"}</div>
+                      </div>
+                      <div style={{ width:120, flexShrink:0 }}>
+                        <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px", marginBottom:6 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:2 }}>TARGET</div>
+                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#39ff14" }}>{pick.targetReturn||"—"}</div>
+                        </div>
+                        <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px" }}>
+                          <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:2 }}>STOP LOSS</div>
+                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#ff2d55" }}>{pick.stopPct||"—"}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop:6, fontSize:9, color:"#2a3d57", textAlign:"center" }}>
+                      ⚠ Educational only · Probabilities are Black-Scholes estimates · Verify on Questrade · Options carry substantial risk of loss
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* No picks yet prompt */}
+            </div>
+          ) : (
+            <div style={{ padding: "10px 12px", borderBottom: "1px solid rgba(26,45,71,0.6)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
+                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#2a3d57", letterSpacing: 3 }}>◎ TOP 3 NEXUS PICKS</div>
+                <div style={{ fontSize: 9, color: "#2a3d57", marginTop: 2 }}>Run pipeline to generate high-conviction picks from all 20 signal layers</div>
+              </div>
+              <button onClick={runFullPipeline} disabled={pipelineRunning} style={{ background: pipelineRunning ? "#1a2d47" : "linear-gradient(135deg,#7b0000,#ff2d55)", color: pipelineRunning ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "7px 18px", fontSize: 10, fontWeight: 700, cursor: pipelineRunning ? "not-allowed" : "pointer", fontFamily: "monospace", letterSpacing: 2 }}>
+                {pipelineRunning ? "GENERATING..." : "◎ RUN PIPELINE"}
+              </button>
+            </div>
+          )}
+              {/* ══ INTEL ANALYSIS ══ */}<div>
                 {/* Header */}
                 <div style={{ background: "linear-gradient(135deg,rgba(178,79,255,0.15),rgba(178,79,255,0.04))", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
