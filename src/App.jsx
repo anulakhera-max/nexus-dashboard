@@ -2065,7 +2065,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
             
             {tab === "intel" && (
-              <div>
+              <div style={{ flex:1, overflowY:"auto", minHeight:0, paddingBottom:40 }}>
                 {/* Header */}
                 <div style={{ background: "linear-gradient(135deg,rgba(178,79,255,0.15),rgba(178,79,255,0.04))", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
@@ -2793,7 +2793,7 @@ export default function NexusDashboard({ user, onLogout }) {
         {/* RIGHT PANEL */}
             {/* TRADES TAB */}
             {tab === "trades" && (
-              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+              <div style={{ flex:1, overflowY: "auto", minHeight:0, paddingBottom: 40 }}>
                 <div style={{ background: "linear-gradient(135deg,rgba(255,45,85,0.1),rgba(255,45,85,0.03))", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
                     <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55", letterSpacing: 3, marginBottom: 4 }}>◎ TOP 3 TRADE EXECUTION</div>
@@ -2989,7 +2989,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
             {/* SIGNALS TAB — All intelligence layers in one view */}
             {tab==="oracle"&&(<div style={{flex:1,overflowY:"auto",padding:20,minHeight:0}}><div style={{fontFamily:"monospace",fontSize:10,letterSpacing:4,color:"#ffd700",marginBottom:20,borderBottom:"1px solid #1a2d47",paddingBottom:10}}>🔮 ORACLE — AI PRICE PREDICTION ENGINE</div><div style={{display:"flex",gap:10,marginBottom:16}}><input value={oracleQuery} onChange={e=>setOracleQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runOracle()} placeholder="e.g. NVDA May 30 2026 · AAPL earnings · BTC year end" style={{flex:1,background:"#0d1829",border:"1px solid #ffd70055",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><input value={oracleDate} onChange={e=>setOracleDate(e.target.value)} placeholder="Target date (opt)" style={{width:170,background:"#0d1829",border:"1px solid #1a2d47",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><button onClick={runOracle} disabled={oracleLoading||!oracleQuery.trim()} style={{background:oracleLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleLoading?"#4a6d8c":"#030609",border:"none",borderRadius:3,padding:"9px 20px",fontSize:12,fontWeight:700,letterSpacing:2,cursor:oracleLoading?"not-allowed":"pointer",fontFamily:"monospace",whiteSpace:"nowrap"}}>{oracleLoading?"COMPUTING...":"🔮 PREDICT"}</button></div>{oracleError&&<div style={{color:"#ff2d55",fontFamily:"monospace",fontSize:11,marginBottom:12}}>❌ {oracleError}</div>}{oracleResult&&<div style={{background:"#080f1a",border:"1px solid #ffd70033",borderLeft:"4px solid #ffd700",borderRadius:4,padding:16}}><div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:3,marginBottom:10}}>ORACLE PREDICTION — {oracleQuery.toUpperCase()}</div><div style={{fontSize:12,lineHeight:1.8,color:"#c8dff0",whiteSpace:"pre-wrap"}}>{typeof oracleResult.prediction==="string"?oracleResult.prediction:JSON.stringify(oracleResult,null,2)}</div></div>}{!oracleResult&&!oracleLoading&&<div style={{textAlign:"center",padding:60,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>Enter a ticker + optional target date<br/>Examples: "AAPL Jun 30 2026" · "NVDA next earnings" · "Bitcoin year end"</div>}</div>)} {tab === "signals" && (
-              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+              <div style={{ flex:1, overflowY: "auto", minHeight:0, paddingBottom: 40 }}>
 
                 {/* Header */}
                 <div style={{ background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: "12px 16px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
@@ -4335,7 +4335,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
             {/* POSITIONS TAB — My Open Questrade Options */}
             {tab === "positions" && (
-              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+              <div style={{ flex:1, minHeight:0, overflowY: "auto", paddingBottom: 40 }}>
                 {/* Header */}
                 <div style={{ background: "linear-gradient(135deg,rgba(0,212,255,0.06),rgba(57,255,20,0.03))", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -4583,7 +4583,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
             {/* RESEARCH TAB — Earnings + Ripple + Pattern + Paper */}
             {tab === "research" && (
-              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+              <div style={{ flex:1, minHeight:0, overflowY: "auto", paddingBottom: 40 }}>
 
                 {/* BACKTESTER — HYPER ACCELERATE TO 90% */}
                 <div style={{ background: "linear-gradient(135deg,rgba(255,45,85,0.08),rgba(157,127,255,0.04))", border: "2px solid rgba(255,45,85,0.4)", borderRadius: 6, padding: 14, marginBottom: 12 }}>
@@ -6343,7 +6343,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
             {/* WATCHLIST TAB */}
             {tab === "watch" && (
-              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+              <div style={{ flex:1, minHeight:0, overflowY: "auto", paddingBottom: 40 }}>
                 {/* Header */}
                 <div className="border-breathe" style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 6, padding: "16px 18px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
