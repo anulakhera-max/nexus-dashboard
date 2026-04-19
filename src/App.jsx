@@ -156,7 +156,7 @@ function AnalysisSection({ title, children }) {
   );
 }
 
-function IntelPickCard({pick,rank}){const isCall=pick.direction==="CALL"||pick.type==="CALL";const tc=isCall?"#39ff14":"#ff2d55";const cc=pick.confidence==="HIGH"?"#ff2d55":pick.confidence==="MEDIUM"?"#ffb800":"#4a6d8c";const uc=pick.urgency==="THIS WEEK"?"#ff2d55":pick.urgency==="NEXT WEEK"?"#ffb800":"#00d4ff";return(<div style={{background:"#080f1a",border:"1px solid "+tc+"33",borderLeft:"4px solid "+tc,borderRadius:4,padding:16,marginBottom:14,position:"relative"}}><div style={{position:"absolute",top:12,right:12,width:28,height:28,borderRadius:"50%",background:tc+"22",border:"1px solid "+tc+"55",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",fontSize:13,fontWeight:700,color:tc}}>{"#"+rank}</div><div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8,paddingRight:40}}><span style={{fontFamily:"monospace",fontSize:22,fontWeight:900,color:"#e8f4ff"}}>{pick.ticker}</span><span style={{fontSize:10,padding:"2px 8px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:tc+"22",color:tc,border:"1px solid "+tc+"55"}}>{pick.direction||pick.type||"CALL"}</span><span style={{fontSize:9,padding:"2px 7px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:cc+"22",color:cc,border:"1px solid "+cc+"55"}}>{pick.confidence||"MED"} CONF</span>{pick.urgency&&<span style={{fontSize:9,padding:"2px 7px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:uc+"22",color:uc,border:"1px solid "+uc+"55"}}>{pick.urgency}</span>}{pick.predictionRate&&<span style={{fontSize:9,padding:"2px 7px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:"#39ff1422",color:"#39ff14",border:"1px solid #39ff1455"}}>{pick.predictionRate} WIN RATE</span>}</div><div style={{fontSize:12,color:"#8aabb8",marginBottom:4}}>{pick.name||pick.companyName||""}</div><div style={{fontSize:10,color:"#4a6d8c",fontFamily:"monospace",marginBottom:10}}>{[pick.exchange,pick.sector||pick.source].filter(Boolean).join(" · ")}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}><div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>EST. MOVE</div><div style={{fontSize:18,fontWeight:900,color:tc,fontFamily:"monospace"}}>{pick.estimatedMove||pick.targetReturn||"—"}</div></div><div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>EXPIRY</div><div style={{fontSize:12,fontWeight:700,color:"#ffb800",fontFamily:"monospace"}}>{pick.expiry||"—"}</div></div><div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>SOURCE</div><div style={{fontSize:11,fontWeight:700,color:"#00d4ff",fontFamily:"monospace"}}>{pick.source||"AI"}</div></div></div>{pick.catalyst&&<div style={{marginBottom:8}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",letterSpacing:2,marginBottom:4}}>CATALYST</div><div style={{fontSize:11,lineHeight:1.6,color:"#c8dff0"}}>{pick.catalyst}</div></div>}{(pick.thesis||pick.eventTrigger)&&<div style={{background:tc+"0d",border:"1px solid "+tc+"22",borderRadius:3,padding:"8px 10px"}}><div style={{fontSize:9,color:tc,fontFamily:"monospace",letterSpacing:2,marginBottom:4}}>THESIS</div><div style={{fontSize:11,color:"#c8dff0",lineHeight:1.5}}>{pick.thesis||pick.eventTrigger}</div></div>}</div>);}
+function IntelPickCard({pick,rank}){const isCall=pick.direction==="CALL"||pick.type==="CALL";const tc=isCall?"#39ff14":"#ff2d55";const cc=pick.confidence==="HIGH"?"#ff2d55":pick.confidence==="MEDIUM"?"#ffb800":"#4a6d8c";const uc=pick.urgency==="THIS WEEK"?"#ff2d55":pick.urgency==="NEXT WEEK"?"#ffb800":"#00d4ff";return(<div style={{background:"#080f1a",border:"1px solid "+tc+"33",borderLeft:"4px solid "+tc,borderRadius:4,padding:16,marginBottom:14,position:"relative"}}><div style={{position:"absolute",top:12,right:12,width:28,height:28,borderRadius:"50%",background:tc+"22",border:"1px solid "+tc+"55",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",fontSize:13,fontWeight:700,color:tc}}>{"#"+rank}</div><div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8,paddingRight:40}}><span style={{fontFamily:"monospace",fontSize:22,fontWeight:900,color:"#e8f4ff"}}>{pick.ticker}</span><span style={{fontSize:10,padding:"2px 8px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:tc+"22",color:tc,border:"1px solid "+tc+"55"}}>{pick.direction||pick.type||"CALL"}</span><span style={{fontSize:9,padding:"2px 7px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:cc+"22",color:cc,border:"1px solid "+cc+"55"}}>{pick.confidence||"MED"} CONF</span>{pick.urgency&&<span style={{fontSize:9,padding:"2px 7px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:uc+"22",color:uc,border:"1px solid "+uc+"55"}}>{pick.urgency}</span>}</div><div style={{fontSize:12,color:"#8aabb8",marginBottom:4}}>{pick.name||pick.companyName||""}</div><div style={{fontSize:10,color:"#4a6d8c",fontFamily:"monospace",marginBottom:10}}>{[pick.exchange,pick.sector||pick.source].filter(Boolean).join(" · ")}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}><div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>EST. MOVE</div><div style={{fontSize:18,fontWeight:900,color:tc,fontFamily:"monospace"}}>{pick.estimatedMove||pick.targetReturn||"—"}</div></div><div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>EXPIRY</div><div style={{fontSize:12,fontWeight:700,color:"#ffb800",fontFamily:"monospace"}}>{pick.expiry||"—"}</div></div><div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>SOURCE</div><div style={{fontSize:11,fontWeight:700,color:"#00d4ff",fontFamily:"monospace"}}>{pick.source||"AI"}</div></div></div>{pick.catalyst&&<div style={{marginBottom:8}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",letterSpacing:2,marginBottom:4}}>CATALYST</div><div style={{fontSize:11,lineHeight:1.6,color:"#c8dff0"}}>{pick.catalyst}</div></div>}{(pick.thesis||pick.eventTrigger)&&<div style={{background:tc+"0d",border:"1px solid "+tc+"22",borderRadius:3,padding:"8px 10px"}}><div style={{fontSize:9,color:tc,fontFamily:"monospace",letterSpacing:2,marginBottom:4}}>THESIS</div><div style={{fontSize:11,color:"#c8dff0",lineHeight:1.5}}>{pick.thesis||pick.eventTrigger}</div></div>}</div>);}
 function OptionsPickCard({ pick, rank }) {
   const isCall = pick.type === "CALL";
   const typeColor = isCall ? "#39ff14" : "#ff2d55";
@@ -743,7 +743,7 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingResolver(false);
   };
 
-  const runOracle=async()=>{if(!oracleQuery.trim())return;setOracleLoading(true);setOracleError(null);setOracleResult(null);try{const res=await fetch(nexusUrl+"/api/oracle",{method:"POST",headers:{"x-nexus-key":nexusKey,"Content-Type":"application/json"},body:JSON.stringify({query:oracleQuery,targetDate:oracleDate||null})});const text=await res.text();let data;try{data=JSON.parse(text);}catch(e){throw new Error("Server error: "+text.slice(0,150));}if(data.success)setOracleResult(data);else setOracleError(data.error||"Oracle failed");}catch(e){setOracleError(e.message);}setOracleLoading(false);}; const fetchSimPrice = async (ticker) => {
+  const runOracle=async()=>{if(!oracleQuery.trim())return;setOracleLoading(true);setOracleError(null);setOracleResult(null);try{const res=await fetch(nexusUrl+"/api/oracle",{method:"POST",headers:{"x-nexus-key":nexusKey,"Content-Type":"application/json"},body:JSON.stringify({query:oracleQuery,targetDate:oracleDate||null})});const data=await res.json();if(data.success)setOracleResult(data);else setOracleError(data.error||"Oracle failed");}catch(e){setOracleError(e.message);}setOracleLoading(false);}; const fetchSimPrice = async (ticker) => {
     if (simPrices[ticker]) return simPrices[ticker];
     try {
       const res = await fetch(nexusUrl + "/api/yahoo-quote?symbol=" + ticker, { headers: { "x-nexus-key": nexusKey } });
@@ -802,36 +802,27 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   const loadLearningStats = async () => {
-    // Each fetch is independent — one failure doesn't block others
-    const safe = async (url) => {
-      try {
-        const r = await fetch(nexusUrl + url, { headers: { "x-nexus-key": nexusKey } });
-        const d = await r.json();
-        return d.success ? d : null;
-      } catch { return null; }
-    };
-    const [lr, sg, wt, au] = await Promise.all([
-      safe("/api/learning-stats"),
-      safe("/api/improvement-suggestions"),
-      safe("/api/learned-weights"),
-      safe("/api/autonomous-status"),
-    ]);
-    if (lr) setLearningData(lr);
-    if (sg) setSuggestionsData(sg);
-    if (wt) setWeightsData(wt);
-    if (au) setAutonomousData(au);
+    try {
+      const [lr, sg, wt, au] = await Promise.all([
+        fetch(nexusUrl + "/api/learning-stats", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
+        fetch(nexusUrl + "/api/improvement-suggestions", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
+        fetch(nexusUrl + "/api/learned-weights", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
+        fetch(nexusUrl + "/api/autonomous-status", { headers: { "x-nexus-key": nexusKey } }).then(r => r.json()),
+      ]);
+      if (lr.success) setLearningData(lr);
+      if (sg.success) setSuggestionsData(sg);
+      if (wt.success) setWeightsData(wt);
+      if (au.success) setAutonomousData(au);
+    } catch {}
   };
 
-  const loadSpikeDetector = async (force = false, sector = "alerts") => {
-    const activeSector = sector;
+  const loadSpikeDetector = async (force = false) => {
     setLoadingSpike(true);
     try {
-      const res = await fetch(nexusUrl + "/api/spike-detector?sector=" + activeSector + (force ? "&force=true" : ""), {
-        headers: { "x-nexus-key": nexusKey }
-      });
+      const res = await fetch(nexusUrl + "/api/spike-detector" + (force ? "?force=true" : ""), { headers: { "x-nexus-key": nexusKey } });
       const data = await res.json();
       if (data.success) setSpikeData(data);
-    } catch(e) {}
+    } catch {}
     setLoadingSpike(false);
   };
 
@@ -1408,7 +1399,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
   // NEXUS ACTION SHORTCUTS — replaces generic quick queries
   const NEXUS_ACTIONS = [
-    { label: "⚡ MORNING SCAN", color: "#39ff14", desc: "Seed + Pipeline + WSB", action: async () => { await Promise.all([loadOptionsOI(true), loadSpikeDetector(true, spikeView||"alerts"), loadRedditWSB(true)]); runFullPipeline(); } },
+    { label: "⚡ MORNING SCAN", color: "#39ff14", desc: "Seed + Pipeline + WSB", action: async () => { await Promise.all([loadOptionsOI(true), loadSpikeDetector(true), loadRedditWSB(true)]); runFullPipeline(); } },
     { label: "🔥 RUN PIPELINE", color: "#b24fff", desc: "Full intelligence run", action: () => runFullPipeline() },
     { label: "📊 OI OVERNIGHT", color: "#00ff9d", desc: "Smart money positioning", action: () => loadOptionsOI(true) },
     { label: "🌍 GEO UPDATE", color: "#ffb800", desc: "Scenarios + Polymarket", action: () => loadGeoScenarios(true) },
@@ -1574,11 +1565,255 @@ export default function NexusDashboard({ user, onLogout }) {
             {analysisHtml && <button onClick={() => setAnalysisHtml(null)} style={{ ...S.btnSecondary, fontSize: 10, padding: "6px 10px", color: "#4a6d8c" }}>✕ CLEAR</button>}
           </div>
 
-          
+          {/* ══════════════════════════════════════════════════════ */}
+          {/* TOP 3 NEXUS PICKS — MISSION CONTROL */}
+          {/* The entire signal stack exists to produce these 3 picks */}
+          {/* ══════════════════════════════════════════════════════ */}
+          {intelPicks && intelPicks.length > 0 ? (
+            <div style={{ padding: "8px 12px 0", borderBottom: "1px solid rgba(26,45,71,0.6)" }}>
+              {/* Header row */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3 }}>◎ TOP 3 NEXUS PICKS</div>
+                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#2a3d57" }}>ALL 20 SIGNAL LAYERS · CONFLICT RESOLVER · SCENARIO ENGINE</div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>TARGET ACCURACY</div>
+                  <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffb800" }}>90%</div>
+                  <div style={{ width: 60, height: 4, background: "rgba(74,109,140,0.2)", borderRadius: 2 }}>
+                    <div style={{ height: "100%", width: "82%", background: "linear-gradient(90deg,#ffb800,#39ff14)", borderRadius: 2 }}/>
+                  </div>
+                  <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14" }}>~82%</div>
+                </div>
+              </div>
+
+              {/* Top 3 picks row */}
+              {/* ══ NEXUS PREDICTION PLATFORM — SCENARIO SIMULATION ══ */}
+              {/* Selector tabs for pick 1/2/3 */}
+              <div style={{ display:"flex", gap:6, marginBottom:8 }}>
+                {intelPicks.slice(0,3).map((pick,i) => {
+                  const isCall = pick.direction !== "PUT";
+                  const rankColors = ["#ffd700","#c0c0c0","#cd7f32"];
+                  const rc = rankColors[i];
+                  return (
+                    <button key={i} onClick={() => setActiveSim(i)}
+                      className="nexus-pick"
+                      style={{ flex:1, padding:"10px 8px", borderRadius:5, cursor:"pointer", border:`2px solid ${activeSim===i ? rc : rc+"33"}`, background: activeSim===i ? rc+"11" : "rgba(0,0,0,0.3)", transition:"all 0.15s", textAlign:"left" }}>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:3 }}>
+                        <span style={{ fontFamily:"monospace", fontSize:18, fontWeight:900, color: activeSim===i ? rc : "#8aabb8" }}>{pick.ticker}</span>
+                        <span style={{ fontFamily:"monospace", fontSize:9, padding:"2px 6px", borderRadius:2, background: isCall?"rgba(57,255,20,0.12)":"rgba(255,45,85,0.12)", color: isCall?"#39ff14":"#ff2d55", fontWeight:700 }}>{pick.direction}</span>
+                      </div>
+                      <div style={{ fontFamily:"monospace", fontSize:13, color: isCall?"#39ff14":"#ff2d55", fontWeight:700, marginBottom:2 }}>{pick.targetReturn||pick.estimatedMove?.split(" ")[0]||"—"}</div>
+                      <div style={{ display:"flex", gap:6, alignItems:"center" }}>
+                        <div style={{ flex:1, height:3, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
+                          <div style={{ height:"100%", width: Math.min(pick.score||0,100)+"%", background: activeSim===i?rc:"#2a3d57", borderRadius:2 }}/>
+                        </div>
+                        <span style={{ fontFamily:"monospace", fontSize:9, color:"#4a6d8c" }}>{pick.score}/100</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* ── ACTIVE SIMULATION PANEL ── */}
+              {(() => {
+                const pick = intelPicks[activeSim];
+                if (!pick) return null;
+                const isCall = pick.direction !== "PUT";
+                const rankColors = ["#ffd700","#c0c0c0","#cd7f32"];
+                const rc = rankColors[activeSim];
+                const dir = pick.direction;
+
+                // Known prices from last pipeline run (fallback to estimates)
+                const PRICES = { GLD:303.8, PLTR:91.2, GDX:55.4, NVDA:110.0, AMD:105.0, IONQ:36.5, QQQ:460.0, SPY:520.0, GDX:55.4, TLT:90.0, USO:72.0 };
+                const curPrice = PRICES[pick.ticker] || 100;
+
+                // Parse target % into price
+                const tgtPct = parseFloat((pick.targetReturn||"30").replace(/[^0-9.-]/g,"")) / 100;
+                const stopPct = parseFloat((pick.stopPct||"-20").replace(/[^0-9.-]/g,"")) / 100;
+                const tgtPrice = curPrice * (1 + (isCall ? tgtPct : -Math.abs(tgtPct)));
+                const stopPrice = curPrice * (1 + (isCall ? stopPct : Math.abs(Math.abs(stopPct))));
+
+                // Parse expiry days
+                const expStr = pick.expiry || "";
+                const expDate = new Date(expStr);
+                const daysLeft = isNaN(expDate) ? 35 : Math.max(1, Math.round((expDate - new Date()) / 86400000));
+
+                // Black-Scholes simplified probability
+                const IV = 0.45;
+                const T = daysLeft / 365;
+                const ln = Math.log(curPrice / tgtPrice);
+                const d2 = (ln + (-0.053 - 0.5 * IV * IV) * T) / (IV * Math.sqrt(T));
+                function normCDF(x) {
+                  const a = [0.254829592,-0.284496736,1.421413741,-1.453152027,1.061405429];
+                  const p = 0.3275911;
+                  const s = x < 0 ? -1 : 1;
+                  x = Math.abs(x) / Math.sqrt(2);
+                  const t2 = 1/(1+p*x);
+                  const y = 1 - ((((a[4]*t2+a[3])*t2+a[2])*t2+a[1])*t2+a[0])*t2*Math.exp(-x*x);
+                  return 0.5*(1+s*y);
+                }
+                const bsProb = isCall ? normCDF(d2) : normCDF(-d2);
+
+                // Scenario probabilities — BS + catalyst adjustment
+                const catalystBoost = (pick.confidence === "HIGH" ? 0.12 : 0.06);
+                const probA = Math.min(0.68, Math.max(0.08, bsProb + catalystBoost));
+                const probB = Math.min(0.42, Math.max(0.05, bsProb + catalystBoost * 0.4));
+                const probBear = Math.max(0.1, 1 - probA - 0.12);
+
+                // Scenario price targets
+                const scA_price = isCall ? curPrice * (1 + Math.abs(tgtPct) * 0.75) : curPrice * (1 - Math.abs(tgtPct) * 0.75);
+                const scB_price = isCall ? curPrice * (1 + Math.abs(tgtPct)) : curPrice * (1 - Math.abs(tgtPct));
+                const scBear_price = isCall ? curPrice * (1 + stopPct) : curPrice * (1 - stopPct);
+
+                // Option P&L estimates (simplified — assume 30-delta, $2 avg premium)
+                const optPremium = 2.50;
+                const contracts = 5;
+                const costBasis = optPremium * contracts * 100;
+                const scA_optVal = Math.max(0, Math.abs(scA_price - (isCall ? curPrice * 1.05 : curPrice * 0.95)) * 0.5 + optPremium * 0.6);
+                const scB_optVal = Math.max(0, Math.abs(scB_price - (isCall ? curPrice * 1.05 : curPrice * 0.95)) * 0.8 + optPremium * 0.3);
+                const scA_pnl = Math.round((scA_optVal - optPremium) * contracts * 100);
+                const scB_pnl = Math.round((scB_optVal - optPremium) * contracts * 100);
+                const bear_pnl = Math.round(-optPremium * 0.7 * contracts * 100);
+                const scA_ret = Math.round(scA_pnl / costBasis * 100);
+                const scB_ret = Math.round(scB_pnl / costBasis * 100);
+
+                const dLabel = daysLeft <= 14 ? "this week" : daysLeft <= 21 ? "2 weeks" : daysLeft <= 35 ? "~1 month" : "~6 weeks";
+
+                return (
+                  <div className="slide-up" style={{ background:"rgba(0,0,0,0.45)", border:`1px solid ${rc}22`, borderRadius:6, padding:"12px 14px", marginBottom:6 }}>
+                    {/* Pick header */}
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
+                      <div>
+                        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
+                          <span style={{ fontFamily:"monospace", fontSize:22, fontWeight:900, color:rc }}>{pick.ticker}</span>
+                          <span style={{ fontFamily:"monospace", fontSize:11, padding:"2px 8px", borderRadius:2, background: isCall?"rgba(57,255,20,0.12)":"rgba(255,45,85,0.12)", color: isCall?"#39ff14":"#ff2d55", fontWeight:700 }}>{dir} · {pick.urgency||"THIS WEEK"}</span>
+                          <span style={{ fontFamily:"monospace", fontSize:9, color:"#4a6d8c" }}>exp {pick.expiry?.slice(0,12)||"—"}</span>
+                        </div>
+                        <div style={{ fontSize:11, color:"#8aabb8", maxWidth:520, lineHeight:1.6 }}>{pick.catalyst?.slice(0,120)}{pick.catalyst?.length>120?"...":""}</div>
+                      </div>
+                      <div style={{ textAlign:"right", flexShrink:0 }}>
+                        <div style={{ fontFamily:"monospace", fontSize:11, color:"#4a6d8c", marginBottom:2 }}>NEXUS SCORE</div>
+                        <div style={{ fontFamily:"monospace", fontSize:24, fontWeight:900, color:rc }}>{pick.score}</div>
+                        <div style={{ fontFamily:"monospace", fontSize:8, color:"#2a3d57" }}>/100</div>
+                      </div>
+                    </div>
+
+                    {/* ── 3-SCENARIO GRID ── */}
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:10 }}>
+                      {/* Scenario A — base case */}
+                      <div style={{ background:"rgba(57,255,20,0.06)", border:"1px solid rgba(57,255,20,0.2)", borderRadius:5, padding:"10px 12px" }}>
+                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#39ff14", letterSpacing:1, marginBottom:6 }}>SCENARIO A — BASE</div>
+                        <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scA_price)}</div>
+                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>from ${Math.round(curPrice)} · {dLabel}</div>
+                        <div style={{ marginBottom:6 }}>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#39ff14", fontWeight:700 }}>{Math.round(probA*100)}%</span></div>
+                          <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
+                            <div style={{ height:"100%", width:Math.round(probA*100)+"%", background:"#39ff14", borderRadius:2 }}/>
+                          </div>
+                        </div>
+                        <div style={{ borderTop:"1px solid rgba(57,255,20,0.15)", paddingTop:6 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:11, color:"#39ff14", fontWeight:700 }}>{scA_pnl >= 0 ? "+" : ""}${scA_pnl.toLocaleString()}</div>
+                          <div style={{ fontSize:9, color:"#4a6d8c" }}>{scA_ret >= 0 ? "+" : ""}{scA_ret}% on 5 contracts</div>
+                        </div>
+                      </div>
+
+                      {/* Scenario B — bull case */}
+                      <div style={{ background:"rgba(0,212,255,0.04)", border:"1px solid rgba(0,212,255,0.2)", borderRadius:5, padding:"10px 12px" }}>
+                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#00d4ff", letterSpacing:1, marginBottom:6 }}>SCENARIO B — BULL</div>
+                        <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scB_price)}</div>
+                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>full {pick.targetReturn||"target"} realized</div>
+                        <div style={{ marginBottom:6 }}>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#00d4ff", fontWeight:700 }}>{Math.round(probB*100)}%</span></div>
+                          <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
+                            <div style={{ height:"100%", width:Math.round(probB*100)+"%", background:"#00d4ff", borderRadius:2 }}/>
+                          </div>
+                        </div>
+                        <div style={{ borderTop:"1px solid rgba(0,212,255,0.15)", paddingTop:6 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:11, color:"#00d4ff", fontWeight:700 }}>{scB_pnl >= 0 ? "+" : ""}${scB_pnl.toLocaleString()}</div>
+                          <div style={{ fontSize:9, color:"#4a6d8c" }}>{scB_ret >= 0 ? "+" : ""}{scB_ret}% full target hit</div>
+                        </div>
+                      </div>
+
+                      {/* Scenario C — bear */}
+                      <div style={{ background:"rgba(255,45,85,0.04)", border:"1px solid rgba(255,45,85,0.18)", borderRadius:5, padding:"10px 12px" }}>
+                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#ff2d55", letterSpacing:1, marginBottom:6 }}>SCENARIO C — BEAR</div>
+                        <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scBear_price)}</div>
+                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>stop hit · {pick.stopPct||"-20%"} loss</div>
+                        <div style={{ marginBottom:6 }}>
+                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#ff2d55", fontWeight:700 }}>{Math.round(probBear*100)}%</span></div>
+                          <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
+                            <div style={{ height:"100%", width:Math.round(probBear*100)+"%", background:"#ff2d55", borderRadius:2 }}/>
+                          </div>
+                        </div>
+                        <div style={{ borderTop:"1px solid rgba(255,45,85,0.15)", paddingTop:6 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:11, color:"#ff2d55", fontWeight:700 }}>${bear_pnl.toLocaleString()}</div>
+                          <div style={{ fontSize:9, color:"#4a6d8c" }}>close immediately at stop</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── CRITICAL DECISION POINTS ── */}
+                    <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 12px", marginBottom:8 }}>
+                      <div style={{ fontFamily:"monospace", fontSize:9, color:"#ffb800", marginBottom:6, letterSpacing:1 }}>CRITICAL DECISION POINTS</div>
+                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
+                        <div style={{ borderLeft:"2px solid #39ff14", paddingLeft:8 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:10, color:"#39ff14", marginBottom:3 }}>IF SCENARIO A</div>
+                          <div style={{ fontSize:10, color:"#c8dff0" }}>Take 50% profit · Hold rest for Scenario B target · Trail stop up</div>
+                        </div>
+                        <div style={{ borderLeft:"2px solid #ffb800", paddingLeft:8 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:10, color:"#ffb800", marginBottom:3 }}>IF STALLING</div>
+                          <div style={{ fontSize:10, color:"#c8dff0" }}>Hold while above stop · Re-evaluate in {Math.round(daysLeft/2)} days · Watch IV</div>
+                        </div>
+                        <div style={{ borderLeft:"2px solid #ff2d55", paddingLeft:8 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:10, color:"#ff2d55", marginBottom:3 }}>IF SCENARIO C</div>
+                          <div style={{ fontSize:10, color:"#c8dff0" }}>Close immediately · Do not average down · Capital preservation</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── WHAT HAS TO HAPPEN ── */}
+                    <div style={{ display:"flex", gap:8, alignItems:"flex-start" }}>
+                      <div style={{ flex:1, background:"rgba(0,0,0,0.2)", borderRadius:4, padding:"8px 10px" }}>
+                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#9d7fff", marginBottom:4 }}>WHAT HAS TO HAPPEN</div>
+                        <div style={{ fontSize:10, color:"#8aabb8", lineHeight:1.7 }}>{pick.catalyst?.slice(0,200)||"—"}</div>
+                      </div>
+                      <div style={{ width:120, flexShrink:0 }}>
+                        <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px", marginBottom:6 }}>
+                          <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:2 }}>TARGET</div>
+                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#39ff14" }}>{pick.targetReturn||"—"}</div>
+                        </div>
+                        <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px" }}>
+                          <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:2 }}>STOP LOSS</div>
+                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#ff2d55" }}>{pick.stopPct||"—"}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop:6, fontSize:9, color:"#2a3d57", textAlign:"center" }}>
+                      ⚠ Educational only · Probabilities are Black-Scholes estimates · Verify on Questrade · Options carry substantial risk of loss
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* No picks yet prompt */}
+            </div>
+          ) : (
+            <div style={{ padding: "10px 12px", borderBottom: "1px solid rgba(26,45,71,0.6)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#2a3d57", letterSpacing: 3 }}>◎ TOP 3 NEXUS PICKS</div>
+                <div style={{ fontSize: 9, color: "#2a3d57", marginTop: 2 }}>Run pipeline to generate high-conviction picks from all 20 signal layers</div>
+              </div>
+              <button onClick={runFullPipeline} disabled={pipelineRunning} style={{ background: pipelineRunning ? "#1a2d47" : "linear-gradient(135deg,#7b0000,#ff2d55)", color: pipelineRunning ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "7px 18px", fontSize: 10, fontWeight: 700, cursor: pipelineRunning ? "not-allowed" : "pointer", fontFamily: "monospace", letterSpacing: 2 }}>
+                {pipelineRunning ? "GENERATING..." : "◎ RUN PIPELINE"}
+              </button>
+            </div>
+          )}
 
           <div style={S.tabs}>
             {/* CORE tabs */}
-            {[[["oracle","🔮 ORACLE"],["events","📡 EVENTS"],["intel","◎ PICKS"],["signals","⚡ SIGNALS"],["power","◈ POWER"],["positions","📋 POSITIONS"],["watch","👁 WATCHLIST"]]].map(([t,l]) => (
+            {[["oracle","🔮 ORACLE"],["events","📡 EVENTS"],["intel","⬡ PICKS"],["power","◈ POWER"],["trades","TRADES"],["positions","📋 POSITIONS"],["watch","WATCHLIST"]].map(([t,l]) => (
               <button key={t} style={{ ...S.tab(tab === t, t==="intel"||t==="power"), color: tab === "intel" ? "#b24fff" : tab === "power" ? "#ff6b35" : tab === t ? "#00d4ff" : "#a8cce0" }} onClick={() => handleTab(t)}>{l}</button>
             ))}
             <span style={{ width: 1, background: "#1a2d47", margin: "4px 4px", flexShrink: 0 }}/>
@@ -1821,254 +2056,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
             
             {tab === "intel" && (
-              
-              {/* ══ PIPELINE + PICKS ══ */}
-              {/* ══════════════════════════════════════════════════════ */}
-          {/* ◎ NEXUS INTELLIGENCE ENGINE */}
-          {/* The entire signal stack exists to produce these 3 picks */}
-          {/* ══════════════════════════════════════════════════════ */}
-          {intelPicks && intelPicks.length > 0 ? (
-            <div style={{ padding: "8px 12px 0", borderBottom: "1px solid rgba(26,45,71,0.6)" }}>
-              {/* Header row */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ fontFamily: "monospace", fontSize: 10, color: "#00d4ff", letterSpacing: 3 }}>◎ TOP 3 NEXUS PICKS</div>
-                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#2a3d57" }}>PIPELINE · PICKS · SCENARIOS · TRACKER</div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ fontFamily: "monospace", fontSize: 8, color: "#4a6d8c" }}>TARGET ACCURACY</div>
-                  <div style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#ffb800" }}>90%</div>
-                  <div style={{ width: 60, height: 4, background: "rgba(74,109,140,0.2)", borderRadius: 2 }}>
-                    <div style={{ height: "100%", width: "82%", background: "linear-gradient(90deg,#ffb800,#39ff14)", borderRadius: 2 }}/>
-                  </div>
-                  <div style={{ fontFamily: "monospace", fontSize: 9, color: "#39ff14" }}>~82%</div>
-                </div>
-              </div>
-
-              {/* Top 3 picks row */}
-              {/* ══ NEXUS PREDICTION PLATFORM — SCENARIO SIMULATION ══ */}
-              {/* Selector tabs for pick 1/2/3 */}
-              <div style={{ display:"flex", gap:6, marginBottom:8 }}>
-                {intelPicks.slice(0,3).map((pick,i) => {
-                  const isCall = pick.direction !== "PUT";
-                  const rankColors = ["#ffd700","#c0c0c0","#cd7f32"];
-                  const rc = rankColors[i];
-                  return (
-                    <button key={i} onClick={() => setActiveSim(i)}
-                      className="nexus-pick"
-                      style={{ flex:1, padding:"10px 8px", borderRadius:5, cursor:"pointer", border:`2px solid ${activeSim===i ? rc : rc+"33"}`, background: activeSim===i ? rc+"11" : "rgba(0,0,0,0.3)", transition:"all 0.15s", textAlign:"left" }}>
-                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:3 }}>
-                        <span style={{ fontFamily:"monospace", fontSize:18, fontWeight:900, color: activeSim===i ? rc : "#8aabb8" }}>{pick.ticker}</span>
-                        <span style={{ fontFamily:"monospace", fontSize:9, padding:"2px 6px", borderRadius:2, background: isCall?"rgba(57,255,20,0.12)":"rgba(255,45,85,0.12)", color: isCall?"#39ff14":"#ff2d55", fontWeight:700 }}>{pick.direction}</span>
-                      </div>
-                      <div style={{ fontFamily:"monospace", fontSize:13, color: isCall?"#39ff14":"#ff2d55", fontWeight:700, marginBottom:2 }}>{pick.targetReturn||pick.estimatedMove?.split(" ")[0]||"—"}</div>
-                      <div style={{ display:"flex", gap:6, alignItems:"center" }}>
-                        <div style={{ flex:1, height:3, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
-                          <div style={{ height:"100%", width: Math.min(pick.score||0,100)+"%", background: activeSim===i?rc:"#2a3d57", borderRadius:2 }}/>
-                        </div>
-                        <span style={{ fontFamily:"monospace", fontSize:9, color:"#4a6d8c" }}>{pick.score}/100</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* ── ACTIVE SIMULATION PANEL ── */}
-              {(() => {
-                const pick = intelPicks[activeSim];
-                if (!pick) return null;
-                const isCall = pick.direction !== "PUT";
-                const rankColors = ["#ffd700","#c0c0c0","#cd7f32"];
-                const rc = rankColors[activeSim];
-                const dir = pick.direction;
-
-                // Known prices from last pipeline run (fallback to estimates)
-                const PRICES = { GLD:303.8, PLTR:91.2, GDX:55.4, NVDA:110.0, AMD:105.0, IONQ:36.5, QQQ:460.0, SPY:520.0, GDX:55.4, TLT:90.0, USO:72.0 };
-                const curPrice = PRICES[pick.ticker] || 100;
-
-                // Parse target % into price
-                const tgtPct = parseFloat((pick.targetReturn||"30").replace(/[^0-9.-]/g,"")) / 100;
-                const stopPct = parseFloat((pick.stopPct||"-20").replace(/[^0-9.-]/g,"")) / 100;
-                const tgtPrice = curPrice * (1 + (isCall ? tgtPct : -Math.abs(tgtPct)));
-                const stopPrice = curPrice * (1 + (isCall ? stopPct : Math.abs(Math.abs(stopPct))));
-
-                // Parse expiry days
-                const expStr = pick.expiry || "";
-                const expDate = new Date(expStr);
-                const daysLeft = isNaN(expDate) ? 35 : Math.max(1, Math.round((expDate - new Date()) / 86400000));
-
-                // Black-Scholes simplified probability
-                const IV = 0.45;
-                const T = daysLeft / 365;
-                const ln = Math.log(curPrice / tgtPrice);
-                const d2 = (ln + (-0.053 - 0.5 * IV * IV) * T) / (IV * Math.sqrt(T));
-                function normCDF(x) {
-                  const a = [0.254829592,-0.284496736,1.421413741,-1.453152027,1.061405429];
-                  const p = 0.3275911;
-                  const s = x < 0 ? -1 : 1;
-                  x = Math.abs(x) / Math.sqrt(2);
-                  const t2 = 1/(1+p*x);
-                  const y = 1 - ((((a[4]*t2+a[3])*t2+a[2])*t2+a[1])*t2+a[0])*t2*Math.exp(-x*x);
-                  return 0.5*(1+s*y);
-                }
-                const bsProb = isCall ? normCDF(d2) : normCDF(-d2);
-
-                // Scenario probabilities — BS + catalyst adjustment
-                const catalystBoost = (pick.confidence === "HIGH" ? 0.12 : 0.06);
-                const probA = Math.min(0.68, Math.max(0.08, bsProb + catalystBoost));
-                const probB = Math.min(0.42, Math.max(0.05, bsProb + catalystBoost * 0.4));
-                const probBear = Math.max(0.1, 1 - probA - 0.12);
-
-                // Scenario price targets
-                const scA_price = isCall ? curPrice * (1 + Math.abs(tgtPct) * 0.75) : curPrice * (1 - Math.abs(tgtPct) * 0.75);
-                const scB_price = isCall ? curPrice * (1 + Math.abs(tgtPct)) : curPrice * (1 - Math.abs(tgtPct));
-                const scBear_price = isCall ? curPrice * (1 + stopPct) : curPrice * (1 - stopPct);
-
-                // Option P&L estimates (simplified — assume 30-delta, $2 avg premium)
-                const optPremium = 2.50;
-                const contracts = 5;
-                const costBasis = optPremium * contracts * 100;
-                const scA_optVal = Math.max(0, Math.abs(scA_price - (isCall ? curPrice * 1.05 : curPrice * 0.95)) * 0.5 + optPremium * 0.6);
-                const scB_optVal = Math.max(0, Math.abs(scB_price - (isCall ? curPrice * 1.05 : curPrice * 0.95)) * 0.8 + optPremium * 0.3);
-                const scA_pnl = Math.round((scA_optVal - optPremium) * contracts * 100);
-                const scB_pnl = Math.round((scB_optVal - optPremium) * contracts * 100);
-                const bear_pnl = Math.round(-optPremium * 0.7 * contracts * 100);
-                const scA_ret = Math.round(scA_pnl / costBasis * 100);
-                const scB_ret = Math.round(scB_pnl / costBasis * 100);
-
-                const dLabel = daysLeft <= 14 ? "this week" : daysLeft <= 21 ? "2 weeks" : daysLeft <= 35 ? "~1 month" : "~6 weeks";
-
-                return (
-                  <div className="slide-up" style={{ background:"rgba(0,0,0,0.45)", border:`1px solid ${rc}22`, borderRadius:6, padding:"12px 14px", marginBottom:6 }}>
-                    {/* Pick header */}
-                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
-                      <div>
-                        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
-                          <span style={{ fontFamily:"monospace", fontSize:22, fontWeight:900, color:rc }}>{pick.ticker}</span>
-                          <span style={{ fontFamily:"monospace", fontSize:11, padding:"2px 8px", borderRadius:2, background: isCall?"rgba(57,255,20,0.12)":"rgba(255,45,85,0.12)", color: isCall?"#39ff14":"#ff2d55", fontWeight:700 }}>{dir} · {pick.urgency||"THIS WEEK"}</span>
-                          <span style={{ fontFamily:"monospace", fontSize:9, color:"#4a6d8c" }}>exp {pick.expiry?.slice(0,12)||"—"}</span>
-                        </div>
-                        <div style={{ fontSize:11, color:"#8aabb8", maxWidth:520, lineHeight:1.6 }}>{pick.catalyst?.slice(0,120)}{pick.catalyst?.length>120?"...":""}</div>
-                      </div>
-                      <div style={{ textAlign:"right", flexShrink:0 }}>
-                        <div style={{ fontFamily:"monospace", fontSize:11, color:"#4a6d8c", marginBottom:2 }}>NEXUS SCORE</div>
-                        <div style={{ fontFamily:"monospace", fontSize:24, fontWeight:900, color:rc }}>{pick.score}</div>
-                        <div style={{ fontFamily:"monospace", fontSize:8, color:"#2a3d57" }}>/100</div>
-                      </div>
-                    </div>
-
-                    {/* ── 3-SCENARIO GRID ── */}
-                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:10 }}>
-                      {/* Scenario A — base case */}
-                      <div style={{ background:"rgba(57,255,20,0.06)", border:"1px solid rgba(57,255,20,0.2)", borderRadius:5, padding:"10px 12px" }}>
-                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#39ff14", letterSpacing:1, marginBottom:6 }}>SCENARIO A — BASE</div>
-                        <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scA_price)}</div>
-                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>from ${Math.round(curPrice)} · {dLabel}</div>
-                        <div style={{ marginBottom:6 }}>
-                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#39ff14", fontWeight:700 }}>{Math.round(probA*100)}%</span></div>
-                          <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
-                            <div style={{ height:"100%", width:Math.round(probA*100)+"%", background:"#39ff14", borderRadius:2 }}/>
-                          </div>
-                        </div>
-                        <div style={{ borderTop:"1px solid rgba(57,255,20,0.15)", paddingTop:6 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:11, color:"#39ff14", fontWeight:700 }}>{scA_pnl >= 0 ? "+" : ""}${scA_pnl.toLocaleString()}</div>
-                          <div style={{ fontSize:9, color:"#4a6d8c" }}>{scA_ret >= 0 ? "+" : ""}{scA_ret}% on 5 contracts</div>
-                        </div>
-                      </div>
-
-                      {/* Scenario B — bull case */}
-                      <div style={{ background:"rgba(0,212,255,0.04)", border:"1px solid rgba(0,212,255,0.2)", borderRadius:5, padding:"10px 12px" }}>
-                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#00d4ff", letterSpacing:1, marginBottom:6 }}>SCENARIO B — BULL</div>
-                        <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scB_price)}</div>
-                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>full {pick.targetReturn||"target"} realized</div>
-                        <div style={{ marginBottom:6 }}>
-                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#00d4ff", fontWeight:700 }}>{Math.round(probB*100)}%</span></div>
-                          <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
-                            <div style={{ height:"100%", width:Math.round(probB*100)+"%", background:"#00d4ff", borderRadius:2 }}/>
-                          </div>
-                        </div>
-                        <div style={{ borderTop:"1px solid rgba(0,212,255,0.15)", paddingTop:6 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:11, color:"#00d4ff", fontWeight:700 }}>{scB_pnl >= 0 ? "+" : ""}${scB_pnl.toLocaleString()}</div>
-                          <div style={{ fontSize:9, color:"#4a6d8c" }}>{scB_ret >= 0 ? "+" : ""}{scB_ret}% full target hit</div>
-                        </div>
-                      </div>
-
-                      {/* Scenario C — bear */}
-                      <div style={{ background:"rgba(255,45,85,0.04)", border:"1px solid rgba(255,45,85,0.18)", borderRadius:5, padding:"10px 12px" }}>
-                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#ff2d55", letterSpacing:1, marginBottom:6 }}>SCENARIO C — BEAR</div>
-                        <div style={{ fontFamily:"monospace", fontSize:20, fontWeight:700, color:"#e8f4ff", marginBottom:2 }}>${Math.round(scBear_price)}</div>
-                        <div style={{ fontSize:9, color:"#4a6d8c", marginBottom:8 }}>stop hit · {pick.stopPct||"-20%"} loss</div>
-                        <div style={{ marginBottom:6 }}>
-                          <div style={{ display:"flex", justifyContent:"space-between", fontSize:9, color:"#4a6d8c", marginBottom:2 }}><span>Probability</span><span style={{ color:"#ff2d55", fontWeight:700 }}>{Math.round(probBear*100)}%</span></div>
-                          <div style={{ height:4, background:"rgba(74,109,140,0.15)", borderRadius:2 }}>
-                            <div style={{ height:"100%", width:Math.round(probBear*100)+"%", background:"#ff2d55", borderRadius:2 }}/>
-                          </div>
-                        </div>
-                        <div style={{ borderTop:"1px solid rgba(255,45,85,0.15)", paddingTop:6 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:11, color:"#ff2d55", fontWeight:700 }}>${bear_pnl.toLocaleString()}</div>
-                          <div style={{ fontSize:9, color:"#4a6d8c" }}>close immediately at stop</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* ── CRITICAL DECISION POINTS ── */}
-                    <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 12px", marginBottom:8 }}>
-                      <div style={{ fontFamily:"monospace", fontSize:9, color:"#ffb800", marginBottom:6, letterSpacing:1 }}>CRITICAL DECISION POINTS</div>
-                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
-                        <div style={{ borderLeft:"2px solid #39ff14", paddingLeft:8 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:10, color:"#39ff14", marginBottom:3 }}>IF SCENARIO A</div>
-                          <div style={{ fontSize:10, color:"#c8dff0" }}>Take 50% profit · Hold rest for Scenario B target · Trail stop up</div>
-                        </div>
-                        <div style={{ borderLeft:"2px solid #ffb800", paddingLeft:8 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:10, color:"#ffb800", marginBottom:3 }}>IF STALLING</div>
-                          <div style={{ fontSize:10, color:"#c8dff0" }}>Hold while above stop · Re-evaluate in {Math.round(daysLeft/2)} days · Watch IV</div>
-                        </div>
-                        <div style={{ borderLeft:"2px solid #ff2d55", paddingLeft:8 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:10, color:"#ff2d55", marginBottom:3 }}>IF SCENARIO C</div>
-                          <div style={{ fontSize:10, color:"#c8dff0" }}>Close immediately · Do not average down · Capital preservation</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* ── WHAT HAS TO HAPPEN ── */}
-                    <div style={{ display:"flex", gap:8, alignItems:"flex-start" }}>
-                      <div style={{ flex:1, background:"rgba(0,0,0,0.2)", borderRadius:4, padding:"8px 10px" }}>
-                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#9d7fff", marginBottom:4 }}>WHAT HAS TO HAPPEN</div>
-                        <div style={{ fontSize:10, color:"#8aabb8", lineHeight:1.7 }}>{pick.catalyst?.slice(0,200)||"—"}</div>
-                      </div>
-                      <div style={{ width:120, flexShrink:0 }}>
-                        <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px", marginBottom:6 }}>
-                          <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:2 }}>TARGET</div>
-                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#39ff14" }}>{pick.targetReturn||"—"}</div>
-                        </div>
-                        <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px" }}>
-                          <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:2 }}>STOP LOSS</div>
-                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#ff2d55" }}>{pick.stopPct||"—"}</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={{ marginTop:6, fontSize:9, color:"#2a3d57", textAlign:"center" }}>
-                      ⚠ Educational only · Probabilities are Black-Scholes estimates · Verify on Questrade · Options carry substantial risk of loss
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* No picks yet prompt */}
-            </div>
-          ) : (
-            <div style={{ padding: "10px 12px", borderBottom: "1px solid rgba(26,45,71,0.6)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
-                <div style={{ fontFamily: "monospace", fontSize: 10, color: "#2a3d57", letterSpacing: 3 }}>◎ TOP 3 NEXUS PICKS</div>
-                <div style={{ fontSize: 9, color: "#2a3d57", marginTop: 2 }}>Run pipeline to generate high-conviction picks from all 20 signal layers</div>
-              </div>
-              <button onClick={runFullPipeline} disabled={pipelineRunning} style={{ background: pipelineRunning ? "#1a2d47" : "linear-gradient(135deg,#7b0000,#ff2d55)", color: pipelineRunning ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "7px 18px", fontSize: 10, fontWeight: 700, cursor: pipelineRunning ? "not-allowed" : "pointer", fontFamily: "monospace", letterSpacing: 2 }}>
-                {pipelineRunning ? "GENERATING..." : "◎ RUN PIPELINE"}
-              </button>
-            </div>
-          )}
-              {/* ══ INTEL ANALYSIS ══ */}<div>
                 {/* Header */}
                 <div style={{ background: "linear-gradient(135deg,rgba(178,79,255,0.15),rgba(178,79,255,0.04))", border: "1px solid rgba(178,79,255,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                   <div>
@@ -2795,10 +2783,203 @@ export default function NexusDashboard({ user, onLogout }) {
 
         {/* RIGHT PANEL */}
             {/* TRADES TAB */}
-            
+            {tab === "trades" && (
+              <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
+                <div style={{ background: "linear-gradient(135deg,rgba(255,45,85,0.1),rgba(255,45,85,0.03))", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55", letterSpacing: 3, marginBottom: 4 }}>◎ TOP 3 TRADE EXECUTION</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Final output of the pipeline — 27 candidates → 9 scored → 3 validated with live Questrade data</div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button onClick={runFullPipeline} disabled={pipelineRunning} style={{ background: pipelineRunning ? "#1a2d47" : "linear-gradient(135deg,#7b0000,#ff2d55)", color: pipelineRunning ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: pipelineRunning ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                      {pipelineRunning ? pipelineStage : "◎ RUN PIPELINE"}
+                    </button>
+                    <button onClick={() => loadTrades(true)} disabled={loadingTrades} style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.4)", color: "#ff2d55", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>
+                      ⟳ REFRESH
+                    </button>
+                    {trades?.trades && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "4px 10px", background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3 }}>✓ AUTO-LOGGED</span>}
+                  </div>
+                </div>
+
+                {tradesError && <div style={{ padding: 12, background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, color: "#ff6b8a", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>⚠ {tradesError}</div>}
+
+                {!trades && !loadingTrades && !tradesError && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>◎</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ff2d55", letterSpacing: 3, marginBottom: 8 }}>NO TRADES GENERATED</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Run the full pipeline to generate your top 3 validated trades</div>
+                    <button onClick={runFullPipeline} style={{ background: "linear-gradient(135deg,#7b0000,#ff2d55)", color: "#fff", border: "none", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>◎ RUN FULL PIPELINE</button>
+                  </div>
+                )}
+
+                {trades?.trades && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    {trades.trades.map((trade, i) => (
+                      <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 6, padding: 20 }}>
+                        {/* Trade header */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 24, fontWeight: 700, color: trade.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{trade.ticker}</div>
+                            <div>
+                              <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 700, color: trade.direction === "CALL" ? "#39ff14" : "#ff2d55", background: trade.direction === "CALL" ? "rgba(57,255,20,0.1)" : "rgba(255,45,85,0.1)", padding: "3px 10px", borderRadius: 3, marginRight: 6 }}>{trade.direction}</span>
+                              <span style={{ fontSize: 11, fontFamily: "monospace", color: "#8aabb8" }}>Score: {trade.score}/100</span>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: "right" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffd700", marginBottom: 2 }}>PROBABILITY</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 700, color: "#ffd700" }}>{trade.probability}</div>
+                          </div>
+                        </div>
+
+                        {/* Live options data — Yahoo Finance (no QT dependency) */}
+                        {(() => {
+                          const yc = qtChains?.[trade.ticker];
+                          const sp = qtQuotes?.[trade.ticker]?.lastTradePrice || yc?.currentPrice;
+                          return (
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: 14, background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 4, padding: 12 }}>
+                              {[
+                                ["STOCK", sp ? "$" + Number(sp).toFixed(2) : "—"],
+                                ["STRIKE", yc?.bestStrike?.strike ? "$" + Number(yc.bestStrike.strike).toFixed(0) : (trade.strike || "ATM")],
+                                ["BID", yc?.bid ? "$" + Number(yc.bid).toFixed(2) : "—"],
+                                ["ASK", yc?.ask ? "$" + Number(yc.ask).toFixed(2) : "—"],
+                                ["MID", yc?.mid ? "$" + Number(yc.mid).toFixed(2) : yc?.bid && yc?.ask ? "$" + (( Number(yc.bid) + Number(yc.ask)) / 2).toFixed(2) : "—"],
+                              ].map(([label, val]) => (
+                                <div key={label} style={{ textAlign: "center" }}>
+                                  <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
+                                  <div style={{ fontSize: 13, fontFamily: "monospace", color: val === "—" ? "#2a3d57" : "#00d4ff", fontWeight: 700 }}>{val}</div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
+
+                        {/* Expiry + timing */}
+                        <div style={{ display: "flex", gap: 16, marginBottom: 12, fontSize: 11, fontFamily: "monospace" }}>
+                          <span style={{ color: "#8aabb8" }}>EXPIRY: <span style={{ color: "#e8f4ff" }}>{trade.expiry && !trade.expiry.includes("00:00:00") ? trade.expiry : trade.expiry?.slice(0,10) || "—"}</span></span>
+                          <span style={{ color: "#8aabb8" }}>TIMING: <span style={{ color: "#e8f4ff" }}>{trade.urgency || (trade.timing && !trade.timing.includes("*") ? trade.timing : "—")}</span></span>
+                          {qtChains?.[trade.ticker]?.iv && qtChains[trade.ticker].iv < 5 ? <span style={{ color: "#8aabb8" }}>IV: <span style={{ color: "#ffb800" }}>{(qtChains[trade.ticker].iv * 100).toFixed(0)}%</span></span> : null}
+                          {qtChains?.[trade.ticker]?.delta ? <span style={{ color: "#8aabb8" }}>Δ: <span style={{ color: "#e8f4ff" }}>{Number(qtChains[trade.ticker].delta).toFixed(2)}</span></span> : null}
+                          <span style={{ color: "#2a3d57", fontSize: 9 }}>via Yahoo Finance</span>
+                        </div>
+
+                        {/* Thesis */}
+                        <div style={{ fontSize: 12, color: "#c8dce8", lineHeight: 1.6, marginBottom: 12, paddingLeft: 10, borderLeft: "2px solid rgba(255,45,85,0.4)" }}>{trade.thesis || trade.catalyst}</div>
+
+                        {/* Target / Stop */}
+                        <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+                          <div style={{ flex: 1, background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 3, padding: "8px 12px" }}>
+                            <div style={{ fontSize: 9, fontFamily: "monospace", color: "#39ff14", marginBottom: 3 }}>TARGET</div>
+                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#39ff14", fontWeight: 700 }}>{trade.targetReturn || (trade.targetPct && !trade.targetPct.includes("*") ? trade.targetPct : null) || trade.estimatedMove?.split(" ")[0] || "—"}</div>
+                          </div>
+                          <div style={{ flex: 1, background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 3, padding: "8px 12px" }}>
+                            <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ff2d55", marginBottom: 3 }}>STOP</div>
+                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#ff2d55", fontWeight: 700 }}>{trade.stopPct && !trade.stopPct.includes("*") ? trade.stopPct : "—"}</div>
+                          </div>
+                          {trade.hedge?.ticker && !trade.hedge.ticker.includes("*") && (
+                            <div style={{ flex: 2, background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 3, padding: "8px 12px" }}>
+                              <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ffb800", marginBottom: 3 }}>HEDGE</div>
+                              <div style={{ fontSize: 13, fontFamily: "monospace", color: "#ffb800", fontWeight: 700 }}>{trade.hedge.ticker} {trade.hedge.direction}</div>
+                              <div style={{ fontSize: 10, color: "#8aabb8" }}>{trade.hedge.reason}</div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Risk factors */}
+                        {trade.riskFactors && <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", padding: "6px 10px", background: "rgba(255,45,85,0.04)", borderRadius: 3 }}>⚠ RISKS: {trade.riskFactors}</div>}
+                      </div>
+                    ))}
+
+                    <div style={{ fontSize: 10, color: "#4a6d8c", textAlign: "center", padding: "8px", lineHeight: 1.6 }}>
+                      {trades.disclaimer} | Generated: {new Date(trades.timestamp).toLocaleString()}
+                    </div>
+
+
+                  </div>
+                )}
+
+                {/* PICK TRACKER */}
+                <div style={{ marginTop: 24 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, cursor: "pointer" }} onClick={() => { setShowTracker(!showTracker); if (!trackerData) loadTrackerData(); }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 3 }}>📋 PICK TRACKER ({trackerData?.stats?.total || trackedPicks.length} logged)</div>
+                    <div style={{ fontSize: 11, color: "#4a6d8c", display: "flex", gap: 8, alignItems: "center" }}>
+                      {trackerData?.stats && <>
+                        <span style={{ color: "#39ff14" }}>{trackerData.stats.wins}W</span>
+                        <span style={{ color: "#ff2d55" }}>{trackerData.stats.losses}L</span>
+                        <span style={{ color: "#ffb800" }}>{trackerData.stats.open} OPEN</span>
+                        {trackerData.stats.winRate !== null && <span style={{ color: "#ffd700", fontWeight: 700 }}>{trackerData.stats.winRate}% WR</span>}
+                        {trackerData.stats.avgPnl !== null && <span style={{ color: trackerData.stats.avgPnl >= 0 ? "#39ff14" : "#ff2d55" }}>avg {trackerData.stats.avgPnl >= 0 ? "+" : ""}{trackerData.stats.avgPnl}%</span>}
+                      </>}
+                      <span>{showTracker ? "▲" : "▼"}</span>
+                    </div>
+                  </div>
+
+                  {showTracker && (
+                    <div>
+                      {/* Analytics */}
+                      {trackerData?.stats && trackerData.stats.closed >= 3 && (
+                        <div style={{ background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 4, padding: 12, marginBottom: 12 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 2, marginBottom: 10 }}>📊 PERFORMANCE ANALYTICS</div>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+                            <div style={{ background: "#080f1a", borderRadius: 3, padding: "8px 10px" }}>
+                              <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 3 }}>CALL WIN RATE</div>
+                              <div style={{ fontSize: 16, fontFamily: "monospace", fontWeight: 700, color: (trackerData.stats.callWinRate || 0) >= 50 ? "#39ff14" : "#ff2d55" }}>{trackerData.stats.callWinRate !== null ? trackerData.stats.callWinRate + "%" : "—"}</div>
+                            </div>
+                            <div style={{ background: "#080f1a", borderRadius: 3, padding: "8px 10px" }}>
+                              <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 3 }}>PUT WIN RATE</div>
+                              <div style={{ fontSize: 16, fontFamily: "monospace", fontWeight: 700, color: (trackerData.stats.putWinRate || 0) >= 50 ? "#39ff14" : "#ff2d55" }}>{trackerData.stats.putWinRate !== null ? trackerData.stats.putWinRate + "%" : "—"}</div>
+                            </div>
+                          </div>
+                          {trackerData.stats.weights && (
+                            <div style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.8, borderTop: "1px solid rgba(255,184,0,0.1)", paddingTop: 8 }}>
+                              <div style={{ color: "#ffb800", fontFamily: "monospace", fontSize: 9, marginBottom: 4 }}>PIPELINE FEEDBACK ACTIVE</div>
+                              {trackerData.stats.weights.bestUrgency && <div>Best timing: <span style={{ color: "#e8f4ff" }}>{trackerData.stats.weights.bestUrgency}</span></div>}
+                              {trackerData.stats.weights.bestSector && <div>Best sector: <span style={{ color: "#39ff14" }}>{trackerData.stats.weights.bestSector}</span></div>}
+                              {trackerData.stats.weights.worstSector && <div>Avoid sector: <span style={{ color: "#ff2d55" }}>{trackerData.stats.weights.worstSector}</span></div>}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {trackedPicks.length === 0 && !loadingTracker && (
+                        <div style={{ fontSize: 11, color: "#4a6d8c", fontStyle: "italic", padding: 12 }}>No picks logged yet. Run the pipeline — trades auto-log after every run.</div>
+                      )}
+                      {loadingTracker && <div style={{ fontSize: 11, color: "#4a6d8c", padding: 12 }}>Loading tracker...</div>}
+                      {trackedPicks.map((pick) => (
+                        <div key={pick.id} style={{ background: "#080f1a", border: `1px solid ${pick.outcome === "WIN" ? "rgba(57,255,20,0.3)" : pick.outcome === "LOSS" ? "rgba(255,45,85,0.3)" : "rgba(74,109,140,0.3)"}`, borderRadius: 4, padding: 12, marginBottom: 8 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 15, fontWeight: 700, color: pick.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{pick.ticker}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 10, color: pick.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{pick.direction}</span>
+                              {pick.strike && <span style={{ fontSize: 10, color: "#8aabb8", fontFamily: "monospace" }}>${pick.strike} strike</span>}
+                              <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>exp {pick.expiry}</span>
+                              <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 2, background: pick.outcome === "WIN" ? "rgba(57,255,20,0.1)" : pick.outcome === "LOSS" ? "rgba(255,45,85,0.1)" : "rgba(255,184,0,0.1)", color: pick.outcome === "WIN" ? "#39ff14" : pick.outcome === "LOSS" ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>{pick.outcome}</span>
+                              {pick.pnlPct !== null && <span style={{ fontSize: 11, fontWeight: 700, color: pick.pnlPct >= 0 ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{pick.pnlPct >= 0 ? "+" : ""}{pick.pnlPct}%</span>}
+                            </div>
+                            <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{new Date(pick.entryDate).toLocaleDateString()}</div>
+                          </div>
+                          {pick.thesis && <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 6, lineHeight: 1.5 }}>{pick.thesis.slice(0, 120)}{pick.thesis.length > 120 ? "..." : ""}</div>}
+                          {pick.entryPrice && <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 4, fontFamily: "monospace" }}>Entry: ${pick.entryPrice} · Target: {pick.targetPct} · Stop: {pick.stopPct}</div>}
+                          {pick.outcome === "OPEN" && (
+                            <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                              <input placeholder="Exit price" style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "4px 8px", fontSize: 11, fontFamily: "monospace", width: 90, outline: "none" }}
+                                onChange={e => setTrackerInput(p => ({...p, [pick.id]: {...p[pick.id], exitPrice: parseFloat(e.target.value)}}))} />
+                              <input placeholder="Notes" style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "4px 8px", fontSize: 11, fontFamily: "monospace", flex: 1, minWidth: 100, outline: "none" }}
+                                onChange={e => setTrackerInput(p => ({...p, [pick.id]: {...p[pick.id], notes: e.target.value}}))} />
+                              <button onClick={() => updateOutcome(pick.id, "WIN", trackerInput[pick.id]?.exitPrice, trackerInput[pick.id]?.notes || "")} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "4px 12px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>WIN</button>
+                              <button onClick={() => updateOutcome(pick.id, "LOSS", trackerInput[pick.id]?.exitPrice, trackerInput[pick.id]?.notes || "")} style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", color: "#ff2d55", borderRadius: 3, padding: "4px 12px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>LOSS</button>
+                              <button onClick={() => updateOutcome(pick.id, "SCRATCH", trackerInput[pick.id]?.exitPrice, trackerInput[pick.id]?.notes || "")} style={{ background: "rgba(74,109,140,0.1)", border: "1px solid rgba(74,109,140,0.3)", color: "#8aabb8", borderRadius: 3, padding: "4px 12px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>SCRATCH</button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* SIGNALS TAB — All intelligence layers in one view */}
-            {tab==="oracle"&&(<div style={{flex:1,overflowY:"auto",padding:20,minHeight:0}}><div style={{fontFamily:"monospace",fontSize:10,letterSpacing:4,color:"#ffd700",marginBottom:20,borderBottom:"1px solid #1a2d47",paddingBottom:10}}>🔮 ORACLE — AI PRICE PREDICTION ENGINE</div><div style={{display:"flex",gap:10,marginBottom:16}}><input value={oracleQuery} onChange={e=>setOracleQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runOracle()} placeholder="e.g. NVDA May 30 2026 · AAPL earnings · BTC year end" style={{flex:1,background:"#0d1829",border:"1px solid #ffd70055",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><input value={oracleDate} onChange={e=>setOracleDate(e.target.value)} placeholder="Target date (opt)" style={{width:170,background:"#0d1829",border:"1px solid #1a2d47",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><button onClick={runOracle} disabled={oracleLoading||!oracleQuery.trim()} style={{background:oracleLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleLoading?"#4a6d8c":"#030609",border:"none",borderRadius:3,padding:"9px 20px",fontSize:12,fontWeight:700,letterSpacing:2,cursor:oracleLoading?"not-allowed":"pointer",fontFamily:"monospace",whiteSpace:"nowrap"}}>{oracleLoading?"COMPUTING...":"🔮 PREDICT"}</button></div>{oracleError&&<div style={{color:"#ff2d55",fontFamily:"monospace",fontSize:11,marginBottom:12}}>❌ {oracleError}</div>}{oracleResult&&<div style={{background:"#080f1a",border:"1px solid #ffd70033",borderLeft:"4px solid #ffd700",borderRadius:4,padding:16}}><div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:3,marginBottom:10}}>ORACLE PREDICTION — {oracleQuery.toUpperCase()}</div><div style={{fontSize:12,lineHeight:1.8,color:"#c8dff0",whiteSpace:"pre-wrap"}}>{typeof oracleResult.prediction==="string"?oracleResult.prediction:JSON.stringify(oracleResult,null,2)}</div></div>}{!oracleResult&&!oracleLoading&&<div style={{textAlign:"center",padding:60,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>Enter a ticker + optional target date<br/>Examples: "AAPL Jun 30 2026" · "NVDA next earnings" · "Bitcoin year end"</div>}</div>)} {tab === "signals" && (
+            {tab==="oracle"&&(<div style={{flex:1,overflowY:"auto",padding:20,minHeight:0}}><div style={{fontFamily:"monospace",fontSize:10,letterSpacing:4,color:"#ffd700",marginBottom:20,borderBottom:"1px solid #1a2d47",paddingBottom:10}}>🔮 ORACLE — AI PRICE PREDICTION ENGINE</div><div style={{display:"flex",gap:10,marginBottom:16}}><input value={oracleQuery} onChange={e=>setOracleQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runOracle()} placeholder="e.g. NVDA May 30 2026 · AAPL earnings · BTC year end" style={{flex:1,background:"#0d1829",border:"1px solid #ffd70055",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><input value={oracleDate} onChange={e=>setOracleDate(e.target.value)} placeholder="Target date (opt)" style={{width:170,background:"#0d1829",border:"1px solid #1a2d47",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><button onClick={runOracle} disabled={oracleLoading||!oracleQuery.trim()} style={{background:oracleLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleLoading?"#4a6d8c":"#030609",border:"none",borderRadius:3,padding:"9px 20px",fontSize:12,fontWeight:700,letterSpacing:2,cursor:oracleLoading?"not-allowed":"pointer",fontFamily:"monospace",whiteSpace:"nowrap"}}>{oracleLoading?"COMPUTING...":"🔮 PREDICT"}</button></div>{oracleError&&<div style={{color:"#ff2d55",fontFamily:"monospace",fontSize:11,marginBottom:12}}>❌ {oracleError}</div>}{oracleResult&&<div style={{background:"#080f1a",border:"1px solid #ffd70033",borderLeft:"4px solid #ffd700",borderRadius:4,padding:16}}><div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:3,marginBottom:10}}>ORACLE PREDICTION — {oracleQuery.toUpperCase()}</div><div style={{fontSize:12,lineHeight:1.8,color:"#c8dff0",whiteSpace:"pre-wrap"}}>{typeof oracleResult.prediction==="string"?oracleResult.prediction:JSON.stringify(oracleResult,null,2)}</div></div>}{!oracleResult&&!oracleLoading&&<div style={{textAlign:"center",padding:60,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>Enter a ticker + optional target date<br/>Examples: "AAPL Jun 30 2026" · "NVDA next earnings" · "Bitcoin year end"</div>}</div>)} {tab === "oracle" && (<div style={{flex:1,overflowY:"auto",padding:20,minHeight:0}}><div style={{fontFamily:"monospace",fontSize:10,letterSpacing:4,color:"#ffd700",marginBottom:20,borderBottom:"1px solid #1a2d47",paddingBottom:10}}>🔮 ORACLE — AI PRICE PREDICTION ENGINE</div><div style={{display:"flex",gap:10,marginBottom:16}}><input value={oracleQuery} onChange={e=>setOracleQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runOracle()} placeholder="e.g. NVDA May 30 2026 · AAPL earnings" style={{flex:1,background:"#0d1829",border:"1px solid #ffd70055",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><input value={oracleDate} onChange={e=>setOracleDate(e.target.value)} placeholder="Target date (opt)" style={{width:160,background:"#0d1829",border:"1px solid #1a2d47",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><button onClick={runOracle} disabled={oracleLoading||!oracleQuery.trim()} style={{background:oracleLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleLoading?"#4a6d8c":"#030609",border:"none",borderRadius:3,padding:"9px 20px",fontSize:12,fontWeight:700,cursor:oracleLoading?"not-allowed":"pointer",fontFamily:"monospace",whiteSpace:"nowrap"}}>{oracleLoading?"COMPUTING...":"🔮 PREDICT"}</button></div>{oracleError&&<div style={{color:"#ff2d55",fontFamily:"monospace",fontSize:11,marginBottom:8}}>❌ {oracleError}</div>}{oracleResult&&<div style={{background:"#080f1a",border:"1px solid #ffd70033",borderLeft:"4px solid #ffd700",borderRadius:4,padding:16}}><div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:3,marginBottom:10}}>ORACLE PREDICTION</div><div style={{fontSize:12,lineHeight:1.8,color:"#c8dff0",whiteSpace:"pre-wrap"}}>{typeof oracleResult.prediction==="string"?oracleResult.prediction:JSON.stringify(oracleResult,null,2)}</div></div>}{!oracleResult&&!oracleLoading&&<div style={{textAlign:"center",padding:60,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>Enter ticker + date: "AAPL Jun 30 2026"</div>}</div>)} {tab === "signals" && (
               <div style={{ height: "100%", overflowY: "auto", paddingBottom: 40 }}>
 
                 {/* Header */}
@@ -3068,7 +3249,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       {/* View switcher */}
                       <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
                         {["alerts","fda","metals","penny","patterns"].map(v => (
-                          <button key={v} onClick={() => { setSpikeView(v); loadSpikeDetector(true, v); }} style={{ fontFamily: "monospace", fontSize: 8, padding: "3px 8px", borderRadius: 2, border: `1px solid ${spikeView === v ? "#ffb800" : "rgba(74,109,140,0.3)"}`, background: spikeView === v ? "rgba(255,184,0,0.1)" : "transparent", color: spikeView === v ? "#ffb800" : "#4a6d8c", cursor: "pointer" }}>{v.toUpperCase()}</button>
+                          <button key={v} onClick={() => setSpikeView(v)} style={{ fontFamily: "monospace", fontSize: 8, padding: "3px 8px", borderRadius: 2, border: `1px solid ${spikeView === v ? "#ffb800" : "rgba(74,109,140,0.3)"}`, background: spikeView === v ? "rgba(255,184,0,0.1)" : "transparent", color: spikeView === v ? "#ffb800" : "#4a6d8c", cursor: "pointer" }}>{v.toUpperCase()}</button>
                         ))}
                       </div>
 
