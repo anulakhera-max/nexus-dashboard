@@ -1815,11 +1815,11 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div style={{ width:120, flexShrink:0 }}>
                         <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px", marginBottom:6 }}>
                           <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:2 }}>TARGET</div>
-                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#39ff14" }}>{pick.targetReturn||"—"}</div>
+                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#39ff14" }}>{pick.targetPrice ? "$"+pick.targetPrice+" ("+pick.targetReturn+")" : pick.targetReturn||"—"}</div>
                         </div>
                         <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 10px" }}>
                           <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:2 }}>STOP LOSS</div>
-                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#ff2d55" }}>{pick.stopPct||"—"}</div>
+                          <div style={{ fontFamily:"monospace", fontSize:16, fontWeight:700, color:"#ff2d55" }}>{pick.stopPrice ? "$"+pick.stopPrice+" ("+pick.stopPct+")" : pick.stopPct||"—"}</div>
                         </div>
                       </div>
                     </div>
