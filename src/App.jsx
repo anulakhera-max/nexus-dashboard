@@ -6343,83 +6343,48 @@ export default function NexusDashboard({ user, onLogout }) {
 
             {/* WATCHLIST TAB */}
             {tab === "watch" && (
-              <div style={{ flex:1, minHeight:0, overflowY: "auto", paddingBottom: 40 }}>
-                {/* Header */}
-                <div className="border-breathe" style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.2)", borderRadius: 6, padding: "16px 18px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+              <div style={{ flex:1, minHeight:0, overflowY:"auto", paddingBottom:40 }}>
+                <div style={{ background:"rgba(0,212,255,0.04)", border:"1px solid rgba(0,212,255,0.2)", borderRadius:6, padding:"16px 18px", marginBottom:14, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
                   <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#00d4ff", letterSpacing: 3, marginBottom: 4 }}>
-                      <span className="signal-live" style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:"#00d4ff",marginRight:8,verticalAlign:"middle"}}/>
-                      MASTER WATCHLIST — 89 TICKERS × 16 THEMES
-                    </div>
-                    <div style={{ fontSize: 11, color: "#4a6d8c" }}>AI · Quantum · Space · Nuclear · Defense · Crypto · Biotech · Energy · Transport · Macro · Oil/Gas · Solar · Helium · Utilities + 15 smart money operators</div>
+                    <div style={{ fontFamily:"monospace", fontSize:14, fontWeight:700, color:"#00d4ff", letterSpacing:3, marginBottom:4 }}>👁 MASTER WATCHLIST — 89 TICKERS × 16 THEMES</div>
+                    <div style={{ fontSize:11, color:"#4a6d8c" }}>AI · Quantum · Space · Nuclear · Defense · Crypto · Biotech · Energy · Transport · Macro · Oil/Gas · Solar · Helium · Utilities</div>
                   </div>
-                  <button onClick={scanWatchlist} disabled={loadingWatch} style={{ background: loadingWatch ? "#1a2d47" : "linear-gradient(135deg,#0a3d5c,#00d4ff)", color: loadingWatch ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 18px", fontSize: 12, fontWeight: 700, letterSpacing: 2, cursor: loadingWatch ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
-                    {loadingWatch ? "SCANNING..." : "👁 SCAN NOW"}
+                  <button onClick={()=>loadWatchlistScan(true)} disabled={loadingWatchlist} style={{ background:loadingWatchlist?"#1a2d47":"linear-gradient(135deg,#0a3d5c,#00d4ff)", color:loadingWatchlist?"#4a6d8c":"#fff", border:"none", borderRadius:3, padding:"9px 18px", fontSize:12, fontWeight:700, letterSpacing:2, cursor:loadingWatchlist?"not-allowed":"pointer", fontFamily:"monospace" }}>
+                    {loadingWatchlist?"SCANNING...":"👁 SCAN NOW"}
                   </button>
                 </div>
 
-                {/* Add item form */}
-                <div style={{ background: "#080f1a", border: "1px solid #1a3a5c", borderRadius: 4, padding: 16, marginBottom: 16 }}>
-                  <div style={{ fontFamily: "monospace", fontSize: 10, color: "#4a6d8c", letterSpacing: 2, marginBottom: 12 }}>ADD TO WATCHLIST</div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                    <select value={watchInput.type} onChange={e => setWatchInput(p => ({...p, type: e.target.value}))} style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "6px 10px", fontSize: 11, fontFamily: "monospace", cursor: "pointer" }}>
-                      <option value="individual">Individual</option>
-                      <option value="stock">Stock</option>
-                    </select>
-                    <input value={watchInput.name} onChange={e => setWatchInput(p => ({...p, name: e.target.value}))} placeholder={watchInput.type === "stock" ? "Company name" : "Person name"} style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "6px 10px", fontSize: 11, fontFamily: "monospace", flex: 1, minWidth: 140, outline: "none" }} />
-                    {watchInput.type === "stock" && <input value={watchInput.ticker} onChange={e => setWatchInput(p => ({...p, ticker: e.target.value.toUpperCase()}))} placeholder="TICKER" style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "6px 10px", fontSize: 11, fontFamily: "monospace", width: 90, outline: "none" }} />}
-                    <button onClick={addToWatchlist} style={{ background: "rgba(0,212,255,0.1)", border: "1px solid rgba(0,212,255,0.4)", color: "#00d4ff", borderRadius: 3, padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>+ ADD</button>
+                {watchlistScan && (
+                  <div style={{ marginBottom:16 }}>
+                    <div style={{ fontFamily:"monospace", fontSize:10, color:"#4a6d8c", letterSpacing:2, marginBottom:8 }}>LIVE SCAN — {watchlistScan.totalScanned} TICKERS</div>
+                    {(watchlistScan.alerts||[]).map((item,idx)=>(
+                      <div key={idx} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 12px", marginBottom:4, background:"#080f1a", border:"1px solid rgba(255,45,85,0.25)", borderRadius:4 }}>
+                        <span style={{ fontFamily:"monospace", fontSize:13, fontWeight:700, color:"#ffd700", width:70 }}>{item.symbol}</span>
+                        <span style={{ fontSize:10, color:"#8aabb8" }}>${item.price}</span>
+                        <span style={{ fontFamily:"monospace", fontSize:11, color:item.change>=0?"#39ff14":"#ff2d55" }}>{item.change>=0?"+":""}{item.change}%</span>
+                        <span style={{ fontSize:9, padding:"2px 6px", borderRadius:2, background:"rgba(255,45,85,0.1)", color:"#ff2d55", fontFamily:"monospace" }}>{item.alert}</span>
+                      </div>
+                    ))}
+                    {(watchlistScan.all||[]).filter(item=>!item.alert).map((item,idx)=>(
+                      <div key={idx} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"5px 12px", marginBottom:2, background:"rgba(0,0,0,0.2)", borderRadius:3 }}>
+                        <span style={{ fontFamily:"monospace", fontSize:11, color:"#e8f4ff", width:70 }}>{item.symbol}</span>
+                        <span style={{ fontSize:10, color:"#8aabb8" }}>${item.price}</span>
+                        <span style={{ fontFamily:"monospace", fontSize:10, color:item.change>=0?"#39ff14":"#ff2d55" }}>{item.change>=0?"+":""}{item.change}%</span>
+                        <span style={{ fontSize:9, color:"#4a6d8c" }}>{item.volume?.toLocaleString()} vol</span>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                )}
 
-                {/* Watchlist display */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
-                  {/* Individuals */}
-                  <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#b24fff", letterSpacing: 3, marginBottom: 10 }}>👤 INDIVIDUALS ({(watchlist.individuals||[]).length})</div>
-                    {(watchlist.individuals || []).length === 0 && <div style={{ fontSize: 11, color: "#4a6d8c", fontStyle: "italic" }}>No individuals added yet</div>}
-                    {(watchlist.individuals || []).map(item => {
-                      const result = watchResults.find(r => r.id === item.id);
-                      return (
-                        <div key={item.id} style={{ background: "#080f1a", border: "1px solid rgba(178,79,255,0.2)", borderRadius: 4, padding: 12, marginBottom: 8 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: result?.articles?.length ? 8 : 0 }}>
-                            <div>
-                              <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 500, color: "#e8f4ff" }}>{item.name}</span>
-                              {result && <span style={{ marginLeft: 8, fontSize: 9, fontFamily: "monospace", color: result.signal === "ACTIVE" ? "#ff2d55" : result.signal === "MENTION" ? "#ffb800" : "#4a6d8c", padding: "1px 6px", background: result.signal === "ACTIVE" ? "rgba(255,45,85,0.1)" : "transparent", borderRadius: 2 }}>{result.signal}</span>}
-                            </div>
-                            <button onClick={() => removeFromWatchlist(item.id, "individual")} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 14, padding: "0 4px" }}>×</button>
-                          </div>
-                          {result?.articles?.map((a, i) => <div key={i} style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.4, marginBottom: 3, paddingLeft: 8, borderLeft: "2px solid rgba(178,79,255,0.3)" }}>{a}</div>)}
-                        </div>
-                      );
-                    })}
+                {!watchlistScan && (
+                  <div style={{ textAlign:"center", padding:60, color:"#4a6d8c", fontFamily:"monospace", fontSize:11, lineHeight:2 }}>
+                    Click 👁 SCAN NOW to scan all 89 tickers<br/>
+                    Alerts on price spikes, volume anomalies, breakouts
                   </div>
+                )}
 
-                  {/* Stocks */}
-                  <div>
-                    <div style={{ fontFamily: "monospace", fontSize: 10, color: "#39ff14", letterSpacing: 3, marginBottom: 10 }}>📈 STOCKS ({(watchlist.stocks||[]).length})</div>
-                    {(watchlist.stocks || []).length === 0 && <div style={{ fontSize: 11, color: "#4a6d8c", fontStyle: "italic" }}>No stocks added yet</div>}
-                    {(watchlist.stocks || []).map(item => {
-                      const result = watchResults.find(r => r.id === item.id);
-                      return (
-                        <div key={item.id} style={{ background: "#080f1a", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 4, padding: 12, marginBottom: 8 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: result?.articles?.length ? 8 : 0 }}>
-                            <div>
-                              {item.ticker && <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "#39ff14", marginRight: 8 }}>{item.ticker}</span>}
-                              <span style={{ fontSize: 12, color: "#8aabb8" }}>{item.name}</span>
-                              {result && <span style={{ marginLeft: 8, fontSize: 9, fontFamily: "monospace", color: result.signal === "ACTIVE" ? "#ff2d55" : result.signal === "MENTION" ? "#ffb800" : "#4a6d8c", padding: "1px 6px", background: result.signal === "ACTIVE" ? "rgba(255,45,85,0.1)" : "transparent", borderRadius: 2 }}>{result.signal}</span>}
-                            </div>
-                            <button onClick={() => removeFromWatchlist(item.id, "stock")} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 14, padding: "0 4px" }}>×</button>
-                          </div>
-                          {result?.articles?.map((a, i) => <div key={i} style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.4, marginBottom: 3, paddingLeft: 8, borderLeft: "2px solid rgba(57,255,20,0.3)" }}>{a}</div>)}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div style={{ padding: "10px 14px", background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 3, fontSize: 10, color: "#4a6d8c", lineHeight: 1.8 }}>
-                  <span style={{ color: "#00d4ff" }}>👁 HOW IT WORKS:</span> Every item here is automatically injected into Power Intel and Intel Picks scans. Watched individuals trigger psychographic analysis. Watched stocks get priority signal detection. Click Scan Now for live news feed per item.
+                <div style={{ padding:"10px 14px", background:"rgba(0,212,255,0.04)", border:"1px solid rgba(0,212,255,0.15)", borderRadius:3, fontSize:10, color:"#4a6d8c", lineHeight:1.8 }}>
+                  <span style={{ color:"#00d4ff" }}>👁 HOW IT WORKS:</span> Scans 89 tickers across 16 themes. Alerts feed directly into Oracle and TRADES pipeline. Every spike, volume anomaly and pattern setup is flagged.
                 </div>
               </div>
             )}
