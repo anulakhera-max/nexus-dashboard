@@ -1848,7 +1848,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
           <div style={S.tabs}>
             {/* CORE tabs */}
-            {[["oracle","🔮 ORACLE"],["events","📡 EVENTS"],["intel","🔬 INTEL"],["power","◈ POWER"],["trades","TRADES"],["positions","📋 POSITIONS"],["watch","WATCHLIST"]].map(([t,l]) => (
+            {[["oracle","🔮 ORACLE"],["events","📡 EVENTS"],["intel","🔬 INTEL"],["power","◈ POWER"],["trades","◎ TRADES"],["positions","📋 POSITIONS"],["watch","👁 WATCHLIST"]].map(([t,l]) => (
               <button key={t} style={{ ...S.tab(tab === t, t==="intel"||t==="power"), color: tab === "intel" ? "#b24fff" : tab === "power" ? "#ff6b35" : tab === t ? "#00d4ff" : "#a8cce0" }} onClick={() => handleTab(t)}>{l}</button>
             ))}
             <span style={{ width: 1, background: "#1a2d47", margin: "4px 4px", flexShrink: 0 }}/>
