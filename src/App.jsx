@@ -1779,7 +1779,40 @@ export default function NexusDashboard({ user, onLogout }) {
                             </div>
                           ))}
                         </div>
-                        <div style={{ display:"flex", justifyContent:"space-between", marginTop:8, fontSize:9, fontFamily:"monospace", color:"#4a6d8c" }}>
+                        {/* LOG THIS TRADE → POSITIONS */}
+                    <div style={{ display:"flex", gap:8, marginBottom:12 }}>
+                      <button 
+                        onClick={()=>{
+                          const trade={
+                            id:Date.now()+'_'+pick.ticker,
+                            ticker:pick.ticker,
+                            direction:pick.direction,
+                            expiry:pick.expiry,
+                            strike:pick.liveOption?.strike||null,
+                            premium:pick.liveOption?.ask||null,
+                            currentPrice:pick.currentPrice||curPrice,
+                            targetPrice:pick.targetPrice||null,
+                            stopPrice:pick.stopPrice||null,
+                            catalyst:pick.catalyst,
+                            confidence:pick.confidence,
+                            score:pick.score,
+                            loggedAt:new Date().toISOString(),
+                            source:'NEXUS_PIPELINE',
+                            outcome:null
+                          };
+                          setMyPositions(prev=>[...(prev||[]),trade]);
+                          alert('✅ '+pick.ticker+' '+pick.direction+' logged to POSITIONS');
+                        }}
+                        style={{ flex:1, background:"linear-gradient(135deg,rgba(57,255,20,0.15),rgba(57,255,20,0.05))", border:"1px solid rgba(57,255,20,0.4)", color:"#39ff14", borderRadius:3, padding:"9px 16px", fontSize:11, fontWeight:700, cursor:"pointer", fontFamily:"monospace", letterSpacing:2 }}>
+                        📋 LOG THIS TRADE → POSITIONS
+                      </button>
+                      <button
+                        onClick={()=>setTab("positions")}
+                        style={{ background:"rgba(0,212,255,0.08)", border:"1px solid rgba(0,212,255,0.3)", color:"#00d4ff", borderRadius:3, padding:"9px 14px", fontSize:11, cursor:"pointer", fontFamily:"monospace" }}>
+                        VIEW POSITIONS →
+                      </button>
+                    </div>
+                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:8, fontSize:9, fontFamily:"monospace", color:"#4a6d8c" }}>
                           <span>Entry: <span style={{color:"#ffb800"}}>${pick.liveOption.ask}</span></span>
                           <span>Target exit: <span style={{color:"#39ff14"}}>${(pick.liveOption.ask*1.5).toFixed(2)}</span> (+50% ROI)</span>
                           <span>Stop: <span style={{color:"#ff2d55"}}>${(pick.liveOption.ask*0.5).toFixed(2)}</span> (-50%)</span>
