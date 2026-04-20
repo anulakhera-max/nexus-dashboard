@@ -3827,7 +3827,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 {/* VIX + FEAR/GREED section */}
                 <div style={{ background: "#080f1a", border: `1px solid ${vixData?.vix?.regime === "EXTREME_FEAR" ? "rgba(255,45,85,0.4)" : vixData?.vix?.regime === "COMPLACENT" ? "rgba(255,184,0,0.4)" : "rgba(0,212,255,0.2)"}`, borderRadius: 6, padding: 14, marginBottom: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>📊 VIX + FEAR/GREED INDEX</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#00d4ff", letterSpacing: 2 }}>���� VIX + FEAR/GREED INDEX</div>
                     {vixData && <button onClick={() => loadVixSentiment(true)} style={{ background: "none", border: "none", color: "#4a6d8c", cursor: "pointer", fontSize: 9, fontFamily: "monospace" }}>⟳</button>}
                   </div>
                   {!vixData ? (
