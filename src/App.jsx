@@ -6361,7 +6361,8 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div key={idx} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 12px", marginBottom:4, background:"#080f1a", border:"1px solid rgba(255,45,85,0.25)", borderRadius:4 }}>
                         <span style={{ fontFamily:"monospace", fontSize:13, fontWeight:700, color:"#ffd700", width:70 }}>{item.symbol}</span>
                         <span style={{ fontSize:10, color:"#8aabb8" }}>${item.price}</span>
-                        <span style={{ fontFamily:"monospace", fontSize:11, color:item.change>=0?"#39ff14":"#ff2d55" }}>{item.change>=0?"+":""}{item.change}%</span>
+                        <span style={{ fontFamily:"monospace", fontSize:10, color:item.change1d>=0?"#39ff14":"#ff2d55" }}>{item.change1d>=0?"+":""}{item.change1d??item.change}% 1D</span>
+                        <span style={{ fontFamily:"monospace", fontSize:10, color:item.change1w>=0?"#ffb800":"#ff6b35" }}>{item.change1w>=0?"+":""}{item.change1w??item.change}% 1W</span>
                         <span style={{ fontSize:9, padding:"2px 6px", borderRadius:2, background:"rgba(255,45,85,0.1)", color:"#ff2d55", fontFamily:"monospace" }}>{item.alert}</span>
                       </div>
                     ))}
@@ -6369,8 +6370,8 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div key={idx} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"5px 12px", marginBottom:2, background:"rgba(0,0,0,0.2)", borderRadius:3 }}>
                         <span style={{ fontFamily:"monospace", fontSize:11, color:"#e8f4ff", width:70 }}>{item.symbol}</span>
                         <span style={{ fontSize:10, color:"#8aabb8" }}>${item.price}</span>
-                        <span style={{ fontFamily:"monospace", fontSize:10, color:item.change>=0?"#39ff14":"#ff2d55" }}>{item.change>=0?"+":""}{item.change}%</span>
-                        <span style={{ fontSize:9, color:"#4a6d8c" }}>{item.volume?.toLocaleString()} vol</span>
+                        <span style={{ fontFamily:"monospace", fontSize:10, color:(item.change1d??item.change)>=0?"#39ff14":"#ff2d55" }}>{(item.change1d??item.change)>=0?"+":""}{item.change1d??item.change}% 1D</span>
+                        <span style={{ fontFamily:"monospace", fontSize:10, color:(item.change1w??item.change)>=0?"#ffb800":"#ff6b35" }}>{(item.change1w??item.change)>=0?"+":""}{item.change1w??item.change}% 1W</span>
                       </div>
                     ))}
                   </div>
