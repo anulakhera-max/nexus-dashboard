@@ -1574,7 +1574,8 @@ export default function NexusDashboard({ user, onLogout }) {
             {analysisHtml && <button onClick={() => setAnalysisHtml(null)} style={{ ...S.btnSecondary, fontSize: 10, padding: "6px 10px", color: "#4a6d8c" }}>✕ CLEAR</button>}
           </div>
 
-          {/* ══════════════════════════════════════════════════════ */}
+          <div style={{overflowY:"auto",maxHeight:"calc(100vh - 120px)",flex:"0 0 auto"}}>
+            {/* ══════════════════════════════════════════════════════ */}
           {/* TOP 3 NEXUS PICKS — MISSION CONTROL */}
           {/* The entire signal stack exists to produce these 3 picks */}
           {/* ══════════════════════════════════════════════════════ */}
@@ -1819,6 +1820,7 @@ export default function NexusDashboard({ user, onLogout }) {
               </button>
             </div>
           )}
+            </div>
 
           <div style={S.tabs}>
             {/* CORE tabs */}
