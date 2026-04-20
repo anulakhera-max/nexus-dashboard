@@ -1763,7 +1763,31 @@ export default function NexusDashboard({ user, onLogout }) {
                       </div>
                     </div>
 
-                    {/* ── CRITICAL DECISION POINTS ── */}
+                    {/* ── {pick.liveOption && (
+                      <div style={{ background:"rgba(57,255,20,0.05)", border:"1px solid rgba(57,255,20,0.2)", borderRadius:4, padding:"10px 14px", marginBottom:12 }}>
+                        <div style={{ fontFamily:"monospace", fontSize:9, color:"#39ff14", letterSpacing:2, marginBottom:8 }}>📊 LIVE OPTION DATA (Yahoo Finance)</div>
+                        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
+                          {[
+                            {label:"STRIKE", value:"$"+pick.liveOption.strike, color:"#e8f4ff"},
+                            {label:"BID/ASK", value:"$"+pick.liveOption.bid+"/$"+pick.liveOption.ask, color:"#ffb800"},
+                            {label:"IV", value:pick.liveOption.iv+"%", color:pick.liveOption.iv>60?"#ff2d55":pick.liveOption.iv>40?"#ffb800":"#39ff14"},
+                            {label:"OPEN INT", value:(pick.liveOption.oi||0).toLocaleString(), color:"#00d4ff"},
+                          ].map((item,i)=>(
+                            <div key={i} style={{ textAlign:"center", background:"rgba(0,0,0,0.3)", borderRadius:3, padding:"6px 8px" }}>
+                              <div style={{ fontFamily:"monospace", fontSize:7, color:"#4a6d8c", marginBottom:2 }}>{item.label}</div>
+                              <div style={{ fontFamily:"monospace", fontSize:11, fontWeight:700, color:item.color }}>{item.value}</div>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ display:"flex", justifyContent:"space-between", marginTop:8, fontSize:9, fontFamily:"monospace", color:"#4a6d8c" }}>
+                          <span>Entry: <span style={{color:"#ffb800"}}>${pick.liveOption.ask}</span></span>
+                          <span>Target exit: <span style={{color:"#39ff14"}}>${(pick.liveOption.ask*1.5).toFixed(2)}</span> (+50% ROI)</span>
+                          <span>Stop: <span style={{color:"#ff2d55"}}>${(pick.liveOption.ask*0.5).toFixed(2)}</span> (-50%)</span>
+                          <span>Est ROI: <span style={{color:"#39ff14"}}>{pick.estimatedROI||"+50%"}</span></span>
+                        </div>
+                      </div>
+                    )}
+                    CRITICAL DECISION POINTS ── */}
                     <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 12px", marginBottom:8 }}>
                       <div style={{ fontFamily:"monospace", fontSize:9, color:"#ffb800", marginBottom:6, letterSpacing:1 }}>CRITICAL DECISION POINTS</div>
                       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
