@@ -1635,9 +1635,9 @@ export default function NexusDashboard({ user, onLogout }) {
                 const dir = pick.direction;
 
                 // Known prices from last pipeline run (fallback to estimates)
-                const PRICES = { GLD:303.8, PLTR:91.2, GDX:55.4, NVDA:110.0, AMD:105.0, IONQ:36.5, QQQ:460.0, SPY:520.0, GDX:55.4, TLT:90.0, USO:72.0 };
-                const curPrice = PRICES[pick.ticker] || 100;
-
+                // Use live price from Yahoo Finance (enriched after pipeline run)
+                const curPrice = pick.currentPrice || pick.livePrice || 100;
+                
                 // Parse target % into price
                 const tgtPct = parseFloat((pick.targetReturn||"30").replace(/[^0-9.-]/g,"")) / 100;
                 const stopPct = parseFloat((pick.stopPct||"-20").replace(/[^0-9.-]/g,"")) / 100;
