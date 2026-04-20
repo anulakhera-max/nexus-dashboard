@@ -1800,7 +1800,8 @@ export default function NexusDashboard({ user, onLogout }) {
                             source:'NEXUS_PIPELINE',
                             outcome:null
                           };
-                          setMyPositions(prev=>[...(prev||[]),trade]);
+                          const newTrade={...trade,entryDate:trade.loggedAt,entryPrice:trade.currentPrice};
+                          setTrackedPicks(prev=>{const updated=[...(prev||[]),newTrade];saveTrackedPicks(updated);return updated;});
                           alert('✅ '+pick.ticker+' '+pick.direction+' logged to POSITIONS');
                         }}
                         style={{ flex:1, background:"linear-gradient(135deg,rgba(57,255,20,0.15),rgba(57,255,20,0.05))", border:"1px solid rgba(57,255,20,0.4)", color:"#39ff14", borderRadius:3, padding:"9px 16px", fontSize:11, fontWeight:700, cursor:"pointer", fontFamily:"monospace", letterSpacing:2 }}>
@@ -2958,7 +2959,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     ))}
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", textAlign: "center", padding: "8px", lineHeight: 1.6 }}>
-                      {trades.disclaimer} | Generated: {new Date(trades.timestamp).toLocaleString()}
+                      {trades.disclaimer} | Generated: {trades.timestamp?new Date(trades.timestamp).toLocaleString():"—"}
                     </div>
 
 
@@ -3022,7 +3023,7 @@ export default function NexusDashboard({ user, onLogout }) {
                               <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 2, background: pick.outcome === "WIN" ? "rgba(57,255,20,0.1)" : pick.outcome === "LOSS" ? "rgba(255,45,85,0.1)" : "rgba(255,184,0,0.1)", color: pick.outcome === "WIN" ? "#39ff14" : pick.outcome === "LOSS" ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>{pick.outcome}</span>
                               {pick.pnlPct !== null && <span style={{ fontSize: 11, fontWeight: 700, color: pick.pnlPct >= 0 ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{pick.pnlPct >= 0 ? "+" : ""}{pick.pnlPct}%</span>}
                             </div>
-                            <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{new Date(pick.entryDate).toLocaleDateString()}</div>
+                            <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{(pick.entryDate||pick.loggedAt)?new Date(pick.entryDate||pick.loggedAt).toLocaleDateString():"—"}</div>
                           </div>
                           {pick.thesis && <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 6, lineHeight: 1.5 }}>{pick.thesis.slice(0, 120)}{pick.thesis.length > 120 ? "..." : ""}</div>}
                           {pick.entryPrice && <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 4, fontFamily: "monospace" }}>Entry: ${pick.entryPrice} · Target: {pick.targetPct} · Stop: {pick.stopPct}</div>}
