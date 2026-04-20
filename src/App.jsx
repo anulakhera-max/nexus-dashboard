@@ -1797,8 +1797,10 @@ export default function NexusDashboard({ user, onLogout }) {
                             confidence:pick.confidence,
                             score:pick.score,
                             loggedAt:new Date().toISOString(),
+                            entryDate:new Date().toISOString(),
+                            entryPrice:pick.liveOption?.ask||pick.premium||null,
                             source:'NEXUS_PIPELINE',
-                            outcome:null
+                            outcome:"OPEN"
                           };
                           const newTrade={...trade,entryDate:trade.loggedAt,entryPrice:trade.currentPrice};
                           setTrackedPicks(prev=>{const updated=[...(prev||[]),newTrade];saveTrackedPicks(updated);return updated;});
@@ -3027,7 +3029,7 @@ export default function NexusDashboard({ user, onLogout }) {
                           </div>
                           {pick.thesis && <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 6, lineHeight: 1.5 }}>{pick.thesis.slice(0, 120)}{pick.thesis.length > 120 ? "..." : ""}</div>}
                           {pick.entryPrice && <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 4, fontFamily: "monospace" }}>Entry: ${pick.entryPrice} · Target: {pick.targetPct} · Stop: {pick.stopPct}</div>}
-                          {pick.outcome === "OPEN" && (
+                          {(!pick.outcome||pick.outcome==="OPEN") && (
                             <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
                               <input placeholder="Exit price" style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "4px 8px", fontSize: 11, fontFamily: "monospace", width: 90, outline: "none" }}
                                 onChange={e => setTrackerInput(p => ({...p, [pick.id]: {...p[pick.id], exitPrice: parseFloat(e.target.value)}}))} />
