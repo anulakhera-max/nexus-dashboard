@@ -335,7 +335,9 @@ export default function NexusDashboard({ user, onLogout }) {
   const [oracleChatInput, setOracleChatInput] = React.useState("");
   const [oracleChatLoading, setOracleChatLoading] = React.useState(false);
   const oracleChatRef = React.useRef(null);
-  const [oracleBrain, setOracleBrain] = React.useState(null);
+  // Auto-load brain on mount
+  React.useEffect(()=>{loadOracleBrain();},[]);
+  const [oracleBrain, setOracleBrain] = React.useState({cycleCount:0,version:0,accuracy:{measured:0,predicted:65,target:90,trajectory:[]},signalWeights:{},lastEvolution:null,nextCycle:null,hyperMode:true,topInsights:[],latestSimulations:[],patterns:{topWinners:[],topLosers:[]}});
   const [showBrain, setShowBrain] = React.useState(false);
   const loadOracleBrain = async () => {
     try{
