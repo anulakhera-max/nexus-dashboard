@@ -1860,15 +1860,17 @@ export default function NexusDashboard({ user, onLogout }) {
                         VIEW POSITIONS →
                       </button>
                     </div>
-                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:8, fontSize:9, fontFamily:"monospace", color:"#4a6d8c" }}>
-                          <span>Entry: <span style={{color:"#ffb800"}}>${pick.liveOption.ask}</span></span>
+                    {/* CRITICAL DECISION POINTS */}
+                    <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 12px", marginBottom:8 }}>
+                      <div style={{ fontFamily:"monospace", fontSize:9, color:"#ffb800", marginBottom:6, letterSpacing:1 }}>CRITICAL DECISION POINTS</div>
+                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
                         <div style={{ borderLeft:"2px solid #39ff14", paddingLeft:8 }}>
                           <div style={{ fontFamily:"monospace", fontSize:10, color:"#39ff14", marginBottom:3 }}>IF SCENARIO A</div>
                           <div style={{ fontSize:10, color:"#c8dff0" }}>Take 50% profit · Hold rest for Scenario B target · Trail stop up</div>
                         </div>
                         <div style={{ borderLeft:"2px solid #ffb800", paddingLeft:8 }}>
                           <div style={{ fontFamily:"monospace", fontSize:10, color:"#ffb800", marginBottom:3 }}>IF STALLING</div>
-                          <div style={{ fontSize:10, color:"#c8dff0" }}>Hold while above stop · Re-evaluate in {Math.round(daysLeft/2)} days · Watch IV</div>
+                          <div style={{ fontSize:10, color:"#c8dff0" }}>Hold while above stop · Re-evaluate · Watch IV</div>
                         </div>
                         <div style={{ borderLeft:"2px solid #ff2d55", paddingLeft:8 }}>
                           <div style={{ fontFamily:"monospace", fontSize:10, color:"#ff2d55", marginBottom:3 }}>IF SCENARIO C</div>
