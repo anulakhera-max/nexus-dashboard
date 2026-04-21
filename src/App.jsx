@@ -2980,7 +2980,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     ))}
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", textAlign: "center", padding: "8px", lineHeight: 1.6 }}>
-                      {trades.disclaimer} | Generated: {trades.timestamp?new Date(trades.timestamp).toLocaleString():"—"}
+                      {trades.disclaimer} | Generated: {trades.timestamp?new Date(trades.timestamp).toLocaleString():new Date().toLocaleString()}
                     </div>
 
 
