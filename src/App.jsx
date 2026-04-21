@@ -3114,6 +3114,51 @@ export default function NexusDashboard({ user, onLogout }) {
 
             {/* SIGNALS TAB — All intelligence layers in one view */}
             {tab==="oracle"&&(<div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:"#040d1a"}}>
+    <div style={{padding:"14px 20px",borderBottom:"1px solid #0d1f3a",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
+      <div>
+        <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:"#ffd700",letterSpacing:4}}>🔮 ORACLE v4 — CONVERSATIONAL INTELLIGENCE</div>
+        <div style={{fontSize:10,color:"#4a6d8c",marginTop:2}}>Ask anything · Live signals · 3/17/80 Framework · Pre-trade filter</div>
+      </div>
+      {oracleMessages.length>0&&<button onClick={()=>setOracleMessages([])} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(74,109,140,0.3)",background:"none",color:"#4a6d8c",cursor:"pointer"}}>CLEAR</button>}
+    </div>
+    <div style={{padding:"12px 20px",borderBottom:"1px solid #0d1f3a",flexShrink:0}}>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+        {["What should I trade today?","Is NVDA a good put right now?","Check my positions","Scan all signals","Who is moving the market?","Market regime analysis"].map(q=>(
+          <button key={q} onClick={()=>sendOracleMessage(q)} style={{fontFamily:"monospace",fontSize:9,padding:"5px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer"}}>{q}</button>
+        ))}
+      </div>
+    </div>
+    <div ref={oracleChatRef} style={{flex:1,overflowY:"auto",padding:"16px 20px",minHeight:0,display:"flex",flexDirection:"column",gap:12}}>
+      {oracleMessages.length===0&&(
+        <div style={{textAlign:"center",padding:40,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>
+          Oracle is watching the market.<br/>
+          <span style={{color:"#ffd700"}}>Ask me anything.</span><br/>
+          I see what others miss.
+        </div>
+      )}
+      {oracleMessages.map((msg,idx)=>(
+        <div key={idx} style={{display:"flex",flexDirection:"column",alignItems:msg.role==="user"?"flex-end":"flex-start"}}>
+          <div style={{maxWidth:"85%",padding:"10px 14px",borderRadius:msg.role==="user"?"12px 12px 2px 12px":"12px 12px 12px 2px",background:msg.role==="user"?"rgba(123,47,255,0.15)":"rgba(255,215,0,0.06)",border:msg.role==="user"?"1px solid rgba(123,47,255,0.3)":"1px solid rgba(255,215,0,0.15)"}}>
+            {msg.role==="oracle"&&<div style={{fontFamily:"monospace",fontSize:8,color:"#ffd700",letterSpacing:2,marginBottom:6}}>🔮 ORACLE · {msg.ts}</div>}
+            <div style={{fontSize:12,lineHeight:1.7,color:msg.role==="user"?"#c8dff0":"#e8f4ff",whiteSpace:"pre-wrap"}}>{msg.content}</div>
+            {msg.filter&&<div style={{marginTop:8,display:"flex",flexWrap:"wrap",gap:4}}>{msg.filter.map((item,i)=><span key={i} style={{fontSize:9,padding:"2px 8px",borderRadius:2,fontFamily:"monospace",background:item.pass?"rgba(57,255,20,0.1)":"rgba(255,45,85,0.1)",color:item.pass?"#39ff14":"#ff2d55",border:"1px solid "+(item.pass?"rgba(57,255,20,0.3)":"rgba(255,45,85,0.3)")}}>{item.pass?"✓":"✗"} {item.label}</span>)}</div>}
+            {msg.signals?.vix&&<div style={{marginTop:6,fontSize:9,fontFamily:"monospace",color:"#4a6d8c"}}>VIX: {msg.signals.vix.value} ({msg.signals.vix.regime}){msg.signals.quote?" · "+msg.signals.quote.ticker+": $"+msg.signals.quote.price:""}{msg.signals.options?" · P/C: "+msg.signals.options.putCallRatio:""}</div>}
+          </div>
+          {msg.role==="user"&&<div style={{fontSize:9,color:"#2a3d57",marginTop:2,fontFamily:"monospace"}}>{msg.ts}</div>}
+        </div>
+      ))}
+      {oracleChatLoading&&<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{fontFamily:"monospace",fontSize:10,color:"#ffd700"}}>🔮 Oracle analyzing...</div></div>}
+    </div>
+    <div style={{padding:"12px 20px",borderTop:"1px solid #0d1f3a",flexShrink:0,background:"#040d1a"}}>
+      <div style={{display:"flex",gap:8}}>
+        <input value={oracleChatInput} onChange={e=>setOracleChatInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&sendOracleMessage()} placeholder="Ask Oracle anything... NVDA setup? Should I hold? Who is accumulating?" style={{flex:1,background:"#0d1829",border:"1px solid rgba(255,215,0,0.3)",borderRadius:6,padding:"10px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} />
+        <button onClick={()=>sendOracleMessage()} disabled={oracleChatLoading||!oracleChatInput.trim()} style={{background:oracleChatLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleChatLoading?"#4a6d8c":"#030609",border:"none",borderRadius:6,padding:"10px 20px",fontSize:12,fontWeight:700,cursor:oracleChatLoading?"not-allowed":"pointer",fontFamily:"monospace"}}>
+          {oracleChatLoading?"...":"SEND →"}
+        </button>
+      </div>
+      <div style={{marginTop:6,fontSize:9,color:"#2a3d57",fontFamily:"monospace"}}>Enter to send · Session memory · Live market data · Pre-trade filter on every trade request</div>
+    </div>
+  </div>)}>
     {/* Oracle Header */}
     <div style={{padding:"14px 20px",borderBottom:"1px solid #0d1f3a",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
       <div>
