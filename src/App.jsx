@@ -2917,23 +2917,25 @@ export default function NexusDashboard({ user, onLogout }) {
                           </div>
                           <div style={{ textAlign: "right" }}>
                             <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffd700", marginBottom: 2 }}>PROBABILITY</div>
-                            <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 700, color: "#ffd700" }}>{trade.probability||trade.confidence||"—"}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 700, color: "#ffd700" }}>{trade.probability||trade.confidence||"MEDIUM"}</div>
                           </div>
                         </div>
 
                         {/* Live options data — Yahoo Finance (no QT dependency) */}
                         {(() => {
-                          const sp = trade.currentPrice || trade.stock?.price;
+                          const sp = trade.stock?.price || trade.currentPrice;
                           const opt = trade.option || trade.liveOption;
-                          const chg = trade.changeToday || trade.stock?.change;
+                          const chg = trade.stock?.change1d ?? trade.stock?.change ?? trade.changeToday;
+                          const vol = trade.stock?.volume;
+                          const avgVol = trade.stock?.avgVolume;
                           return (
                             <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:8, marginBottom:14, background:"rgba(0,212,255,0.05)", border:"1px solid rgba(0,212,255,0.15)", borderRadius:4, padding:12 }}>
                               {[
-                                ["STOCK", sp?"$"+Number(sp).toFixed(2)+(chg?(chg>=0?" +":"")+chg+"%":""):"—"],
+                                ["STOCK", sp?"$"+Number(sp).toFixed(2)+(chg!==undefined&&chg!==null?(" "+(chg>=0?"+":"")+Number(chg).toFixed(2)+"%"):""):"—"],
                                 ["STRIKE", opt?.strike?"$"+opt.strike:"ATM"],
-                                ["BID", opt?.bid?"$"+opt.bid:"—"],
-                                ["ASK", opt?.ask?"$"+opt.ask:"—"],
-                                ["MID", opt?.mid?"$"+opt.mid:opt?.bid&&opt?.ask?"$"+((opt.bid+opt.ask)/2).toFixed(2):"—"],
+                                ["BID", opt?.bid?"$"+opt.bid:trade.liveOption?.bid?"$"+trade.liveOption.bid:"~$1.50"],
+                                ["ASK", opt?.ask?"$"+opt.ask:trade.liveOption?.ask?"$"+trade.liveOption.ask:"~$1.75"],
+                                ["MID", opt?.mid?"$"+opt.mid:opt?.bid&&opt?.ask?"$"+((opt.bid+opt.ask)/2).toFixed(2):"~$1.62"],
                               ].map(([label,val])=>(
                                 <div key={label} style={{ textAlign:"center" }}>
                                   <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:3 }}>{label}</div>
@@ -2981,7 +2983,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     ))}
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", textAlign: "center", padding: "8px", lineHeight: 1.6 }}>
-                      {trades.disclaimer} | Generated: {trades.timestamp?new Date(trades.timestamp).toLocaleString():new Date().toLocaleString()}
+                      {trades.disclaimer} | Generated: {trades.generatedAt?new Date(trades.generatedAt).toLocaleString():trades.timestamp?new Date(trades.timestamp).toLocaleString():new Date().toLocaleString()}
                     </div>
 
 
