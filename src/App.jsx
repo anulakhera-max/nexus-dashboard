@@ -330,13 +330,12 @@ export default function NexusDashboard({ user, onLogout }) {
   const [loadingWatch, setLoadingWatch] = useState(false);
   const [watchInput, setWatchInput] = useState({ name: "", ticker: "", type: "individual" });
   const [loadingTab, setLoadingTab] = useState(false);
-  const [oracleQuery,setOracleQuery]=useState(""); const [oracleDate,setOracleDate]=useState(""); const [oracleResult,setOracleResult]=useState(null); const [oracleLoading,setOracleLoading]=useState(false); const [oracleError,setOracleError]=useState(null);
-  // Oracle v4 — Conversational Intelligence
+  const [oracleQuery,setOracleQuery]=useState(""); const [oracleDate,setOracleDate]=useState(""); const [oracleResult,setOracleResult]=useState(null); const [oracleLoading,setOracleLoading]=useState(false); // Oracle v4 state
   const [oracleMessages, setOracleMessages] = React.useState([]);
   const [oracleChatInput, setOracleChatInput] = React.useState("");
   const [oracleChatLoading, setOracleChatLoading] = React.useState(false);
-  const [oracleMode, setOracleMode] = React.useState("chat"); // chat or predict
-  const oracleChatRef = React.useRef(null); const [legendaryIntel,setLegendaryIntel]=useState(null); const [legendaryLoading,setLegendaryLoading]=useState(false); const [googleFinance,setGoogleFinance]=useState({}); const [clock, setClock] = useState("");
+  const oracleChatRef = React.useRef(null);
+  const [oracleError,setOracleError]=useState(null); const [legendaryIntel,setLegendaryIntel]=useState(null); const [legendaryLoading,setLegendaryLoading]=useState(false); const [googleFinance,setGoogleFinance]=useState({}); const [clock, setClock] = useState("");
   const [tickerItems, setTickerItems] = useState([]);
   const [apiError, setApiError] = useState(null);
   const [optionsPicks, setOptionsPicks] = useState(null);
@@ -611,7 +610,7 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingTab(false);
   };
 
-  // ─�� Pipeline functions ───────────────────────────────────────
+  // ── Pipeline functions ───────────────────────────────────────
   const runFullPipeline = async () => {
     if (pipelineRunning) return;
     setPipelineRunning(true); setPipelineStage("Gathering data..."); setTradesError(null);
@@ -769,40 +768,28 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   const runOracle=async()=>{if(!oracleQuery.trim())return;setOracleLoading(true);setOracleError(null);setOracleResult(null);try{const res=await fetch(nexusUrl+"/api/oracle",{method:"POST",headers:{"x-nexus-key":nexusKey,"Content-Type":"application/json"},body:JSON.stringify({query:oracleQuery,targetDate:oracleDate||null})});const text=await res.text();let data;try{data=JSON.parse(text);}catch(e){throw new Error("Server error: "+text.slice(0,150));}if(data.success)setOracleResult(data);else setOracleError(data.error||"Oracle failed");}catch(e){setOracleError(e.message);}setOracleLoading(false);}
-  const sendOracleMessage = async (msgOverride) => {
-    const msg = msgOverride || oracleChatInput.trim();
+  const sendOracleMessage = async (msg) => {
+    msg = msg || oracleChatInput.trim();
     if(!msg) return;
     setOracleChatInput("");
-    const userMsg = { role:"user", content:msg, ts:new Date().toLocaleTimeString() };
-    setOracleMessages(prev => [...prev, userMsg]);
+    const userMsg = {role:"user",content:msg,ts:new Date().toLocaleTimeString()};
+    setOracleMessages(prev=>[...prev,userMsg]);
     setOracleChatLoading(true);
     try {
-      // Build context from positions + recent picks
-      const posCtx = trackedPicks?.slice(-3).map(p=>p.ticker+" "+p.direction+" exp "+p.expiry+" ("+p.outcome+")").join(", ") || "none";
-      const res = await fetch(nexusUrl+"/api/oracle-chat", {
+      const posCtx = trackedPicks?.slice(-3).map(p=>p.ticker+" "+p.direction+" ("+p.outcome+")").join(", ")||"none";
+      const res = await fetch(nexusUrl+"/api/oracle-chat",{
         method:"POST",
         headers:{"x-nexus-key":nexusKey,"Content-Type":"application/json"},
-        body:JSON.stringify({
-          message: msg,
-          history: oracleMessages.slice(-8).map(m=>({role:m.role,content:m.content})),
-          context: {
-            positions: posCtx,
-            lastPicks: intelPicks?.slice(0,3).map(p=>p.ticker+" "+p.direction).join(", ") || "none",
-            rules: "Max premium $1.80 | Max expiry 27 days | Min ROI 9% | Min R/R 1:3"
-          }
-        })
+        body:JSON.stringify({message:msg,history:oracleMessages.slice(-8).map(m=>({role:m.role,content:m.content})),context:{positions:posCtx,lastPicks:intelPicks?.slice(0,3).map(p=>p.ticker+" "+p.direction).join(", ")||"none",rules:"Max premium $1.80 | Max expiry 27 days | Min ROI 9% | Min R/R 1:3"}})
       });
-      const data = await res.json();
-      const assistantMsg = { role:"oracle", content:data.response||data.prediction||"Oracle is thinking...", ts:new Date().toLocaleTimeString(), signals:data.signals, filter:data.preTradeFilter };
-      setOracleMessages(prev => [...prev, assistantMsg]);
+      const data=await res.json();
+      setOracleMessages(prev=>[...prev,{role:"oracle",content:data.response||"Oracle error",ts:new Date().toLocaleTimeString(),signals:data.signals,filter:data.preTradeFilter}]);
       setTimeout(()=>oracleChatRef.current?.scrollTo({top:9999,behavior:"smooth"}),100);
     } catch(e) {
-      setOracleMessages(prev=>[...prev,{role:"oracle",content:"⚠️ Connection error: "+e.message,ts:new Date().toLocaleTimeString()}]);
+      setOracleMessages(prev=>[...prev,{role:"oracle",content:"⚠️ "+e.message,ts:new Date().toLocaleTimeString()}]);
     }
     setOracleChatLoading(false);
   };
-
-  const clearOracleChat = () => { setOracleMessages([]); };
   ; const fetchSimPrice = async (ticker) => {
     if (simPrices[ticker]) return simPrices[ticker];
     try {
@@ -1685,7 +1672,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 })}
               </div>
 
-              {/*  ACTIVE SIMULATION PANEL */}
+              {/* ── ACTIVE SIMULATION PANEL ── */}
               {(() => {
                 const pick = intelPicks[activeSim];
                 if (!pick) return null;
@@ -1769,7 +1756,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       </div>
                     </div>
 
-                    {/* ── 3-{/* SCENARIO GRID */}
+                    {/* ── 3-SCENARIO GRID ── */}
                     <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:10 }}>
                       {/* Scenario A — base case */}
                       <div style={{ background:"rgba(57,255,20,0.06)", border:"1px solid rgba(57,255,20,0.2)", borderRadius:5, padding:"10px 12px" }}>
@@ -1875,7 +1862,15 @@ export default function NexusDashboard({ user, onLogout }) {
                         VIEW POSITIONS →
                       </button>
                     </div>
+                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:8, fontSize:9, fontFamily:"monospace", color:"#4a6d8c" }}>
+                          <span>Entry: <span style={{color:"#ffb800"}}>${pick.liveOption.ask}</span></span>
+                          <span>Target exit: <span style={{color:"#39ff14"}}>${(pick.liveOption.ask*1.5).toFixed(2)}</span> (+50% ROI)</span>
+                          <span>Stop: <span style={{color:"#ff2d55"}}>${(pick.liveOption.ask*0.5).toFixed(2)}</span> (-50%)</span>
+                          <span>Est ROI: <span style={{color:"#39ff14"}}>{pick.estimatedROI||"+50%"}</span></span>
+                        </div>
+                      </div>
                     )}
+                    CRITICAL DECISION POINTS ── */}
                     <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 12px", marginBottom:8 }}>
                       <div style={{ fontFamily:"monospace", fontSize:9, color:"#ffb800", marginBottom:6, letterSpacing:1 }}>CRITICAL DECISION POINTS</div>
                       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
@@ -1894,7 +1889,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       </div>
                     </div>
 
-                    {/*  WHAT HAS TO HAPPEN */}
+                    {/* ── WHAT HAS TO HAPPEN ── */}
                     <div style={{ display:"flex", gap:8, alignItems:"flex-start" }}>
                       <div style={{ flex:1, background:"rgba(0,0,0,0.2)", borderRadius:4, padding:"8px 10px" }}>
                         <div style={{ fontFamily:"monospace", fontSize:9, color:"#9d7fff", marginBottom:4 }}>WHAT HAS TO HAPPEN</div>
@@ -2546,7 +2541,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 12, marginBottom: 20 }}>
                         {[
                           { name: "DONALD TRUMP", emoji: "🇺🇸", data: profiles.trump, fields: [["Core Driver", "coreDriver"], ["Vanity Trigger", "vanityTrigger"], ["Announcement Pattern", "announcementPattern"], ["Current Play", "currentPlay"], ["Next Move", "nextMoveProbability"]] },
-                          { name: "BENJAMIN NETANYAHU", emoji: "���🇱", data: profiles.netanyahu, fields: [["Core Driver", "coreDriver"], ["Survival Play", "survivalPlay"], ["Trump Leverage", "trumpLeverage"], ["Next Move", "nextMove"]] },
+                          { name: "BENJAMIN NETANYAHU", emoji: "🇮🇱", data: profiles.netanyahu, fields: [["Core Driver", "coreDriver"], ["Survival Play", "survivalPlay"], ["Trump Leverage", "trumpLeverage"], ["Next Move", "nextMove"]] },
                           { name: "VLADIMIR PUTIN", emoji: "🇷🇺", data: profiles.putin, fields: [["Core Driver", "coreDriver"], ["Economic Pressure", "economicPressure"], ["Iran Connection", "iranConnection"], ["Sanctions Play", "sanctionsPlay"]] },
                           { name: "XI JINPING", emoji: "🇨🇳", data: profiles.xi, fields: [["Core Driver", "coreDriver"], ["Taiwan Timeline", "taiwanTimeline"], ["Trade Play", "trumpTradePlay"], ["Next Move", "nextMove"]] },
                         ].map((p, i) => p.data && (
@@ -3107,39 +3102,28 @@ export default function NexusDashboard({ user, onLogout }) {
             {/* SIGNALS TAB — All intelligence layers in one view */}
             {tab==="oracle"&&(<div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:"#040d1a"}}>
     <div style={{padding:"14px 20px",borderBottom:"1px solid #0d1f3a",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
-      <div>
-        <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:"#ffd700",letterSpacing:4}}>🔮 ORACLE v4 — CONVERSATIONAL INTELLIGENCE</div>
-        <div style={{fontSize:10,color:"#4a6d8c",marginTop:2}}>Ask anything · Live signals · 3/17/80 Framework · Pre-trade filter</div>
-      </div>
+      <div><div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:"#ffd700",letterSpacing:4}}>🔮 ORACLE v4 — CONVERSATIONAL INTELLIGENCE</div>
+      <div style={{fontSize:10,color:"#4a6d8c",marginTop:2}}>Ask anything · Live signals · 3/17/80 Framework · Pre-trade filter</div></div>
       {oracleMessages.length>0&&<button onClick={()=>setOracleMessages([])} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(74,109,140,0.3)",background:"none",color:"#4a6d8c",cursor:"pointer"}}>CLEAR</button>}
     </div>
-    <div style={{padding:"12px 20px",borderBottom:"1px solid #0d1f3a",flexShrink:0}}>
-      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-        {["What should I trade today?","Is NVDA a good put right now?","Check my positions","Scan all signals","Who is moving the market?","Market regime analysis"].map(q=>(
-          <button key={q} onClick={()=>sendOracleMessage(q)} style={{fontFamily:"monospace",fontSize:9,padding:"5px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer"}}>{q}</button>
-        ))}
-      </div>
+    <div style={{padding:"10px 20px",borderBottom:"1px solid #0d1f3a",flexShrink:0,display:"flex",gap:6,flexWrap:"wrap"}}>
+      {["What should I trade today?","Is NVDA a good put right now?","Check my positions","Scan all signals","Who is moving the market?","Market regime analysis"].map(q=>(
+        <button key={q} onClick={()=>sendOracleMessage(q)} style={{fontFamily:"monospace",fontSize:9,padding:"5px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer"}}>{q}</button>
+      ))}
     </div>
     <div ref={oracleChatRef} style={{flex:1,overflowY:"auto",padding:"16px 20px",minHeight:0,display:"flex",flexDirection:"column",gap:12}}>
-      {oracleMessages.length===0&&(
-        <div style={{textAlign:"center",padding:40,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>
-          Oracle is watching the market.<br/>
-          <span style={{color:"#ffd700"}}>Ask me anything.</span><br/>
-          I see what others miss.
-        </div>
-      )}
+      {oracleMessages.length===0&&<div style={{textAlign:"center",padding:40,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>Oracle is watching the market.<br/><span style={{color:"#ffd700"}}>Ask me anything.</span><br/>I see what others miss.</div>}
       {oracleMessages.map((msg,idx)=>(
         <div key={idx} style={{display:"flex",flexDirection:"column",alignItems:msg.role==="user"?"flex-end":"flex-start"}}>
           <div style={{maxWidth:"85%",padding:"10px 14px",borderRadius:msg.role==="user"?"12px 12px 2px 12px":"12px 12px 12px 2px",background:msg.role==="user"?"rgba(123,47,255,0.15)":"rgba(255,215,0,0.06)",border:msg.role==="user"?"1px solid rgba(123,47,255,0.3)":"1px solid rgba(255,215,0,0.15)"}}>
             {msg.role==="oracle"&&<div style={{fontFamily:"monospace",fontSize:8,color:"#ffd700",letterSpacing:2,marginBottom:6}}>🔮 ORACLE · {msg.ts}</div>}
             <div style={{fontSize:12,lineHeight:1.7,color:msg.role==="user"?"#c8dff0":"#e8f4ff",whiteSpace:"pre-wrap"}}>{msg.content}</div>
-            {msg.filter&&<div style={{marginTop:8,display:"flex",flexWrap:"wrap",gap:4}}>{msg.filter.map((item,i)=><span key={i} style={{fontSize:9,padding:"2px 8px",borderRadius:2,fontFamily:"monospace",background:item.pass?"rgba(57,255,20,0.1)":"rgba(255,45,85,0.1)",color:item.pass?"#39ff14":"#ff2d55",border:"1px solid "+(item.pass?"rgba(57,255,20,0.3)":"rgba(255,45,85,0.3)")}}>{item.pass?"✓":"✗"} {item.label}</span>)}</div>}
-            {msg.signals?.vix&&<div style={{marginTop:6,fontSize:9,fontFamily:"monospace",color:"#4a6d8c"}}>VIX: {msg.signals.vix.value} ({msg.signals.vix.regime}){msg.signals.quote?" · "+msg.signals.quote.ticker+": $"+msg.signals.quote.price:""}{msg.signals.options?" · P/C: "+msg.signals.options.putCallRatio:""}</div>}
+            {msg.filter&&<div style={{marginTop:8,display:"flex",flexWrap:"wrap",gap:4}}>{msg.filter.map((item,i)=><span key={i} style={{fontSize:9,padding:"2px 8px",borderRadius:2,fontFamily:"monospace",background:item.pass?"rgba(57,255,20,0.1)":"rgba(255,45,85,0.1)",color:item.pass?"#39ff14":"#ff2d55"}}>{item.pass?"✓":"✗"} {item.label}</span>)}</div>}
+            {msg.signals?.vix&&<div style={{marginTop:6,fontSize:9,fontFamily:"monospace",color:"#4a6d8c"}}>VIX: {msg.signals.vix.value} ({msg.signals.vix.regime}){msg.signals.quote?" · "+msg.signals.quote.ticker+": $"+msg.signals.quote.price:""}</div>}
           </div>
-          {msg.role==="user"&&<div style={{fontSize:9,color:"#2a3d57",marginTop:2,fontFamily:"monospace"}}>{msg.ts}</div>}
         </div>
       ))}
-      {oracleChatLoading&&<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{fontFamily:"monospace",fontSize:10,color:"#ffd700"}}>🔮 Oracle analyzing...</div></div>}
+      {oracleChatLoading&&<div style={{padding:"8px 0",fontFamily:"monospace",fontSize:10,color:"#ffd700"}}>🔮 Oracle analyzing...</div>}
     </div>
     <div style={{padding:"12px 20px",borderTop:"1px solid #0d1f3a",flexShrink:0,background:"#040d1a"}}>
       <div style={{display:"flex",gap:8}}>
@@ -3148,117 +3132,9 @@ export default function NexusDashboard({ user, onLogout }) {
           {oracleChatLoading?"...":"SEND →"}
         </button>
       </div>
-      <div style={{marginTop:6,fontSize:9,color:"#2a3d57",fontFamily:"monospace"}}>Enter to send · Session memory · Live market data · Pre-trade filter on every trade request</div>
+      <div style={{marginTop:6,fontSize:9,color:"#2a3d57",fontFamily:"monospace"}}>Enter to send · Session memory · Live market data</div>
     </div>
-  </div>)}>
-    {/* Oracle Header */}
-    <div style={{padding:"14px 20px",borderBottom:"1px solid #0d1f3a",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
-      <div>
-        <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:"#ffd700",letterSpacing:4}}>🔮 ORACLE v4</div>
-        <div style={{fontSize:10,color:"#4a6d8c",marginTop:2}}>Conversational Market Intelligence · 3/17/80 Framework · Live Signal Analysis</div>
-      </div>
-      <div style={{display:"flex",gap:8,alignItems:"center"}}>
-        <button onClick={()=>setOracleMode(oracleMode==="chat"?"predict":"chat")} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>
-          {oracleMode==="chat"?"📊 PREDICT MODE":"💬 CHAT MODE"}
-        </button>
-        {oracleMessages.length>0&&<button onClick={clearOracleChat} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(74,109,140,0.3)",background:"none",color:"#4a6d8c",cursor:"pointer"}}>CLEAR</button>}
-      </div>
-    </div>
-
-    {/* Quick Prompts */}
-    {oracleMessages.length===0&&(
-      <div style={{padding:"20px 20px 0",flexShrink:0}}>
-        <div style={{fontFamily:"monospace",fontSize:9,color:"#4a6d8c",letterSpacing:2,marginBottom:10}}>QUICK ACTIONS</div>
-        <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
-          <button onClick={()=>sendOracleMessage("What should I trade today?")} style={{fontFamily:"monospace",fontSize:10,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer",whiteSpace:"nowrap"}}>${p}</button><button onClick={()=>sendOracleMessage("Scan all signals now")} style={{fontFamily:"monospace",fontSize:10,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer",whiteSpace:"nowrap"}}>${p}</button><button onClick={()=>sendOracleMessage("Check my positions")} style={{fontFamily:"monospace",fontSize:10,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer",whiteSpace:"nowrap"}}>${p}</button><button onClick={()=>sendOracleMessage("Best setup right now")} style={{fontFamily:"monospace",fontSize:10,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer",whiteSpace:"nowrap"}}>${p}</button><button onClick={()=>sendOracleMessage("Market regime analysis")} style={{fontFamily:"monospace",fontSize:10,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer",whiteSpace:"nowrap"}}>${p}</button><button onClick={()=>sendOracleMessage("Who is moving the market?")} style={{fontFamily:"monospace",fontSize:10,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer",whiteSpace:"nowrap"}}>${p}</button>
-        </div>
-        <div style={{background:"rgba(255,215,0,0.04)",border:"1px solid rgba(255,215,0,0.1)",borderRadius:6,padding:"14px 16px",marginBottom:16}}>
-          <div style={{fontFamily:"monospace",fontSize:10,color:"#ffd700",marginBottom:8}}>ORACLE IS WATCHING</div>
-          <div style={{fontSize:11,color:"#4a6d8c",lineHeight:1.8}}>
-            Ask me anything: trade ideas, position analysis, market structure, who is moving what and why.<br/>
-            I see the patterns others miss. I know who is positioned where. I read greed and fear before the market does.
-          </div>
-        </div>
-      </div>
-    )}
-
-    {/* Chat Messages */}
-    <div ref={oracleChatRef} style={{flex:1,overflowY:"auto",padding:"16px 20px",minHeight:0,display:"flex",flexDirection:"column",gap:12}}>
-      {oracleMessages.map((msg,idx)=>(
-        <div key={idx} style={{display:"flex",flexDirection:"column",alignItems:msg.role==="user"?"flex-end":"flex-start"}}>
-          <div style={{
-            maxWidth:"85%",padding:"10px 14px",borderRadius:msg.role==="user"?"12px 12px 2px 12px":"12px 12px 12px 2px",
-            background:msg.role==="user"?"rgba(123,47,255,0.15)":"rgba(255,215,0,0.06)",
-            border:msg.role==="user"?"1px solid rgba(123,47,255,0.3)":"1px solid rgba(255,215,0,0.15)",
-          }}>
-            {msg.role==="oracle"&&<div style={{fontFamily:"monospace",fontSize:8,color:"#ffd700",letterSpacing:2,marginBottom:6}}>🔮 ORACLE · {msg.ts}</div>}
-            <div style={{fontSize:12,lineHeight:1.7,color:msg.role==="user"?"#c8dff0":"#e8f4ff",whiteSpace:"pre-wrap"}}>{msg.content}</div>
-            {/* Pre-trade filter results */}
-            {msg.filter&&(
-              <div style={{marginTop:10,borderTop:"1px solid rgba(255,215,0,0.1)",paddingTop:8}}>
-                <div style={{fontFamily:"monospace",fontSize:8,color:"#ffd700",letterSpacing:2,marginBottom:6}}>PRE-TRADE FILTER</div>
-                <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
-                  {msg.filter.map((item,i)=>(
-                    <span key={i} style={{fontSize:9,padding:"2px 8px",borderRadius:2,fontFamily:"monospace",background:item.pass?"rgba(57,255,20,0.1)":"rgba(255,45,85,0.1)",color:item.pass?"#39ff14":"#ff2d55",border:"1px solid "+(item.pass?"rgba(57,255,20,0.3)":"rgba(255,45,85,0.3)")}}>
-                      {item.pass?"✓":"✗"} {item.label}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-            {/* Signal snapshot */}
-            {msg.signals&&<div style={{marginTop:8,fontSize:9,fontFamily:"monospace",color:"#4a6d8c"}}>VIX: {msg.signals.vix?.value} · P/C: {msg.signals.options?.putCallRatio} · Dark Pool: {msg.signals.darkPool?.signal}</div>}
-          </div>
-          {msg.role==="user"&&<div style={{fontSize:9,color:"#2a3d57",marginTop:2,fontFamily:"monospace"}}>{msg.ts}</div>}
-        </div>
-      ))}
-      {oracleChatLoading&&(
-        <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0"}}>
-          <div style={{fontFamily:"monospace",fontSize:10,color:"#ffd700"}}>🔮 Oracle is analyzing</div>
-          <div style={{display:"flex",gap:3}}>
-            {[0,1,2].map(i=><div key={i} style={{width:4,height:4,borderRadius:"50%",background:"#ffd700",animation:"pulse 1s ease-in-out "+i*0.2+"s infinite"}}/>)}
-          </div>
-        </div>
-      )}
-    </div>
-
-    {/* Predict Mode — original single query */}
-    {oracleMode==="predict"&&(
-      <div style={{padding:"12px 20px",borderTop:"1px solid #0d1f3a",flexShrink:0,background:"#040d1a"}}>
-        <div style={{display:"flex",gap:8,marginBottom:8}}>
-          <input value={oracleQuery} onChange={e=>setOracleQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runOracle()} placeholder="NVDA May 30 2026 · AAPL earnings · BTC year end" style={{flex:1,background:"#0d1829",border:"1px solid #ffd70055",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} />
-          <input value={oracleDate} onChange={e=>setOracleDate(e.target.value)} placeholder="Target date" style={{width:140,background:"#0d1829",border:"1px solid #1a2d47",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} />
-          <button onClick={runOracle} disabled={oracleLoading||!oracleQuery.trim()} style={{background:oracleLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleLoading?"#4a6d8c":"#030609",border:"none",borderRadius:3,padding:"9px 20px",fontSize:12,fontWeight:700,cursor:oracleLoading?"not-allowed":"pointer",fontFamily:"monospace"}}>
-            {oracleLoading?"COMPUTING...":"🔮 PREDICT"}
-          </button>
-        </div>
-        {oracleError&&<div style={{color:"#ff2d55",fontFamily:"monospace",fontSize:11,marginBottom:8}}>❌ {oracleError}</div>}
-        {oracleResult&&<div style={{background:"#080f1a",border:"1px solid #ffd70033",borderLeft:"4px solid #ffd700",borderRadius:4,padding:14,maxHeight:300,overflowY:"auto"}}>
-          <div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:3,marginBottom:8}}>ORACLE PREDICTION — {oracleQuery.toUpperCase()}</div>
-          <div style={{fontSize:11,lineHeight:1.8,color:"#c8dff0",whiteSpace:"pre-wrap"}}>{typeof oracleResult.prediction==="string"?oracleResult.prediction:JSON.stringify(oracleResult,null,2)}</div>
-        </div>}
-      </div>
-    )}
-
-    {/* Chat Input */}
-    {oracleMode==="chat"&&(
-      <div style={{padding:"12px 20px",borderTop:"1px solid #0d1f3a",flexShrink:0,background:"#040d1a"}}>
-        <div style={{display:"flex",gap:8}}>
-          <input 
-            value={oracleChatInput} 
-            onChange={e=>setOracleChatInput(e.target.value)}
-            onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&sendOracleMessage()}
-            placeholder="Ask Oracle anything... NVDA setup? Market regime? Should I hold my PLTR puts?"
-            style={{flex:1,background:"#0d1829",border:"1px solid rgba(255,215,0,0.3)",borderRadius:6,padding:"10px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}}
-          />
-          <button onClick={()=>sendOracleMessage()} disabled={oracleChatLoading||!oracleChatInput.trim()} style={{background:oracleChatLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleChatLoading?"#4a6d8c":"#030609",border:"none",borderRadius:6,padding:"10px 20px",fontSize:12,fontWeight:700,cursor:oracleChatLoading?"not-allowed":"pointer",fontFamily:"monospace",whiteSpace:"nowrap"}}>
-            {oracleChatLoading?"...":"SEND →"}
-          </button>
-        </div>
-        <div style={{marginTop:6,fontSize:9,color:"#2a3d57",fontFamily:"monospace"}}>Enter to send · Oracle remembers context within session · All analysis uses live market data</div>
-      </div>
-    )}
-  </div>)} {tab === "signals" && (
+  </div>)}><div style={{fontFamily:"monospace",fontSize:10,letterSpacing:4,color:"#ffd700",marginBottom:20,borderBottom:"1px solid #1a2d47",paddingBottom:10}}>🔮 ORACLE — AI PRICE PREDICTION ENGINE</div><div style={{display:"flex",gap:10,marginBottom:16}}><input value={oracleQuery} onChange={e=>setOracleQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runOracle()} placeholder="e.g. NVDA May 30 2026 · AAPL earnings · BTC year end" style={{flex:1,background:"#0d1829",border:"1px solid #ffd70055",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><input value={oracleDate} onChange={e=>setOracleDate(e.target.value)} placeholder="Target date (opt)" style={{width:170,background:"#0d1829",border:"1px solid #1a2d47",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><button onClick={runOracle} disabled={oracleLoading||!oracleQuery.trim()} style={{background:oracleLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleLoading?"#4a6d8c":"#030609",border:"none",borderRadius:3,padding:"9px 20px",fontSize:12,fontWeight:700,letterSpacing:2,cursor:oracleLoading?"not-allowed":"pointer",fontFamily:"monospace",whiteSpace:"nowrap"}}>{oracleLoading?"COMPUTING...":"🔮 PREDICT"}</button></div>{oracleError&&<div style={{color:"#ff2d55",fontFamily:"monospace",fontSize:11,marginBottom:12}}>❌ {oracleError}</div>}{oracleResult&&<div style={{background:"#080f1a",border:"1px solid #ffd70033",borderLeft:"4px solid #ffd700",borderRadius:4,padding:16}}><div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:3,marginBottom:10}}>ORACLE PREDICTION — {oracleQuery.toUpperCase()}</div><div style={{fontSize:12,lineHeight:1.8,color:"#c8dff0",whiteSpace:"pre-wrap"}}>{typeof oracleResult.prediction==="string"?oracleResult.prediction:JSON.stringify(oracleResult,null,2)}</div></div>}{!oracleResult&&!oracleLoading&&<div style={{textAlign:"center",padding:60,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>Enter a ticker + optional target date<br/>Examples: "AAPL Jun 30 2026" · "NVDA next earnings" · "Bitcoin year end"</div>}</div>)} {tab === "signals" && (
               <div style={{ flex:1, overflowY: "auto", minHeight:0, paddingBottom: 40 }}>
 
                 {/* Header */}
@@ -6658,7 +6534,6 @@ export default function NexusDashboard({ user, onLogout }) {
                   <span style={{ color:"#00d4ff" }}>👁 HOW IT WORKS:</span> Scans 89 tickers across 16 themes. Alerts feed directly into Oracle and TRADES pipeline. Every spike, volume anomaly and pattern setup is flagged.
                 </div>
               </div>
-            </div>
             )}
 
         {/* AI INTELLIGENCE BRIEF — slide-over drawer (replaces permanent right column) */}
