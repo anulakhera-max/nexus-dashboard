@@ -335,367 +335,20 @@ export default function NexusDashboard({ user, onLogout }) {
   const [oracleChatInput, setOracleChatInput] = React.useState("");
   const [oracleChatLoading, setOracleChatLoading] = React.useState(false);
   const oracleChatRef = React.useRef(null);
-  // Auto-load brain on mount
-  React.useEffect(()=>{loadOracleBrain();},[]);
-  const [oracleBrain, setOracleBrain] = React.useState({cycleCount:0,version:0,accuracy:{measured:0,predicted:65,target:90,trajectory:[]},signalWeights:{},lastEvolution:null,nextCycle:null,hyperMode:true,topInsights:[],latestSimulations:[],patterns:{topWinners:[],topLosers:[]}});
+  const [oracleBrain, setOracleBrain] = React.useState(null);
   const [showBrain, setShowBrain] = React.useState(false);
-import { useState, useEffect, useCallback } from "react";
-
-const API_URL = "https://api.anthropic.com/v1/messages";
-const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
-
-const seedEvents = [
-  { id: 1, category: "conflict", severity: "critical", title: "Russia-Ukraine War — Ongoing Offensive Operations", location: "Eastern Ukraine / Black Sea Region", summary: "Continued missile strikes on energy infrastructure. Black Sea grain corridor under pressure. European energy markets on edge.", commodities: ["Natural Gas", "Wheat", "Sunflower Oil", "Steel"], region: "europe" },
-  { id: 2, category: "conflict", severity: "critical", title: "Middle East — Multi-Front Tensions Escalate", location: "Israel / Gaza / Red Sea", summary: "Houthi attacks disrupting Red Sea shipping. Suez Canal traffic at 5-year low. Insurance premiums spiking 200%+.", commodities: ["Crude Oil", "LNG", "Container Shipping", "Aluminum"], region: "middleeast" },
-  { id: 3, category: "weather", severity: "high", title: "El Niño — Severe Drought Across Southern Asia", location: "India, Thailand, Vietnam, Philippines", summary: "Rice paddy yields projected down 18%. Water reservoirs critically low. Power generation from hydro dropping sharply.", commodities: ["Rice", "Palm Oil", "Rubber", "Electricity"], region: "asia" },
-  { id: 4, category: "diplomatic", severity: "high", title: "US-China Tech War — Semiconductor Export Controls", location: "Global / Taiwan Strait", summary: "CHIPS Act restrictions on advanced node chips. China retaliation via rare earth export limits. Taiwan remains flashpoint.", commodities: ["Semiconductors", "Gallium", "Germanium", "Cobalt"], region: "asia" },
-  { id: 5, category: "weather", severity: "critical", title: "Amazon Basin — Record Drought & Wildfires", location: "Brazil, Bolivia, Peru", summary: "Amazon River at historic lows. Soybean and coffee harvest forecasts reduced 22%. Wildfire smoke impacting air quality.", commodities: ["Soybeans", "Coffee", "Beef", "Timber"], region: "latam" },
-  { id: 6, category: "economic", severity: "high", title: "Panama Canal — Drought Reduces Capacity 36%", location: "Panama / Pacific Routes", summary: "Canal capacity down 36%. LNG tankers rerouting via Cape Horn adding 20+ days. Freight costs surging.", commodities: ["LNG", "Grain", "Coal", "Auto Parts"], region: "latam" },
-  { id: 7, category: "diplomatic", severity: "medium", title: "BRICS Expansion — De-Dollarization Push", location: "Global / Emerging Markets", summary: "Saudi Arabia, UAE, Ethiopia joining BRICS. New currency settlement frameworks challenge USD dominance in commodity trade.", commodities: ["Gold", "Oil", "Grain Futures", "USD"], region: "global" },
-  { id: 8, category: "tech", severity: "medium", title: "AI Data Center Boom — Power Grid Strain", location: "USA, Europe, Southeast Asia", summary: "Hyperscaler capex reaching $200B+. Power grid constraints in key markets. Copper demand projections revised upward 40%.", commodities: ["Copper", "Electricity", "Natural Gas", "Water"], region: "northamerica" },
-  { id: 9, category: "weather", severity: "high", title: "European Winter — Gas Storage Below Average", location: "Germany, France, UK, Netherlands", summary: "Cold snap incoming with storage 8% below 5-year average. LNG spot prices rising. Industrial curtailments possible.", commodities: ["Natural Gas", "LNG", "Coal", "Electricity"], region: "europe" },
-  { id: 10, category: "economic", severity: "high", title: "China Property Crisis — Steel Demand Collapse", location: "China / Global Commodities", summary: "Steel demand projections cut 12%. Iron ore futures tumbling. Construction slowdown rippling through global supply chains.", commodities: ["Iron Ore", "Steel", "Copper", "Nickel"], region: "asia" },
-  { id: 11, category: "health", severity: "medium", title: "Avian Flu H5N1 — Global Poultry Disruption", location: "USA, Europe, Asia", summary: "Over 90M birds culled globally. Egg prices up 65% YoY. Dairy cattle infections expanding in North America.", commodities: ["Poultry", "Eggs", "Feed Grain", "Milk"], region: "global" },
-  { id: 12, category: "conflict", severity: "high", title: "Sudan Civil War — Grain Belt Devastation", location: "Sudan, South Sudan", summary: "Agricultural regions destroyed. 18M facing famine. Nile River access disputed. Aid convoys blocked.", commodities: ["Wheat", "Sorghum", "Aid Logistics", "Humanitarian Supply"], region: "africa" },
-];
-
-const catColors = { weather: "#00d4ff", conflict: "#ff2d55", diplomatic: "#ffb800", tech: "#b24fff", economic: "#39ff14", health: "#ff6b35" };
-const catLabels = { weather: "🌊 WEATHER", conflict: "⚔ CONFLICT", diplomatic: "🏛 DIPLOMATIC", economic: "💹 ECONOMIC", tech: "⚡ TECH", health: "🧬 HEALTH" };
-const sevColors = { critical: "#ff2d55", high: "#ffb800", medium: "#00d4ff", low: "#39ff14" };
-
-// NEXUS v3.1 — Earnings Calendar // Estimate cost: ~$3 per 1M input tokens, ~$15 per 1M output tokens (Sonnet)
-function estimateCost(promptLen, maxTokens) {
-  const inputTokens = Math.ceil(promptLen / 4);
-  const outputTokens = maxTokens;
-  return (inputTokens * 0.000003) + (outputTokens * 0.000015);
-}
-
-async function callClaude(prompt, maxTokens = 900) {
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": API_KEY,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: maxTokens,
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  return data.content?.[0]?.text || "";
-}
-
-function parseJSON(text) {
-  if (!text) return null;
-  var clean = text.trim();
-  if (clean.indexOf("json") === 0) clean = clean.slice(4);
-  clean = clean.replace(/^[\s\S]*?\[/, "[").replace(/\}[\s\S]*$/, "}");
-  try { return JSON.parse(clean); } catch {}
-  var a = clean.indexOf("[");
-  var b = clean.lastIndexOf("]");
-  if (a >= 0 && b > a) { try { return JSON.parse(clean.slice(a, b+1)); } catch {} }
-  var c = clean.indexOf("{");
-  var d = clean.lastIndexOf("}");
-  if (c >= 0 && d > c) { try { return JSON.parse(clean.slice(c, d+1)); } catch {} }
-  return null;
-}
-
-function getUpcomingFridays() {
-  const now = new Date();
-  const day = now.getDay();
-  const daysToFriday = day === 5 ? 7 : (5 - day + 7) % 7 || 7;
-  const first = new Date(now); first.setDate(now.getDate() + daysToFriday);
-  const second = new Date(first); second.setDate(first.getDate() + 7);
-  const fmt = (d) => d.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
-  return { first: fmt(first), second: fmt(second) };
-}
-
-const OPTS_KEY = "nexus_options_picks";
-const OPTS_TIME_KEY = "nexus_options_time";
-
-function saveOptions(data) {
-  try { localStorage.setItem(OPTS_KEY, JSON.stringify(data)); localStorage.setItem(OPTS_TIME_KEY, new Date().toISOString()); } catch {}
-}
-function loadOptions() {
-  try { const r = localStorage.getItem(OPTS_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
-}
-function loadOptionsTime() {
-  try { const r = localStorage.getItem(OPTS_TIME_KEY); return r ? new Date(r) : null; } catch { return null; }
-}
-
-const S = {
-  app: { fontFamily: "'Segoe UI', sans-serif", background: "#03060d", color: "#c8dff0", height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" },
-  topbar: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 20px", background: "linear-gradient(90deg,#020a14,#03101f,#020a14)", borderBottom: "1px solid #1a2d47", flexShrink: 0 },
-  logo: { fontFamily: "monospace", fontWeight: 900, fontSize: 22, letterSpacing: 6, color: "#00d4ff", textShadow: "0 0 20px rgba(0,212,255,0.4)" },
-  body: { display: "flex", flex: 1, overflow: "hidden" },
-  sidebar: { width: 250, background: "#080f1a", borderRight: "1px solid #1a2d47", display: "flex", flexDirection: "column", overflow: "hidden", flexShrink: 0 },
-  sideScroll: { overflowY: "auto", flex: 1, padding: "12px 0" },
-  sectionLabel: { fontSize: 10, letterSpacing: 4, textTransform: "uppercase", color: "#4a6d8c", padding: "12px 16px 6px", fontFamily: "monospace" },
-  filterBtn: (active) => ({ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "7px 16px", background: active ? "rgba(0,212,255,0.07)" : "transparent", border: "none", borderLeft: active ? "2px solid #00d4ff" : "2px solid transparent", color: active ? "#00d4ff" : "#4a6d8c", fontSize: 12, cursor: "pointer", textAlign: "left", fontFamily: "inherit" }),
-  main: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" },
-  queryBar: { display: "flex", gap: 10, padding: "12px 16px", background: "#080f1a", borderBottom: "1px solid #1a2d47", flexShrink: 0 },
-  input: { flex: 1, background: "#0d1829", border: "1px solid #1a2d47", borderRadius: 3, padding: "9px 14px", color: "#e8f4ff", fontSize: 12, fontFamily: "monospace", outline: "none" },
-  btnPrimary: (dis) => ({ background: dis ? "#1a2d47" : "#00d4ff", color: dis ? "#4a6d8c" : "#03060d", border: "none", borderRadius: 3, padding: "9px 18px", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: dis ? "not-allowed" : "pointer", fontFamily: "monospace", whiteSpace: "nowrap" }),
-  btnSecondary: { background: "transparent", color: "#ff6b35", border: "1px solid #ff6b35", borderRadius: 3, padding: "9px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: "pointer", fontFamily: "monospace" },
-  btnGold: (dis) => ({ background: dis ? "#1a2d47" : "linear-gradient(135deg,#b8860b,#ffd700)", color: dis ? "#4a6d8c" : "#0a0800", border: "none", borderRadius: 3, padding: "9px 18px", fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", cursor: dis ? "not-allowed" : "pointer", fontFamily: "monospace", whiteSpace: "nowrap" }),
-  tabs: { display: "flex", borderBottom: "1px solid #1a2d47", background: "#080f1a", flexShrink: 0 },
-  tab: (active, gold) => ({ padding: "10px 14px", cursor: "pointer", color: active ? (gold ? "#ffd700" : "#00d4ff") : "#a8cce0", borderBottom: active ? `2px solid ${gold ? "#ffd700" : "#00d4ff"}` : "2px solid transparent", fontSize: 11, letterSpacing: 2, fontFamily: "monospace", background: "transparent", border: "none", fontWeight: active ? 700 : 400 }),
-  contentArea: { flex: 1, overflowY: "auto", padding: 16, minHeight: 0 },
-  card: (cat, sel) => ({ background: sel ? "#0d1829" : "#080f1a", border: `1px solid ${sel ? "#00d4ff" : "#1a2d47"}`, borderLeft: `3px solid ${catColors[cat] || "#4a6d8c"}`, borderRadius: 4, padding: 14, cursor: "pointer", marginBottom: 10 }),
-  badge: (sev) => ({ fontSize: 9, padding: "2px 7px", borderRadius: 2, fontFamily: "monospace", fontWeight: 700, background: `${sevColors[sev]}22`, color: sevColors[sev], border: `1px solid ${sevColors[sev]}55` }),
-  tag: (hot) => ({ fontSize: 10, padding: "2px 8px", background: "#0d1829", border: `1px solid ${hot ? "#ff2d5544" : "#1a2d47"}`, borderRadius: 2, color: hot ? "#ff2d55" : "#4a6d8c", fontFamily: "monospace" }),
-  panel: { display: "none" }, /* AI Brief moved to slide-over drawer */
-  panelHeader: { padding: "12px 16px", background: "#0d1829", borderBottom: "1px solid #1a2d47", fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#00d4ff", fontFamily: "monospace", flexShrink: 0 },
-  panelBody: { flex: 1, overflowY: "auto", padding: 14 },
-  loading: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40, gap: 10 },
-  grid2: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 },
-  insightCard: { background: "#0d1829", border: "1px solid #1a2d47", borderRadius: 3, padding: 12 },
-  ticker: { borderTop: "1px solid #1a2d47", background: "#0d1829", height: 28, display: "flex", alignItems: "center", overflow: "hidden", flexShrink: 0 },
-};
-
-function Spinner({ label = "PROCESSING..." }) {
-  return (
-    <div style={S.loading}>
-      <div style={{ width: 180, height: 2, background: "#1a2d47", borderRadius: 1, overflow: "hidden", position: "relative" }}>
-        <div style={{ position: "absolute", top: 0, height: "100%", width: "40%", background: "linear-gradient(90deg,transparent,#00d4ff,transparent)", animation: "slide 1.4s infinite" }} />
-      </div>
-      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#4a6d8c", animation: "blink 1s step-end infinite" }}>{label}</div>
-    </div>
-  );
-}
-
-function EventCard({ event, selected, onClick }) {
-  return (
-    <div style={S.card(event.category, selected)} onClick={onClick}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-        <div>
-          <div style={{ fontSize: 9, letterSpacing: 3, color: catColors[event.category], fontFamily: "monospace", marginBottom: 3 }}>{catLabels[event.category]}</div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#e8f4ff", lineHeight: 1.3 }}>{event.title}</div>
-        </div>
-        <span style={S.badge(event.severity)}>{event.severity.toUpperCase()}</span>
-      </div>
-      <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 6 }}>📍 {event.location}</div>
-      <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.5, marginBottom: 8 }}>{event.summary}</div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-        {event.commodities.map((c, i) => <span key={c} style={S.tag(i < 2)}>{c}</span>)}
-      </div>
-    </div>
-  );
-}
-
-function AnalysisSection({ title, children }) {
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <div style={{ fontSize: 10, letterSpacing: 3, color: "#00d4ff", fontFamily: "monospace", borderBottom: "1px solid #1a2d47", paddingBottom: 5, marginBottom: 8 }}>{title}</div>
-      {children}
-    </div>
-  );
-}
-
-function IntelPickCard({pick,rank}){const isCall=pick.direction==="CALL"||pick.type==="CALL";const tc=isCall?"#39ff14":"#ff2d55";const cc=pick.confidence==="HIGH"?"#ff2d55":pick.confidence==="MEDIUM"?"#ffb800":"#4a6d8c";const uc=pick.urgency==="THIS WEEK"?"#ff2d55":pick.urgency==="NEXT WEEK"?"#ffb800":"#00d4ff";return(<div style={{background:"#080f1a",border:"1px solid "+tc+"33",borderLeft:"4px solid "+tc,borderRadius:4,padding:16,marginBottom:14,position:"relative"}}><div style={{position:"absolute",top:12,right:12,width:28,height:28,borderRadius:"50%",background:tc+"22",border:"1px solid "+tc+"55",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"monospace",fontSize:13,fontWeight:700,color:tc}}>{"#"+rank}</div><div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8,paddingRight:40}}><span style={{fontFamily:"monospace",fontSize:22,fontWeight:900,color:"#e8f4ff"}}>{pick.ticker}</span><span style={{fontSize:10,padding:"2px 8px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:tc+"22",color:tc,border:"1px solid "+tc+"55"}}>{pick.direction||pick.type||"CALL"}</span><span style={{fontSize:9,padding:"2px 7px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:cc+"22",color:cc,border:"1px solid "+cc+"55"}}>{pick.confidence||"MED"} CONF</span>{pick.urgency&&<span style={{fontSize:9,padding:"2px 7px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:uc+"22",color:uc,border:"1px solid "+uc+"55"}}>{pick.urgency}</span>}{pick.predictionRate&&<span style={{fontSize:9,padding:"2px 7px",borderRadius:2,fontFamily:"monospace",fontWeight:700,background:"#39ff1422",color:"#39ff14",border:"1px solid #39ff1455"}}>{pick.predictionRate} WIN RATE</span>}</div><div style={{fontSize:12,color:"#8aabb8",marginBottom:4}}>{pick.name||pick.companyName||""}</div><div style={{fontSize:10,color:"#4a6d8c",fontFamily:"monospace",marginBottom:10}}>{[pick.exchange,pick.sector||pick.source].filter(Boolean).join(" · ")}</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}><div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>EST. MOVE</div><div style={{fontSize:18,fontWeight:900,color:tc,fontFamily:"monospace"}}>{pick.estimatedMove||pick.targetReturn||"—"}</div></div><div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>EXPIRY</div><div style={{fontSize:12,fontWeight:700,color:"#ffb800",fontFamily:"monospace"}}>{pick.expiry||"—"}</div></div><div style={{background:"#0d1829",borderRadius:3,padding:"8px 10px",textAlign:"center"}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",marginBottom:3}}>SOURCE</div><div style={{fontSize:11,fontWeight:700,color:"#00d4ff",fontFamily:"monospace"}}>{pick.source||"AI"}</div></div></div>{pick.catalyst&&<div style={{marginBottom:8}}><div style={{fontSize:9,color:"#4a6d8c",fontFamily:"monospace",letterSpacing:2,marginBottom:4}}>CATALYST</div><div style={{fontSize:11,lineHeight:1.6,color:"#c8dff0"}}>{pick.catalyst}</div></div>}{(pick.thesis||pick.eventTrigger)&&<div style={{background:tc+"0d",border:"1px solid "+tc+"22",borderRadius:3,padding:"8px 10px"}}><div style={{fontSize:9,color:tc,fontFamily:"monospace",letterSpacing:2,marginBottom:4}}>THESIS</div><div style={{fontSize:11,color:"#c8dff0",lineHeight:1.5}}>{pick.thesis||pick.eventTrigger}</div></div>}</div>);}
-function OptionsPickCard({ pick, rank }) {
-  const isCall = pick.type === "CALL";
-  const typeColor = isCall ? "#39ff14" : "#ff2d55";
-  const confColor = pick.confidence === "HIGH" ? "#ff2d55" : pick.confidence === "MEDIUM" ? "#ffb800" : "#4a6d8c";
-  return (
-    <div style={{ background: "#080f1a", border: `1px solid ${typeColor}33`, borderLeft: `4px solid ${typeColor}`, borderRadius: 4, padding: 16, marginBottom: 14, position: "relative" }}>
-      <div style={{ position: "absolute", top: 12, right: 12, width: 28, height: 28, borderRadius: "50%", background: `${typeColor}22`, border: `1px solid ${typeColor}55`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: typeColor }}>#{rank}</div>
-
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10, paddingRight: 40 }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-            <span style={{ fontFamily: "monospace", fontSize: 22, fontWeight: 900, color: "#e8f4ff" }}>{pick.ticker}</span>
-            <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, fontFamily: "monospace", fontWeight: 700, background: `${typeColor}22`, color: typeColor, border: `1px solid ${typeColor}55` }}>{pick.type}</span>
-            <span style={{ fontSize: 9, padding: "2px 7px", borderRadius: 2, fontFamily: "monospace", fontWeight: 700, background: `${confColor}22`, color: confColor, border: `1px solid ${confColor}55` }}>{pick.confidence} CONF</span>
-          </div>
-          <div style={{ fontSize: 12, color: "#8aabb8", marginBottom: 2 }}>{pick.companyName}</div>
-          <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{pick.exchange} · {pick.sector}</div>
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 12, background: "#0d1829", borderRadius: 3, padding: 10 }}>
-        {[
-          { label: "STRIKE", value: pick.strike, color: "#e8f4ff" },
-          { label: "EXPIRY", value: pick.expiry, color: "#ffb800" },
-          { label: "CLOSES", value: "3:30 PM ET", color: "#4a6d8c" },
-          { label: "EST. PREMIUM", value: pick.premium, color: typeColor },
-        ].map(({ label, value, color }) => (
-          <div key={label} style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", letterSpacing: 1, marginBottom: 3 }}>{label}</div>
-            <div style={{ fontSize: 12, fontWeight: 700, color, fontFamily: "monospace" }}>{value}</div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
-        <div style={{ background: "#0d1829", borderRadius: 3, padding: "8px 10px", textAlign: "center" }}>
-          <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>TARGET RETURN</div>
-          <div style={{ fontSize: 18, fontWeight: 900, color: "#39ff14", fontFamily: "monospace" }}>{pick.targetReturn}</div>
-        </div>
-        <div style={{ background: "#0d1829", borderRadius: 3, padding: "8px 10px", textAlign: "center" }}>
-          <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>MAX LOSS</div>
-          <div style={{ fontSize: 18, fontWeight: 900, color: "#ff2d55", fontFamily: "monospace" }}>Premium</div>
-        </div>
-        <div style={{ background: "#0d1829", borderRadius: 3, padding: "8px 10px", textAlign: "center" }}>
-          <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", marginBottom: 3 }}>CATALYST</div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#ffb800", fontFamily: "monospace" }}>{pick.catalystDate}</div>
-        </div>
-      </div>
-
-      <div style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 9, color: "#4a6d8c", fontFamily: "monospace", letterSpacing: 2, marginBottom: 5 }}>TRADE THESIS</div>
-        <div style={{ fontSize: 11, lineHeight: 1.6, color: "#c8dff0" }}>{pick.thesis}</div>
-      </div>
-
-      <div style={{ background: `${typeColor}0d`, border: `1px solid ${typeColor}22`, borderRadius: 3, padding: "8px 10px", marginBottom: 10 }}>
-        <div style={{ fontSize: 9, color: typeColor, fontFamily: "monospace", letterSpacing: 2, marginBottom: 4 }}>NEXUS EVENT TRIGGER</div>
-        <div style={{ fontSize: 11, color: "#c8dff0", lineHeight: 1.5 }}>{pick.eventTrigger}</div>
-      </div>
-
-      <div style={{ fontSize: 10, color: "#4a6d8c", fontStyle: "italic", lineHeight: 1.5 }}>
-        ⚠ Risk: {pick.riskNote} · Max loss = premium paid.
-      </div>
-    </div>
-  );
-}
-
-export default function NexusDashboard({ user, onLogout }) {
-  const [events, setEvents] = useState(seedEvents);
-  const [filter, setFilter] = useState("all");
-  const [selected, setSelected] = useState(null);
-  const [tab, setTab] = useState("events");
-  const [query, setQuery] = useState("");
-  const [analysisHtml, setAnalysisHtml] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [scanning, setScanning] = useState(false);
-  const [predictions, setPredictions] = useState(null);
-  const [supplyData, setSupplyData] = useState(null);
-  const [sourcesData, setSourcesData] = useState(null);
-  const [watchlist, setWatchlist] = useState({ individuals: [], stocks: [] });
-  const [trades, setTrades] = useState(null);
-  const [trackerData, setTrackerData] = useState(null);
-  const [showTracker, setShowTracker] = useState(false);
-  const [trackerInput, setTrackerInput] = useState({});
-  const [loadingTracker, setLoadingTracker] = useState(false);
-  const [loadingTrades, setLoadingTrades] = useState(false);
-  const [tradesError, setTradesError] = useState(null);
-  const [pipelineStatus, setPipelineStatus] = useState(null);
-  const [earnings, setEarnings] = useState([]);
-  const [unusualFlow, setUnusualFlow] = useState(null);
-  const [movers, setMovers] = useState(null);
-  const [warRipple, setWarRipple] = useState(null);
-  const [loadingWar, setLoadingWar] = useState(false);
-  const [warError, setWarError] = useState(null);
-  const [newsBias, setNewsBias] = useState(null);
-  const [loadingBias, setLoadingBias] = useState(false);
-  const [biasError, setBiasError] = useState(null);
-  const [earningsDive, setEarningsDive] = useState({});
-  const [loadingDive, setLoadingDive] = useState({});
-  const [diveSearch, setDiveSearch] = useState("");
-  const [rippleChain, setRippleChain] = useState(null);
-  const [loadingRipple, setLoadingRipple] = useState(false);
-  const [rippleInput, setRippleInput] = useState("");
-  const [patternMemory, setPatternMemory] = useState(null);
-  const [loadingPattern, setLoadingPattern] = useState(false);
-  const [allianceData, setAllianceData] = useState(null);
-  const [loadingAlliance, setLoadingAlliance] = useState(false);
-  const [chartPatterns, setChartPatterns] = useState(null);
-  const [loadingPatterns, setLoadingPatterns] = useState(false);
-  const [patternTicker, setPatternTicker] = useState("");
-  const [paperBook, setPaperBook] = useState(null);
-  const [loadingPaper, setLoadingPaper] = useState(false);
-  const [paperFilter, setPaperFilter] = useState("all");
-  const [insiderData, setInsiderData] = useState(null);
-  const [loadingInsider, setLoadingInsider] = useState(false);
-  const [vixData, setVixData] = useState(null);
-  const [loadingVix, setLoadingVix] = useState(false);
-  const [fedData, setFedData] = useState(null);
-  const [loadingFed, setLoadingFed] = useState(false);
-  const [pcrData, setPcrData] = useState(null);
-  const [loadingPcr, setLoadingPcr] = useState(false);
-  const [sectorData, setSectorData] = useState(null);
-  const [loadingSector, setLoadingSector] = useState(false);
-  const [darkPoolData, setDarkPoolData] = useState(null);
-  const [loadingDarkPool, setLoadingDarkPool] = useState(false);
-  const [whisperData, setWhisperData] = useState(null);
-  const [loadingWhisper, setLoadingWhisper] = useState(false);
-  const [aiInfraData, setAiInfraData] = useState(null);
-  const [loadingAiInfra, setLoadingAiInfra] = useState(false);
-  const [aiInfraPillar, setAiInfraPillar] = useState(null);
-  const [geoData, setGeoData] = useState(null);
-  const [loadingGeo, setLoadingGeo] = useState(false);
-  const [geoScenario, setGeoScenario] = useState(null);
-  const [smartMoneyData, setSmartMoneyData] = useState(null);
-  const [loadingSmartMoney, setLoadingSmartMoney] = useState(false);
-  const [watchlistScan, setWatchlistScan] = useState(null);
-  const [loadingWatchlist, setLoadingWatchlist] = useState(false);
-  const [watchTheme, setWatchTheme] = useState(null);
-  const [spikeData, setSpikeData] = useState(null);
-  const [loadingSpike, setLoadingSpike] = useState(false);
-  const [spikeView, setSpikeView] = useState("alerts");
-  const [learningData, setLearningData] = useState(null);
-  const [suggestionsData, setSuggestionsData] = useState(null);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const [resolverData, setResolverData] = useState(null);
-  const [loadingResolver, setLoadingResolver] = useState(false);
-  const [redditData, setRedditData] = useState(null);
-  const [loadingReddit, setLoadingReddit] = useState(false);
-  const [oiData, setOiData] = useState(null);
-  const [loadingOI, setLoadingOI] = useState(false);
-  const [weightsData, setWeightsData] = useState(null);
-  const [loadingWeights, setLoadingWeights] = useState(false);
-  const [weightsScenario, setWeightsScenario] = useState("STALL");
-  const [autonomousData, setAutonomousData] = useState(null);
-  const [loadingAutonomous, setLoadingAutonomous] = useState(false);
-  const [backtestData, setBacktestData] = useState(null);
-  const [loadingBacktest, setLoadingBacktest] = useState(false);
-  const [backtestDays, setBacktestDays] = useState(30);
-  const [expandedPick, setExpandedPick] = useState(null);
-  const [myPositions, setMyPositions] = useState(null);
-  const [activeSim, setActiveSim] = useState(0); // which pick is being simulated (0,1,2)
-  const [simPrices, setSimPrices] = useState({}); // live prices for picks
-  const [loadingPositions, setLoadingPositions] = useState(false);
-  const [positionAnalyses, setPositionAnalyses] = useState({});
-  const [analyzingPosition, setAnalyzingPosition] = useState(null);
-  const [expandedPosition, setExpandedPosition] = useState(null);
-  const [loadingFlow, setLoadingFlow] = useState(false);
-  const [flowError, setFlowError] = useState(null);
-  const [pipelineRunning, setPipelineRunning] = useState(false);
-  const [pipelineStage, setPipelineStage] = useState("");
-  const [watchResults, setWatchResults] = useState([]);
-  const [loadingWatch, setLoadingWatch] = useState(false);
-  const [watchInput, setWatchInput] = useState({ name: "", ticker: "", type: "individual" });
-  const [loadingTab, setLoadingTab] = useState(false);
-  const [oracleQuery,setOracleQuery]=useState(""); const [oracleDate,setOracleDate]=useState(""); const [oracleResult,setOracleResult]=useState(null); const [oracleLoading,setOracleLoading]=useState(false); // Oracle v4 state
-  const [oracleMessages, setOracleMessages] = React.useState([]);
-  const [oracleChatInput, setOracleChatInput] = React.useState("");
-  const [oracleChatLoading, setOracleChatLoading] = React.useState(false);
-  const oracleChatRef = React.useRef(null);
-  // Auto-load brain on mount
-  React.useEffect(()=>{loadOracleBrain();},[]);
-  const [oracleBrain, setOracleBrain] = React.useState({cycleCount:0,version:0,accuracy:{measured:0,predicted:65,target:90,trajectory:[]},signalWeights:{},lastEvolution:null,nextCycle:null,hyperMode:true,topInsights:[],latestSimulations:[],patterns:{topWinners:[],topLosers:[]}});
+  const [oracleBrain, setOracleBrain] = React.useState(null);
   const [showBrain, setShowBrain] = React.useState(false);
   const loadOracleBrain = async () => {
     try{
-      const url=(window.NEXUS_URL||"https://nexus-api-953z.onrender.com")+"/api/oracle-brain";
-      const r=await fetch(url,{headers:{"x-nexus-key":"nexus-axl-agent-key"}});
+      const r=await fetch(nexusUrl+"/api/oracle-brain",{headers:{"x-nexus-key":nexusKey}});
       const d=await r.json();
-      console.log('[Brain] loaded:',d.cycleCount,'cycles');
       if(d.success) setOracleBrain(d);
-    }catch(e){console.log('[Brain] load error:',e.message);}
+    }catch(e){}
   };
   const triggerEvolution = async () => {
-    try{
-      const url=(window.NEXUS_URL||"https://nexus-api-953z.onrender.com")+"/api/oracle-brain/evolve";
-      await fetch(url,{method:"POST",headers:{"x-nexus-key":"nexus-axl-agent-key","Content-Type":"application/json"}});
-      console.log('[Brain] evolution triggered');
-      setTimeout(loadOracleBrain,3000);
-    }catch(e){console.log('[Brain] evolve error:',e.message);}
+    await fetch(nexusUrl+"/api/oracle-brain/evolve",{method:"POST",headers:{"x-nexus-key":nexusKey}});
+    setTimeout(loadOracleBrain,3000);
   };
   const [oracleError,setOracleError]=useState(null); const [legendaryIntel,setLegendaryIntel]=useState(null); const [legendaryLoading,setLegendaryLoading]=useState(false); const [googleFinance,setGoogleFinance]=useState({}); const [clock, setClock] = useState("");
   const [tickerItems, setTickerItems] = useState([]);
@@ -972,7 +625,7 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingTab(false);
   };
 
-  // ── Pipeline functions ───────────────────────────────────────
+  // ── Pipeline functions ───��───────────────────────────────────
   const runFullPipeline = async () => {
     if (pipelineRunning) return;
     setPipelineRunning(true); setPipelineStage("Gathering data..."); setTradesError(null);
@@ -1031,27 +684,7 @@ export default function NexusDashboard({ user, onLogout }) {
       if (data.success) setTrackerData(data);
     } catch {}
     setLoadingTracker(false);
-  }
-  // Oracle Brain functions — properly scoped in component body
-  const loadOracleBrain = React.useCallback(async () => {
-    try{
-      const r=await fetch("https://nexus-api-953z.onrender.com/api/oracle-brain",{headers:{"x-nexus-key":"nexus-axl-agent-key"}});
-      const d=await r.json();
-      console.log('[Brain] loaded:',d.cycleCount,'cycles');
-      if(d.success) setOracleBrain(d);
-    }catch(e){console.log('[Brain] error:',e.message);}
-  },[]);
-
-  const triggerEvolution = React.useCallback(async () => {
-    try{
-      await fetch("https://nexus-api-953z.onrender.com/api/oracle-brain/evolve",{method:"POST",headers:{"x-nexus-key":"nexus-axl-agent-key","Content-Type":"application/json"}});
-      console.log('[Brain] evolution triggered');
-      setTimeout(()=>loadOracleBrain(),3000);
-    }catch(e){console.log('[Brain] evolve error:',e.message);}
-  },[loadOracleBrain]);
-
-  React.useEffect(()=>{loadOracleBrain();},[loadOracleBrain]);
-  ;
+  };
 
   const autoLogTrades = async (tradeList) => {
     try {
@@ -1150,6 +783,19 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   const runOracle=async()=>{if(!oracleQuery.trim())return;setOracleLoading(true);setOracleError(null);setOracleResult(null);try{const res=await fetch(nexusUrl+"/api/oracle",{method:"POST",headers:{"x-nexus-key":nexusKey,"Content-Type":"application/json"},body:JSON.stringify({query:oracleQuery,targetDate:oracleDate||null})});const text=await res.text();let data;try{data=JSON.parse(text);}catch(e){throw new Error("Server error: "+text.slice(0,150));}if(data.success)setOracleResult(data);else setOracleError(data.error||"Oracle failed");}catch(e){setOracleError(e.message);}setOracleLoading(false);}
+  const loadOracleBrain = async () => {
+    try{
+      const r=await fetch("https://nexus-api-953z.onrender.com/api/oracle-brain",{headers:{"x-nexus-key":"nexus-axl-agent-key"}});
+      const d=await r.json();
+      if(d.success) setOracleBrain(d);
+    }catch(e){}
+  };
+  const triggerEvolution = async () => {
+    try{
+      await fetch("https://nexus-api-953z.onrender.com/api/oracle-brain/evolve",{method:"POST",headers:{"x-nexus-key":"nexus-axl-agent-key","Content-Type":"application/json"}});
+      setTimeout(loadOracleBrain,3000);
+    }catch(e){}
+  };
   const sendOracleMessage = async (msg) => {
     msg = msg || oracleChatInput.trim();
     if(!msg) return;
@@ -3476,7 +3122,8 @@ export default function NexusDashboard({ user, onLogout }) {
       <div><div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:"#ffd700",letterSpacing:4}}>🔮 ORACLE v4 — CONVERSATIONAL INTELLIGENCE</div>
       <div style={{fontSize:10,color:"#4a6d8c",marginTop:2}}>Ask anything · Live signals · 3/17/80 Framework · Pre-trade filter</div></div>
       <div style={{display:"flex",gap:6,alignItems:"center"}}>
-        <button onClick={()=>{const next=!showBrain;setShowBrain(next);if(next)loadOracleBrain();}} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>🧠 BRAIN {showBrain?"▲":"▼"}</button>
+        <button onClick={()=>{setShowBrain(!showBrain);if(!oracleBrain)loadOracleBrain();}} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>🧠 BRAIN {showBrain?"▲":"▼"}</button>
+        <button onClick={()=>{setShowBrain(b=>!b);loadOracleBrain();}} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>🧠 BRAIN</button>
         {oracleMessages.length>0&&<button onClick={()=>setOracleMessages([])} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(74,109,140,0.3)",background:"none",color:"#4a6d8c",cursor:"pointer"}}>CLEAR</button>}
       </div>
     </div>
@@ -3486,10 +3133,9 @@ export default function NexusDashboard({ user, onLogout }) {
       ))}
     </div>
     {/* Oracle Brain Status */}
-    {showBrain && (
+    {showBrain && oracleBrain && (
       <div style={{padding:"12px 20px",borderBottom:"1px solid #0d1f3a",flexShrink:0,background:"rgba(255,215,0,0.03)"}}>
-        {!oracleBrain && <div style={{fontFamily:"monospace",fontSize:10,color:"#ffd700",padding:"8px 0"}}>🧠 Loading Oracle Brain...</div>}
-        {oracleBrain && <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
           <div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:2}}>🧠 ORACLE BRAIN — CYCLE {oracleBrain.cycleCount} · v{oracleBrain.version}</div>
           <div style={{display:"flex",gap:6}}>
             <button onClick={triggerEvolution} style={{fontFamily:"monospace",fontSize:8,padding:"3px 8px",borderRadius:2,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>⚡ FORCE EVOLVE</button>
@@ -3532,6 +3178,38 @@ export default function NexusDashboard({ user, onLogout }) {
         )}
         <div style={{marginTop:6,fontSize:8,fontFamily:"monospace",color:"#2a3d57"}}>
           Next evolution: {oracleBrain.nextCycle?new Date(oracleBrain.nextCycle).toLocaleTimeString():"—"} · Hyper mode: {oracleBrain.hyperMode?"ACTIVE":"OFF"}
+        </div>
+      </div>
+    )}
+    {showBrain&&(
+      <div style={{padding:"10px 20px",borderBottom:"1px solid #0d1f3a",background:"rgba(255,215,0,0.03)",flexShrink:0}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+          <div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700"}}>🧠 ORACLE BRAIN — {oracleBrain?("CYCLE "+oracleBrain.cycleCount+" · v"+oracleBrain.version):"LOADING..."}</div>
+          <div style={{display:"flex",gap:6}}>
+            <button onClick={triggerEvolution} style={{fontFamily:"monospace",fontSize:8,padding:"3px 8px",borderRadius:2,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.08)",color:"#ffd700",cursor:"pointer"}}>⚡ EVOLVE</button>
+            <button onClick={loadOracleBrain} style={{fontFamily:"monospace",fontSize:8,padding:"3px 8px",borderRadius:2,border:"1px solid rgba(74,109,140,0.3)",background:"none",color:"#4a6d8c",cursor:"pointer"}}>↻ REFRESH</button>
+          </div>
+        </div>
+        {oracleBrain&&(
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6}}>
+            {[
+              {l:"MEASURED",v:oracleBrain.accuracy?.measured+"%",c:"#39ff14"},
+              {l:"PROJECTED",v:oracleBrain.accuracy?.predicted+"%",c:"#ffd700"},
+              {l:"TARGET",v:"90%",c:"#ff2d55"},
+              {l:"CYCLES",v:oracleBrain.cycleCount,c:"#00d4ff"},
+            ].map((x,i)=>(
+              <div key={i} style={{textAlign:"center",background:"rgba(0,0,0,0.3)",borderRadius:3,padding:"5px 8px"}}>
+                <div style={{fontFamily:"monospace",fontSize:7,color:"#4a6d8c",marginBottom:2}}>{x.l}</div>
+                <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:x.c}}>{x.v}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {oracleBrain?.topInsights?.slice(0,2).map((insight,i)=>(
+          <div key={i} style={{fontSize:9,color:"#8aabb8",marginTop:4}}>→ {insight}</div>
+        ))}
+        <div style={{marginTop:4,fontSize:8,fontFamily:"monospace",color:"#2a3d57"}}>
+          Hyper mode: ACTIVE · Next: {oracleBrain?.nextCycle?new Date(oracleBrain.nextCycle).toLocaleTimeString():"—"}
         </div>
       </div>
     )}
