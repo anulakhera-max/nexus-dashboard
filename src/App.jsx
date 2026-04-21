@@ -6658,6 +6658,7 @@ export default function NexusDashboard({ user, onLogout }) {
                   <span style={{ color:"#00d4ff" }}>👁 HOW IT WORKS:</span> Scans 89 tickers across 16 themes. Alerts feed directly into Oracle and TRADES pipeline. Every spike, volume anomaly and pattern setup is flagged.
                 </div>
               </div>
+            </div>
             )}
 
         {/* AI INTELLIGENCE BRIEF — slide-over drawer (replaces permanent right column) */}
