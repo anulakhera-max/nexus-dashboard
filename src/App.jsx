@@ -611,7 +611,7 @@ export default function NexusDashboard({ user, onLogout }) {
     setLoadingTab(false);
   };
 
-  // ── Pipeline functions ───────────────────────────────────────
+  // ─�� Pipeline functions ───────────────────────────────────────
   const runFullPipeline = async () => {
     if (pipelineRunning) return;
     setPipelineRunning(true); setPipelineStage("Gathering data..."); setTradesError(null);
@@ -1685,7 +1685,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 })}
               </div>
 
-              {/* ── ACTIVE SIMULATION PANEL ── */}
+              {/* ──{/*  ACTIVE SIMULATION PANEL */}
               {(() => {
                 const pick = intelPicks[activeSim];
                 if (!pick) return null;
@@ -1769,7 +1769,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       </div>
                     </div>
 
-                    {/* ── 3-SCENARIO GRID ── */}
+                    {/* ── 3-{/* SCENARIO GRID */}
                     <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8, marginBottom:10 }}>
                       {/* Scenario A — base case */}
                       <div style={{ background:"rgba(57,255,20,0.06)", border:"1px solid rgba(57,255,20,0.2)", borderRadius:5, padding:"10px 12px" }}>
@@ -1883,7 +1883,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         </div>
                       </div>
                     )}
-                    CRITICAL DECISION POINTS ── */}
+                    {/* CRITICAL DECISION POINTS */}
                     <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 12px", marginBottom:8 }}>
                       <div style={{ fontFamily:"monospace", fontSize:9, color:"#ffb800", marginBottom:6, letterSpacing:1 }}>CRITICAL DECISION POINTS</div>
                       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
@@ -1902,7 +1902,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       </div>
                     </div>
 
-                    {/* ── WHAT HAS TO HAPPEN ── */}
+                    {/* ──{/*  WHAT HAS TO HAPPEN */}
                     <div style={{ display:"flex", gap:8, alignItems:"flex-start" }}>
                       <div style={{ flex:1, background:"rgba(0,0,0,0.2)", borderRadius:4, padding:"8px 10px" }}>
                         <div style={{ fontFamily:"monospace", fontSize:9, color:"#9d7fff", marginBottom:4 }}>WHAT HAS TO HAPPEN</div>
