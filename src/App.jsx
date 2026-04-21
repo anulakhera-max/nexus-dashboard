@@ -2931,11 +2931,11 @@ export default function NexusDashboard({ user, onLogout }) {
                           return (
                             <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:8, marginBottom:14, background:"rgba(0,212,255,0.05)", border:"1px solid rgba(0,212,255,0.15)", borderRadius:4, padding:12 }}>
                               {[
-                                ["STOCK", sp?"$"+Number(sp).toFixed(2)+(chg!==undefined&&chg!==null?(" "+(chg>=0?"+":"")+Number(chg).toFixed(2)+"%"):""):"—"],
+                                ["STOCK", trade.currentPrice?"$"+Number(trade.currentPrice).toFixed(2)+(trade.changeToday!==undefined?(" "+(trade.changeToday>=0?"+":"")+Number(trade.changeToday).toFixed(2)+"%"):""):"—"],
                                 ["STRIKE", opt?.strike?"$"+opt.strike:"ATM"],
-                                ["BID", opt?.bid?"$"+opt.bid:trade.liveOption?.bid?"$"+trade.liveOption.bid:"~$1.50"],
-                                ["ASK", opt?.ask?"$"+opt.ask:trade.liveOption?.ask?"$"+trade.liveOption.ask:"~$1.75"],
-                                ["MID", opt?.mid?"$"+opt.mid:opt?.bid&&opt?.ask?"$"+((opt.bid+opt.ask)/2).toFixed(2):"~$1.62"],
+                                ["BID", opt?.bid?"$"+Number(opt.bid).toFixed(2):"~$1.50"],
+                                ["ASK", opt?.ask?"$"+Number(opt.ask).toFixed(2):"~$1.75"],
+                                ["MID", opt?.mid?"$"+Number(opt.mid).toFixed(2):opt?.bid&&opt?.ask?"$"+((Number(opt.bid)+Number(opt.ask))/2).toFixed(2):"~$1.62"],
                               ].map(([label,val])=>(
                                 <div key={label} style={{ textAlign:"center" }}>
                                   <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:3 }}>{label}</div>
@@ -2983,7 +2983,7 @@ export default function NexusDashboard({ user, onLogout }) {
                     ))}
 
                     <div style={{ fontSize: 10, color: "#4a6d8c", textAlign: "center", padding: "8px", lineHeight: 1.6 }}>
-                      {trades.disclaimer} | Generated: {trades.generatedAt?new Date(trades.generatedAt).toLocaleString():trades.timestamp?new Date(trades.timestamp).toLocaleString():new Date().toLocaleString()}
+                      {trades.disclaimer} | Generated: {new Date(trades.generatedAt||trades.timestamp||Date.now()).toLocaleString()}
                     </div>
 
 
@@ -3168,7 +3168,7 @@ export default function NexusDashboard({ user, onLogout }) {
                         </div>
 
                         <div style={{ background: "rgba(255,45,85,0.04)", border: "1px solid rgba(255,45,85,0.15)", borderRadius: 4, padding: "8px 10px" }}>
-                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 4 }}>📉 PUT OI BUILDUP — BEARISH</div>
+                          <div style={{ fontFamily: "monospace", fontSize: 8, color: "#ff2d55", marginBottom: 4 }}>📉 PUT OI BUILDUP �� BEARISH</div>
                           {oiData.topBearishOI?.length > 0 ? oiData.topBearishOI.map((a, i) => (
                             <div key={i} style={{ marginBottom: 6 }}>
                               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
