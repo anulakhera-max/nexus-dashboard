@@ -339,7 +339,7 @@ export default function NexusDashboard({ user, onLogout }) {
   React.useEffect(()=>{loadOracleBrain();},[]);
   const [oracleBrain, setOracleBrain] = React.useState({cycleCount:0,version:0,accuracy:{measured:0,predicted:65,target:90,trajectory:[]},signalWeights:{},lastEvolution:null,nextCycle:null,hyperMode:true,topInsights:[],latestSimulations:[],patterns:{topWinners:[],topLosers:[]}});
   const [showBrain, setShowBrain] = React.useState(false);
-  t { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const API_URL = "https://api.anthropic.com/v1/messages";
 const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY;
