@@ -2914,10 +2914,359 @@ export default function NexusDashboard({ user, onLogout }) {
 
         {/* RIGHT PANEL */}
             {/* TRADES TAB */}
-            
+            {tab === "trades" && (
+              <div style={{ flex:1, overflowY: "auto", minHeight:0, paddingBottom: 40 }}>
+                <div style={{ background: "linear-gradient(135deg,rgba(255,45,85,0.1),rgba(255,45,85,0.03))", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, padding: "14px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#ff2d55", letterSpacing: 3, marginBottom: 4 }}>◎ TOP 3 TRADE EXECUTION</div>
+                    <div style={{ fontSize: 11, color: "#8aabb8" }}>Final output of the pipeline — 27 candidates → 9 scored → 3 validated with live Questrade data</div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button onClick={runFullPipeline} disabled={pipelineRunning} style={{ background: pipelineRunning ? "#1a2d47" : "linear-gradient(135deg,#7b0000,#ff2d55)", color: pipelineRunning ? "#4a6d8c" : "#fff", border: "none", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: pipelineRunning ? "not-allowed" : "pointer", fontFamily: "monospace" }}>
+                      {pipelineRunning ? pipelineStage : "◎ RUN PIPELINE"}
+                    </button>
+                    <button onClick={() => loadTrades(true)} disabled={loadingTrades} style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.4)", color: "#ff2d55", borderRadius: 3, padding: "9px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>
+                      ⟳ REFRESH
+                    </button>
+                    {trades?.trades && <span style={{ fontFamily: "monospace", fontSize: 9, padding: "4px 10px", background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3 }}>✓ AUTO-LOGGED</span>}
+                  </div>
+                </div>
+
+                {tradesError && <div style={{ padding: 12, background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 4, color: "#ff6b8a", fontSize: 12, fontFamily: "monospace", marginBottom: 16 }}>⚠ {tradesError}</div>}
+
+                {!trades && !loadingTrades && !tradesError && (
+                  <div style={{ textAlign: "center", padding: 60 }}>
+                    <div style={{ fontSize: 48, marginBottom: 16 }}>◎</div>
+                    <div style={{ fontFamily: "monospace", fontSize: 14, color: "#ff2d55", letterSpacing: 3, marginBottom: 8 }}>NO TRADES GENERATED</div>
+                    <div style={{ fontSize: 12, color: "#4a6d8c", marginBottom: 24 }}>Run the full pipeline to generate your top 3 validated trades</div>
+                    <button onClick={runFullPipeline} style={{ background: "linear-gradient(135deg,#7b0000,#ff2d55)", color: "#fff", border: "none", borderRadius: 3, padding: "12px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "monospace", letterSpacing: 2 }}>◎ RUN FULL PIPELINE</button>
+                  </div>
+                )}
+
+                {trades?.trades && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                    {trades.trades.map((trade, i) => (
+                      <div key={i} style={{ background: "#080f1a", border: "1px solid rgba(255,45,85,0.3)", borderRadius: 6, padding: 20 }}>
+                        {/* Trade header */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 24, fontWeight: 700, color: trade.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{trade.ticker}</div>
+                            <div>
+                              <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 700, color: trade.direction === "CALL" ? "#39ff14" : "#ff2d55", background: trade.direction === "CALL" ? "rgba(57,255,20,0.1)" : "rgba(255,45,85,0.1)", padding: "3px 10px", borderRadius: 3, marginRight: 6 }}>{trade.direction}</span>
+                              <span style={{ fontSize: 11, fontFamily: "monospace", color: "#8aabb8" }}>Score: {trade.score}/100</span>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: "right" }}>
+                            <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffd700", marginBottom: 2 }}>PROBABILITY</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 700, color: "#ffd700" }}>{trade.probability||trade.confidence||"MEDIUM"}</div>
+                          </div>
+                        </div>
+
+                        {/* Live options data — Yahoo Finance (no QT dependency) */}
+                        {(() => {
+                          const sp = trade.stock?.price || trade.currentPrice;
+                          const opt = trade.option || trade.liveOption;
+                          const chg = trade.stock?.change1d ?? trade.stock?.change ?? trade.changeToday;
+                          const vol = trade.stock?.volume;
+                          const avgVol = trade.stock?.avgVolume;
+                          return (
+                            <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:8, marginBottom:14, background:"rgba(0,212,255,0.05)", border:"1px solid rgba(0,212,255,0.15)", borderRadius:4, padding:12 }}>
+                              {[
+                                ["STOCK", trade.currentPrice?"$"+Number(trade.currentPrice).toFixed(2)+(trade.changeToday!==undefined?(" "+(trade.changeToday>=0?"+":"")+Number(trade.changeToday).toFixed(2)+"%"):""):"—"],
+                                ["STRIKE", opt?.strike?"$"+opt.strike:"ATM"],
+                                ["BID", opt?.bid?"$"+Number(opt.bid).toFixed(2):"~$1.50"],
+                                ["ASK", opt?.ask?"$"+Number(opt.ask).toFixed(2):"~$1.75"],
+                                ["MID", opt?.mid?"$"+Number(opt.mid).toFixed(2):opt?.bid&&opt?.ask?"$"+((Number(opt.bid)+Number(opt.ask))/2).toFixed(2):"~$1.62"],
+                              ].map(([label,val])=>(
+                                <div key={label} style={{ textAlign:"center" }}>
+                                  <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:3 }}>{label}</div>
+                                  <div style={{ fontFamily:"monospace", fontSize:13, fontWeight:700, color:label==="STOCK"?(chg>=0?"#39ff14":"#ff2d55"):"#e8f4ff" }}>{val}</div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
+
+                        {/* Expiry + timing */}
+                        <div style={{ display: "flex", gap: 16, marginBottom: 12, fontSize: 11, fontFamily: "monospace" }}>
+                          <span style={{ color: "#8aabb8" }}>EXPIRY: <span style={{ color: "#e8f4ff" }}>{trade.expiry && !trade.expiry.includes("00:00:00") ? trade.expiry : trade.expiry?.slice(0,10) || "—"}</span></span>
+                          <span style={{ color: "#8aabb8" }}>TIMING: <span style={{ color: "#e8f4ff" }}>{trade.urgency || (trade.timing && !trade.timing.includes("*") ? trade.timing : "—")}</span></span>
+                          {qtChains?.[trade.ticker]?.iv && qtChains[trade.ticker].iv < 5 ? <span style={{ color: "#8aabb8" }}>IV: <span style={{ color: "#ffb800" }}>{(qtChains[trade.ticker].iv * 100).toFixed(0)}%</span></span> : null}
+                          {qtChains?.[trade.ticker]?.delta ? <span style={{ color: "#8aabb8" }}>Δ: <span style={{ color: "#e8f4ff" }}>{Number(qtChains[trade.ticker].delta).toFixed(2)}</span></span> : null}
+                          <span style={{ color: "#2a3d57", fontSize: 9 }}>via Yahoo Finance</span>
+                        </div>
+
+                        {/* Thesis */}
+                        <div style={{ fontSize: 12, color: "#c8dce8", lineHeight: 1.6, marginBottom: 12, paddingLeft: 10, borderLeft: "2px solid rgba(255,45,85,0.4)" }}>{trade.thesis || trade.catalyst}</div>
+
+                        {/* Target / Stop */}
+                        <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+                          <div style={{ flex: 1, background: "rgba(57,255,20,0.05)", border: "1px solid rgba(57,255,20,0.2)", borderRadius: 3, padding: "8px 12px" }}>
+                            <div style={{ fontSize: 9, fontFamily: "monospace", color: "#39ff14", marginBottom: 3 }}>TARGET</div>
+                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#39ff14", fontWeight: 700 }}>{trade.targetReturn || (trade.targetPct && !trade.targetPct.includes("*") ? trade.targetPct : null) || trade.estimatedMove?.split(" ")[0] || "—"}</div>
+                          </div>
+                          <div style={{ flex: 1, background: "rgba(255,45,85,0.05)", border: "1px solid rgba(255,45,85,0.2)", borderRadius: 3, padding: "8px 12px" }}>
+                            <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ff2d55", marginBottom: 3 }}>STOP</div>
+                            <div style={{ fontSize: 16, fontFamily: "monospace", color: "#ff2d55", fontWeight: 700 }}>{trade.stopPct && !trade.stopPct.includes("*") ? trade.stopPct : "—"}</div>
+                          </div>
+                          {trade.hedge?.ticker && !trade.hedge.ticker.includes("*") && (
+                            <div style={{ flex: 2, background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 3, padding: "8px 12px" }}>
+                              <div style={{ fontSize: 9, fontFamily: "monospace", color: "#ffb800", marginBottom: 3 }}>HEDGE</div>
+                              <div style={{ fontSize: 13, fontFamily: "monospace", color: "#ffb800", fontWeight: 700 }}>{trade.hedge.ticker} {trade.hedge.direction}</div>
+                              <div style={{ fontSize: 10, color: "#8aabb8" }}>{trade.hedge.reason}</div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Risk factors */}
+                        {trade.riskFactors && <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace", padding: "6px 10px", background: "rgba(255,45,85,0.04)", borderRadius: 3 }}>⚠ RISKS: {trade.riskFactors}</div>}
+                      </div>
+                    ))}
+
+                    <div style={{ fontSize: 10, color: "#4a6d8c", textAlign: "center", padding: "8px", lineHeight: 1.6 }}>
+                      {trades.disclaimer} | Generated: {new Date(trades.generatedAt||trades.timestamp||Date.now()).toLocaleString()}
+                    </div>
+
+
+                  </div>
+                )}
+
+                {/* PICK TRACKER */}
+                <div style={{ marginTop: 24 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, cursor: "pointer" }} onClick={() => { setShowTracker(!showTracker); if (!trackerData) loadTrackerData(); }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffb800", letterSpacing: 3 }}>📋 PICK TRACKER ({trackerData?.stats?.total || trackedPicks.length} logged)</div>
+                    <div style={{ fontSize: 11, color: "#4a6d8c", display: "flex", gap: 8, alignItems: "center" }}>
+                      {trackerData?.stats && <>
+                        <span style={{ color: "#39ff14" }}>{trackerData.stats.wins}W</span>
+                        <span style={{ color: "#ff2d55" }}>{trackerData.stats.losses}L</span>
+                        <span style={{ color: "#ffb800" }}>{trackerData.stats.open} OPEN</span>
+                        {trackerData.stats.winRate !== null && <span style={{ color: "#ffd700", fontWeight: 700 }}>{trackerData.stats.winRate}% WR</span>}
+                        {trackerData.stats.avgPnl !== null && <span style={{ color: trackerData.stats.avgPnl >= 0 ? "#39ff14" : "#ff2d55" }}>avg {trackerData.stats.avgPnl >= 0 ? "+" : ""}{trackerData.stats.avgPnl}%</span>}
+                      </>}
+                      <span>{showTracker ? "▲" : "▼"}</span>
+                    </div>
+                  </div>
+
+                  {showTracker && (
+                    <div>
+                      {/* Analytics */}
+                      {trackerData?.stats && trackerData.stats.closed >= 3 && (
+                        <div style={{ background: "rgba(255,184,0,0.05)", border: "1px solid rgba(255,184,0,0.2)", borderRadius: 4, padding: 12, marginBottom: 12 }}>
+                          <div style={{ fontFamily: "monospace", fontSize: 10, color: "#ffb800", letterSpacing: 2, marginBottom: 10 }}>📊 PERFORMANCE ANALYTICS</div>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+                            <div style={{ background: "#080f1a", borderRadius: 3, padding: "8px 10px" }}>
+                              <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 3 }}>CALL WIN RATE</div>
+                              <div style={{ fontSize: 16, fontFamily: "monospace", fontWeight: 700, color: (trackerData.stats.callWinRate || 0) >= 50 ? "#39ff14" : "#ff2d55" }}>{trackerData.stats.callWinRate !== null ? trackerData.stats.callWinRate + "%" : "—"}</div>
+                            </div>
+                            <div style={{ background: "#080f1a", borderRadius: 3, padding: "8px 10px" }}>
+                              <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 3 }}>PUT WIN RATE</div>
+                              <div style={{ fontSize: 16, fontFamily: "monospace", fontWeight: 700, color: (trackerData.stats.putWinRate || 0) >= 50 ? "#39ff14" : "#ff2d55" }}>{trackerData.stats.putWinRate !== null ? trackerData.stats.putWinRate + "%" : "—"}</div>
+                            </div>
+                          </div>
+                          {trackerData.stats.weights && (
+                            <div style={{ fontSize: 10, color: "#8aabb8", lineHeight: 1.8, borderTop: "1px solid rgba(255,184,0,0.1)", paddingTop: 8 }}>
+                              <div style={{ color: "#ffb800", fontFamily: "monospace", fontSize: 9, marginBottom: 4 }}>PIPELINE FEEDBACK ACTIVE</div>
+                              {trackerData.stats.weights.bestUrgency && <div>Best timing: <span style={{ color: "#e8f4ff" }}>{trackerData.stats.weights.bestUrgency}</span></div>}
+                              {trackerData.stats.weights.bestSector && <div>Best sector: <span style={{ color: "#39ff14" }}>{trackerData.stats.weights.bestSector}</span></div>}
+                              {trackerData.stats.weights.worstSector && <div>Avoid sector: <span style={{ color: "#ff2d55" }}>{trackerData.stats.weights.worstSector}</span></div>}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {trackedPicks.length === 0 && !loadingTracker && (
+                        <div style={{ fontSize: 11, color: "#4a6d8c", fontStyle: "italic", padding: 12 }}>No picks logged yet. Run the pipeline — trades auto-log after every run.</div>
+                      )}
+                      {loadingTracker && <div style={{ fontSize: 11, color: "#4a6d8c", padding: 12 }}>Loading tracker...</div>}
+                      {trackedPicks.map((pick) => (
+                        <div key={pick.id} style={{ background: "#080f1a", border: `1px solid ${pick.outcome === "WIN" ? "rgba(57,255,20,0.3)" : pick.outcome === "LOSS" ? "rgba(255,45,85,0.3)" : "rgba(74,109,140,0.3)"}`, borderRadius: 4, padding: 12, marginBottom: 8 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontFamily: "monospace", fontSize: 15, fontWeight: 700, color: pick.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{pick.ticker}</span>
+                              <span style={{ fontFamily: "monospace", fontSize: 10, color: pick.direction === "CALL" ? "#39ff14" : "#ff2d55" }}>{pick.direction}</span>
+                              {pick.strike && <span style={{ fontSize: 10, color: "#8aabb8", fontFamily: "monospace" }}>${pick.strike} strike</span>}
+                              <span style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>exp {pick.expiry}</span>
+                              <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 2, background: pick.outcome === "WIN" ? "rgba(57,255,20,0.1)" : pick.outcome === "LOSS" ? "rgba(255,45,85,0.1)" : "rgba(255,184,0,0.1)", color: pick.outcome === "WIN" ? "#39ff14" : pick.outcome === "LOSS" ? "#ff2d55" : "#ffb800", fontFamily: "monospace" }}>{pick.outcome}</span>
+                              {pick.pnlPct !== null && <span style={{ fontSize: 11, fontWeight: 700, color: pick.pnlPct >= 0 ? "#39ff14" : "#ff2d55", fontFamily: "monospace" }}>{pick.pnlPct >= 0 ? "+" : ""}{pick.pnlPct}%</span>}
+                            </div>
+                            <div style={{ fontSize: 10, color: "#4a6d8c", fontFamily: "monospace" }}>{(pick.entryDate||pick.loggedAt)?new Date(pick.entryDate||pick.loggedAt).toLocaleDateString():"—"}</div>
+                          </div>
+                          {pick.thesis && <div style={{ fontSize: 10, color: "#8aabb8", marginTop: 6, lineHeight: 1.5 }}>{pick.thesis.slice(0, 120)}{pick.thesis.length > 120 ? "..." : ""}</div>}
+                          {pick.entryPrice && <div style={{ fontSize: 10, color: "#4a6d8c", marginTop: 4, fontFamily: "monospace" }}>Entry: ${pick.entryPrice} · Target: {pick.targetPct} · Stop: {pick.stopPct}</div>}
+                          {(!pick.outcome||pick.outcome==="OPEN") && (
+                            <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                              <input placeholder="Exit price" style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "4px 8px", fontSize: 11, fontFamily: "monospace", width: 90, outline: "none" }}
+                                onChange={e => setTrackerInput(p => ({...p, [pick.id]: {...p[pick.id], exitPrice: parseFloat(e.target.value)}}))} />
+                              <input placeholder="Notes" style={{ background: "#0d1829", border: "1px solid #1a3a5c", color: "#e8f4ff", borderRadius: 3, padding: "4px 8px", fontSize: 11, fontFamily: "monospace", flex: 1, minWidth: 100, outline: "none" }}
+                                onChange={e => setTrackerInput(p => ({...p, [pick.id]: {...p[pick.id], notes: e.target.value}}))} />
+                              <button onClick={() => updateOutcome(pick.id, "WIN", trackerInput[pick.id]?.exitPrice, trackerInput[pick.id]?.notes || "")} style={{ background: "rgba(57,255,20,0.1)", border: "1px solid rgba(57,255,20,0.3)", color: "#39ff14", borderRadius: 3, padding: "4px 12px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>WIN</button>
+                              <button onClick={() => updateOutcome(pick.id, "LOSS", trackerInput[pick.id]?.exitPrice, trackerInput[pick.id]?.notes || "")} style={{ background: "rgba(255,45,85,0.1)", border: "1px solid rgba(255,45,85,0.3)", color: "#ff2d55", borderRadius: 3, padding: "4px 12px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>LOSS</button>
+                              <button onClick={() => updateOutcome(pick.id, "SCRATCH", trackerInput[pick.id]?.exitPrice, trackerInput[pick.id]?.notes || "")} style={{ background: "rgba(74,109,140,0.1)", border: "1px solid rgba(74,109,140,0.3)", color: "#8aabb8", borderRadius: 3, padding: "4px 12px", fontSize: 10, fontWeight: 700, cursor: "pointer", fontFamily: "monospace" }}>SCRATCH</button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* SIGNALS TAB — All intelligence layers in one view */}
-            ><div style={{fontFamily:"monospace",fontSize:10,letterSpacing:4,color:"#ffd700",marginBottom:20,borderBottom:"1px solid #1a2d47",paddingBottom:10}}>🔮 ORACLE — AI PRICE PREDICTION ENGINE</div><div style={{display:"flex",gap:10,marginBottom:16}}><input value={oracleQuery} onChange={e=>setOracleQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runOracle()} placeholder="e.g. NVDA May 30 2026 · AAPL earnings · BTC year end" style={{flex:1,background:"#0d1829",border:"1px solid #ffd70055",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><input value={oracleDate} onChange={e=>setOracleDate(e.target.value)} placeholder="Target date (opt)" style={{width:170,background:"#0d1829",border:"1px solid #1a2d47",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><button onClick={runOracle} disabled={oracleLoading||!oracleQuery.trim()} style={{background:oracleLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleLoading?"#4a6d8c":"#030609",border:"none",borderRadius:3,padding:"9px 20px",fontSize:12,fontWeight:700,letterSpacing:2,cursor:oracleLoading?"not-allowed":"pointer",fontFamily:"monospace",whiteSpace:"nowrap"}}>{oracleLoading?"COMPUTING...":"🔮 PREDICT"}</button></div>{oracleError&&<div style={{color:"#ff2d55",fontFamily:"monospace",fontSize:11,marginBottom:12}}>❌ {oracleError}</div>}{oracleResult&&<div style={{background:"#080f1a",border:"1px solid #ffd70033",borderLeft:"4px solid #ffd700",borderRadius:4,padding:16}}><div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:3,marginBottom:10}}>ORACLE PREDICTION — {oracleQuery.toUpperCase()}</div><div style={{fontSize:12,lineHeight:1.8,color:"#c8dff0",whiteSpace:"pre-wrap"}}>{typeof oracleResult.prediction==="string"?oracleResult.prediction:JSON.stringify(oracleResult,null,2)}</div></div>}{!oracleResult&&!oracleLoading&&<div style={{textAlign:"center",padding:60,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>Enter a ticker + optional target date<br/>Examples: "AAPL Jun 30 2026" · "NVDA next earnings" · "Bitcoin year end"</div>}</div>)} {tab === "signals" && (
+            {tab==="oracle"&&(<div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:"#040d1a"}}>
+    <div style={{padding:"14px 20px",borderBottom:"1px solid #0d1f3a",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
+      <div>
+        <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:"#ffd700",letterSpacing:4}}>🔮 ORACLE v4 — CONVERSATIONAL INTELLIGENCE</div>
+        <div style={{fontSize:10,color:"#4a6d8c",marginTop:2}}>Ask anything · Live signals · 3/17/80 Framework · Pre-trade filter</div>
+      </div>
+      {oracleMessages.length>0&&<button onClick={()=>setOracleMessages([])} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(74,109,140,0.3)",background:"none",color:"#4a6d8c",cursor:"pointer"}}>CLEAR</button>}
+    </div>
+    <div style={{padding:"12px 20px",borderBottom:"1px solid #0d1f3a",flexShrink:0}}>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+        {["What should I trade today?","Is NVDA a good put right now?","Check my positions","Scan all signals","Who is moving the market?","Market regime analysis"].map(q=>(
+          <button key={q} onClick={()=>sendOracleMessage(q)} style={{fontFamily:"monospace",fontSize:9,padding:"5px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer"}}>{q}</button>
+        ))}
+      </div>
+    </div>
+    <div ref={oracleChatRef} style={{flex:1,overflowY:"auto",padding:"16px 20px",minHeight:0,display:"flex",flexDirection:"column",gap:12}}>
+      {oracleMessages.length===0&&(
+        <div style={{textAlign:"center",padding:40,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>
+          Oracle is watching the market.<br/>
+          <span style={{color:"#ffd700"}}>Ask me anything.</span><br/>
+          I see what others miss.
+        </div>
+      )}
+      {oracleMessages.map((msg,idx)=>(
+        <div key={idx} style={{display:"flex",flexDirection:"column",alignItems:msg.role==="user"?"flex-end":"flex-start"}}>
+          <div style={{maxWidth:"85%",padding:"10px 14px",borderRadius:msg.role==="user"?"12px 12px 2px 12px":"12px 12px 12px 2px",background:msg.role==="user"?"rgba(123,47,255,0.15)":"rgba(255,215,0,0.06)",border:msg.role==="user"?"1px solid rgba(123,47,255,0.3)":"1px solid rgba(255,215,0,0.15)"}}>
+            {msg.role==="oracle"&&<div style={{fontFamily:"monospace",fontSize:8,color:"#ffd700",letterSpacing:2,marginBottom:6}}>🔮 ORACLE · {msg.ts}</div>}
+            <div style={{fontSize:12,lineHeight:1.7,color:msg.role==="user"?"#c8dff0":"#e8f4ff",whiteSpace:"pre-wrap"}}>{msg.content}</div>
+            {msg.filter&&<div style={{marginTop:8,display:"flex",flexWrap:"wrap",gap:4}}>{msg.filter.map((item,i)=><span key={i} style={{fontSize:9,padding:"2px 8px",borderRadius:2,fontFamily:"monospace",background:item.pass?"rgba(57,255,20,0.1)":"rgba(255,45,85,0.1)",color:item.pass?"#39ff14":"#ff2d55",border:"1px solid "+(item.pass?"rgba(57,255,20,0.3)":"rgba(255,45,85,0.3)")}}>{item.pass?"✓":"✗"} {item.label}</span>)}</div>}
+            {msg.signals?.vix&&<div style={{marginTop:6,fontSize:9,fontFamily:"monospace",color:"#4a6d8c"}}>VIX: {msg.signals.vix.value} ({msg.signals.vix.regime}){msg.signals.quote?" · "+msg.signals.quote.ticker+": $"+msg.signals.quote.price:""}{msg.signals.options?" · P/C: "+msg.signals.options.putCallRatio:""}</div>}
+          </div>
+          {msg.role==="user"&&<div style={{fontSize:9,color:"#2a3d57",marginTop:2,fontFamily:"monospace"}}>{msg.ts}</div>}
+        </div>
+      ))}
+      {oracleChatLoading&&<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{fontFamily:"monospace",fontSize:10,color:"#ffd700"}}>🔮 Oracle analyzing...</div></div>}
+    </div>
+    <div style={{padding:"12px 20px",borderTop:"1px solid #0d1f3a",flexShrink:0,background:"#040d1a"}}>
+      <div style={{display:"flex",gap:8}}>
+        <input value={oracleChatInput} onChange={e=>setOracleChatInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&sendOracleMessage()} placeholder="Ask Oracle anything... NVDA setup? Should I hold? Who is accumulating?" style={{flex:1,background:"#0d1829",border:"1px solid rgba(255,215,0,0.3)",borderRadius:6,padding:"10px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} />
+        <button onClick={()=>sendOracleMessage()} disabled={oracleChatLoading||!oracleChatInput.trim()} style={{background:oracleChatLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleChatLoading?"#4a6d8c":"#030609",border:"none",borderRadius:6,padding:"10px 20px",fontSize:12,fontWeight:700,cursor:oracleChatLoading?"not-allowed":"pointer",fontFamily:"monospace"}}>
+          {oracleChatLoading?"...":"SEND →"}
+        </button>
+      </div>
+      <div style={{marginTop:6,fontSize:9,color:"#2a3d57",fontFamily:"monospace"}}>Enter to send · Session memory · Live market data · Pre-trade filter on every trade request</div>
+    </div>
+  </div>)}>
+    {/* Oracle Header */}
+    <div style={{padding:"14px 20px",borderBottom:"1px solid #0d1f3a",display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
+      <div>
+        <div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:"#ffd700",letterSpacing:4}}>🔮 ORACLE v4</div>
+        <div style={{fontSize:10,color:"#4a6d8c",marginTop:2}}>Conversational Market Intelligence · 3/17/80 Framework · Live Signal Analysis</div>
+      </div>
+      <div style={{display:"flex",gap:8,alignItems:"center"}}>
+        <button onClick={()=>setOracleMode(oracleMode==="chat"?"predict":"chat")} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>
+          {oracleMode==="chat"?"📊 PREDICT MODE":"💬 CHAT MODE"}
+        </button>
+        {oracleMessages.length>0&&<button onClick={clearOracleChat} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(74,109,140,0.3)",background:"none",color:"#4a6d8c",cursor:"pointer"}}>CLEAR</button>}
+      </div>
+    </div>
+
+    {/* Quick Prompts */}
+    {oracleMessages.length===0&&(
+      <div style={{padding:"20px 20px 0",flexShrink:0}}>
+        <div style={{fontFamily:"monospace",fontSize:9,color:"#4a6d8c",letterSpacing:2,marginBottom:10}}>QUICK ACTIONS</div>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
+          <button onClick={()=>sendOracleMessage("What should I trade today?")} style={{fontFamily:"monospace",fontSize:10,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer",whiteSpace:"nowrap"}}>${p}</button><button onClick={()=>sendOracleMessage("Scan all signals now")} style={{fontFamily:"monospace",fontSize:10,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer",whiteSpace:"nowrap"}}>${p}</button><button onClick={()=>sendOracleMessage("Check my positions")} style={{fontFamily:"monospace",fontSize:10,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer",whiteSpace:"nowrap"}}>${p}</button><button onClick={()=>sendOracleMessage("Best setup right now")} style={{fontFamily:"monospace",fontSize:10,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer",whiteSpace:"nowrap"}}>${p}</button><button onClick={()=>sendOracleMessage("Market regime analysis")} style={{fontFamily:"monospace",fontSize:10,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer",whiteSpace:"nowrap"}}>${p}</button><button onClick={()=>sendOracleMessage("Who is moving the market?")} style={{fontFamily:"monospace",fontSize:10,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer",whiteSpace:"nowrap"}}>${p}</button>
+        </div>
+        <div style={{background:"rgba(255,215,0,0.04)",border:"1px solid rgba(255,215,0,0.1)",borderRadius:6,padding:"14px 16px",marginBottom:16}}>
+          <div style={{fontFamily:"monospace",fontSize:10,color:"#ffd700",marginBottom:8}}>ORACLE IS WATCHING</div>
+          <div style={{fontSize:11,color:"#4a6d8c",lineHeight:1.8}}>
+            Ask me anything: trade ideas, position analysis, market structure, who is moving what and why.<br/>
+            I see the patterns others miss. I know who is positioned where. I read greed and fear before the market does.
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Chat Messages */}
+    <div ref={oracleChatRef} style={{flex:1,overflowY:"auto",padding:"16px 20px",minHeight:0,display:"flex",flexDirection:"column",gap:12}}>
+      {oracleMessages.map((msg,idx)=>(
+        <div key={idx} style={{display:"flex",flexDirection:"column",alignItems:msg.role==="user"?"flex-end":"flex-start"}}>
+          <div style={{
+            maxWidth:"85%",padding:"10px 14px",borderRadius:msg.role==="user"?"12px 12px 2px 12px":"12px 12px 12px 2px",
+            background:msg.role==="user"?"rgba(123,47,255,0.15)":"rgba(255,215,0,0.06)",
+            border:msg.role==="user"?"1px solid rgba(123,47,255,0.3)":"1px solid rgba(255,215,0,0.15)",
+          }}>
+            {msg.role==="oracle"&&<div style={{fontFamily:"monospace",fontSize:8,color:"#ffd700",letterSpacing:2,marginBottom:6}}>🔮 ORACLE · {msg.ts}</div>}
+            <div style={{fontSize:12,lineHeight:1.7,color:msg.role==="user"?"#c8dff0":"#e8f4ff",whiteSpace:"pre-wrap"}}>{msg.content}</div>
+            {/* Pre-trade filter results */}
+            {msg.filter&&(
+              <div style={{marginTop:10,borderTop:"1px solid rgba(255,215,0,0.1)",paddingTop:8}}>
+                <div style={{fontFamily:"monospace",fontSize:8,color:"#ffd700",letterSpacing:2,marginBottom:6}}>PRE-TRADE FILTER</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                  {msg.filter.map((item,i)=>(
+                    <span key={i} style={{fontSize:9,padding:"2px 8px",borderRadius:2,fontFamily:"monospace",background:item.pass?"rgba(57,255,20,0.1)":"rgba(255,45,85,0.1)",color:item.pass?"#39ff14":"#ff2d55",border:"1px solid "+(item.pass?"rgba(57,255,20,0.3)":"rgba(255,45,85,0.3)")}}>
+                      {item.pass?"✓":"✗"} {item.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Signal snapshot */}
+            {msg.signals&&<div style={{marginTop:8,fontSize:9,fontFamily:"monospace",color:"#4a6d8c"}}>VIX: {msg.signals.vix?.value} · P/C: {msg.signals.options?.putCallRatio} · Dark Pool: {msg.signals.darkPool?.signal}</div>}
+          </div>
+          {msg.role==="user"&&<div style={{fontSize:9,color:"#2a3d57",marginTop:2,fontFamily:"monospace"}}>{msg.ts}</div>}
+        </div>
+      ))}
+      {oracleChatLoading&&(
+        <div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 0"}}>
+          <div style={{fontFamily:"monospace",fontSize:10,color:"#ffd700"}}>🔮 Oracle is analyzing</div>
+          <div style={{display:"flex",gap:3}}>
+            {[0,1,2].map(i=><div key={i} style={{width:4,height:4,borderRadius:"50%",background:"#ffd700",animation:"pulse 1s ease-in-out "+i*0.2+"s infinite"}}/>)}
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* Predict Mode — original single query */}
+    {oracleMode==="predict"&&(
+      <div style={{padding:"12px 20px",borderTop:"1px solid #0d1f3a",flexShrink:0,background:"#040d1a"}}>
+        <div style={{display:"flex",gap:8,marginBottom:8}}>
+          <input value={oracleQuery} onChange={e=>setOracleQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runOracle()} placeholder="NVDA May 30 2026 · AAPL earnings · BTC year end" style={{flex:1,background:"#0d1829",border:"1px solid #ffd70055",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} />
+          <input value={oracleDate} onChange={e=>setOracleDate(e.target.value)} placeholder="Target date" style={{width:140,background:"#0d1829",border:"1px solid #1a2d47",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} />
+          <button onClick={runOracle} disabled={oracleLoading||!oracleQuery.trim()} style={{background:oracleLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleLoading?"#4a6d8c":"#030609",border:"none",borderRadius:3,padding:"9px 20px",fontSize:12,fontWeight:700,cursor:oracleLoading?"not-allowed":"pointer",fontFamily:"monospace"}}>
+            {oracleLoading?"COMPUTING...":"🔮 PREDICT"}
+          </button>
+        </div>
+        {oracleError&&<div style={{color:"#ff2d55",fontFamily:"monospace",fontSize:11,marginBottom:8}}>❌ {oracleError}</div>}
+        {oracleResult&&<div style={{background:"#080f1a",border:"1px solid #ffd70033",borderLeft:"4px solid #ffd700",borderRadius:4,padding:14,maxHeight:300,overflowY:"auto"}}>
+          <div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:3,marginBottom:8}}>ORACLE PREDICTION — {oracleQuery.toUpperCase()}</div>
+          <div style={{fontSize:11,lineHeight:1.8,color:"#c8dff0",whiteSpace:"pre-wrap"}}>{typeof oracleResult.prediction==="string"?oracleResult.prediction:JSON.stringify(oracleResult,null,2)}</div>
+        </div>}
+      </div>
+    )}
+
+    {/* Chat Input */}
+    {oracleMode==="chat"&&(
+      <div style={{padding:"12px 20px",borderTop:"1px solid #0d1f3a",flexShrink:0,background:"#040d1a"}}>
+        <div style={{display:"flex",gap:8}}>
+          <input 
+            value={oracleChatInput} 
+            onChange={e=>setOracleChatInput(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&!e.shiftKey&&sendOracleMessage()}
+            placeholder="Ask Oracle anything... NVDA setup? Market regime? Should I hold my PLTR puts?"
+            style={{flex:1,background:"#0d1829",border:"1px solid rgba(255,215,0,0.3)",borderRadius:6,padding:"10px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}}
+          />
+          <button onClick={()=>sendOracleMessage()} disabled={oracleChatLoading||!oracleChatInput.trim()} style={{background:oracleChatLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleChatLoading?"#4a6d8c":"#030609",border:"none",borderRadius:6,padding:"10px 20px",fontSize:12,fontWeight:700,cursor:oracleChatLoading?"not-allowed":"pointer",fontFamily:"monospace",whiteSpace:"nowrap"}}>
+            {oracleChatLoading?"...":"SEND →"}
+          </button>
+        </div>
+        <div style={{marginTop:6,fontSize:9,color:"#2a3d57",fontFamily:"monospace"}}>Enter to send · Oracle remembers context within session · All analysis uses live market data</div>
+      </div>
+    )}
+  </div>)}><div style={{fontFamily:"monospace",fontSize:10,letterSpacing:4,color:"#ffd700",marginBottom:20,borderBottom:"1px solid #1a2d47",paddingBottom:10}}>🔮 ORACLE — AI PRICE PREDICTION ENGINE</div><div style={{display:"flex",gap:10,marginBottom:16}}><input value={oracleQuery} onChange={e=>setOracleQuery(e.target.value)} onKeyDown={e=>e.key==="Enter"&&runOracle()} placeholder="e.g. NVDA May 30 2026 · AAPL earnings · BTC year end" style={{flex:1,background:"#0d1829",border:"1px solid #ffd70055",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><input value={oracleDate} onChange={e=>setOracleDate(e.target.value)} placeholder="Target date (opt)" style={{width:170,background:"#0d1829",border:"1px solid #1a2d47",borderRadius:3,padding:"9px 14px",color:"#e8f4ff",fontSize:12,fontFamily:"monospace",outline:"none"}} /><button onClick={runOracle} disabled={oracleLoading||!oracleQuery.trim()} style={{background:oracleLoading?"#1a2d47":"linear-gradient(135deg,#7b2fff,#ffd700)",color:oracleLoading?"#4a6d8c":"#030609",border:"none",borderRadius:3,padding:"9px 20px",fontSize:12,fontWeight:700,letterSpacing:2,cursor:oracleLoading?"not-allowed":"pointer",fontFamily:"monospace",whiteSpace:"nowrap"}}>{oracleLoading?"COMPUTING...":"🔮 PREDICT"}</button></div>{oracleError&&<div style={{color:"#ff2d55",fontFamily:"monospace",fontSize:11,marginBottom:12}}>❌ {oracleError}</div>}{oracleResult&&<div style={{background:"#080f1a",border:"1px solid #ffd70033",borderLeft:"4px solid #ffd700",borderRadius:4,padding:16}}><div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:3,marginBottom:10}}>ORACLE PREDICTION — {oracleQuery.toUpperCase()}</div><div style={{fontSize:12,lineHeight:1.8,color:"#c8dff0",whiteSpace:"pre-wrap"}}>{typeof oracleResult.prediction==="string"?oracleResult.prediction:JSON.stringify(oracleResult,null,2)}</div></div>}{!oracleResult&&!oracleLoading&&<div style={{textAlign:"center",padding:60,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>Enter a ticker + optional target date<br/>Examples: "AAPL Jun 30 2026" · "NVDA next earnings" · "Bitcoin year end"</div>}</div>)} {tab === "signals" && (
               <div style={{ flex:1, overflowY: "auto", minHeight:0, paddingBottom: 40 }}>
 
                 {/* Header */}
