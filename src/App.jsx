@@ -3165,7 +3165,7 @@ export default function NexusDashboard({ user, onLogout }) {
         </div>
       </div>
     )}
-    ref={oracleChatRef} style={{flex:1,overflowY:"auto",padding:"16px 20px",minHeight:0,display:"flex",flexDirection:"column",gap:12}}>
+    <div ref={oracleChatRef} style={{flex:1,overflowY:"auto",padding:"16px 20px",minHeight:0,display:"flex",flexDirection:"column",gap:12}}>
       {oracleMessages.length===0&&<div style={{textAlign:"center",padding:40,color:"#4a6d8c",fontFamily:"monospace",fontSize:11,lineHeight:2}}>Oracle is watching the market.<br/><span style={{color:"#ffd700"}}>Ask me anything.</span><br/>I see what others miss.</div>}
       {oracleMessages.map((msg,idx)=>(
         <div key={idx} style={{display:"flex",flexDirection:"column",alignItems:msg.role==="user"?"flex-end":"flex-start"}}>
