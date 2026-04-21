@@ -671,12 +671,31 @@ export default function NexusDashboard({ user, onLogout }) {
       const res = await fetch(nexusUrl + "/api/tracker/log", {
         method: "POST",
         headers: { "x-nexus-key": nexusKey, "Content-Type": "application/json" },
-        body: JSON.stringify({ trades: tradeList })
+        body: JSON.stringify({ trades: tradeList.map(t=>({
+          id: Date.now()+'_'+t.ticker+'_'+t.rank,
+          ticker: t.ticker,
+          direction: t.direction||t.type||'CALL',
+          expiry: t.expiry,
+          strike: t.option?.strike||t.liveOption?.strike||null,
+          entryPrice: t.option?.ask||t.liveOption?.ask||t.premium||null,
+          currentPrice: t.currentPrice||null,
+          targetPrice: t.targetPrice||null,
+          stopPrice: t.stopPrice||null,
+          catalyst: t.catalyst||t.thesis||'',
+          confidence: t.confidence||'MEDIUM',
+          score: t.score||null,
+          predictionRate: t.predictionRate||null,
+          entryDate: new Date().toISOString(),
+          loggedAt: new Date().toISOString(),
+          source: 'NEXUS_PIPELINE_AUTO',
+          outcome: 'OPEN'
+        })) })
       });
       const data = await res.json();
       if (data.success) {
-        // Refresh tracker data
+        // Refresh tracker data and update trackedPicks directly
         await loadTrackerData();
+        setShowTracker(true); // auto-expand tracker
       }
       return data;
     } catch (err) { return { error: err.message }; }
