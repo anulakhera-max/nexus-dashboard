@@ -339,14 +339,20 @@ export default function NexusDashboard({ user, onLogout }) {
   const [showBrain, setShowBrain] = React.useState(false);
   const loadOracleBrain = async () => {
     try{
-      const r=await fetch(nexusUrl+"/api/oracle-brain",{headers:{"x-nexus-key":nexusKey}});
+      const url=(window.NEXUS_URL||"https://nexus-api-953z.onrender.com")+"/api/oracle-brain";
+      const r=await fetch(url,{headers:{"x-nexus-key":"nexus-axl-agent-key"}});
       const d=await r.json();
+      console.log('[Brain] loaded:',d.cycleCount,'cycles');
       if(d.success) setOracleBrain(d);
-    }catch(e){}
+    }catch(e){console.log('[Brain] load error:',e.message);}
   };
   const triggerEvolution = async () => {
-    await fetch(nexusUrl+"/api/oracle-brain/evolve",{method:"POST",headers:{"x-nexus-key":nexusKey}});
-    setTimeout(loadOracleBrain,3000);
+    try{
+      const url=(window.NEXUS_URL||"https://nexus-api-953z.onrender.com")+"/api/oracle-brain/evolve";
+      await fetch(url,{method:"POST",headers:{"x-nexus-key":"nexus-axl-agent-key","Content-Type":"application/json"}});
+      console.log('[Brain] evolution triggered');
+      setTimeout(loadOracleBrain,3000);
+    }catch(e){console.log('[Brain] evolve error:',e.message);}
   };
   const [oracleError,setOracleError]=useState(null); const [legendaryIntel,setLegendaryIntel]=useState(null); const [legendaryLoading,setLegendaryLoading]=useState(false); const [googleFinance,setGoogleFinance]=useState({}); const [clock, setClock] = useState("");
   const [tickerItems, setTickerItems] = useState([]);
@@ -3107,7 +3113,7 @@ export default function NexusDashboard({ user, onLogout }) {
       <div><div style={{fontFamily:"monospace",fontSize:13,fontWeight:700,color:"#ffd700",letterSpacing:4}}>🔮 ORACLE v4 — CONVERSATIONAL INTELLIGENCE</div>
       <div style={{fontSize:10,color:"#4a6d8c",marginTop:2}}>Ask anything · Live signals · 3/17/80 Framework · Pre-trade filter</div></div>
       <div style={{display:"flex",gap:6,alignItems:"center"}}>
-        <button onClick={()=>{setShowBrain(!showBrain);if(!oracleBrain)loadOracleBrain();}} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>🧠 BRAIN {showBrain?"▲":"▼"}</button>
+        <button onClick={()=>{const next=!showBrain;setShowBrain(next);if(next)loadOracleBrain();}} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>🧠 BRAIN {showBrain?"▲":"▼"}</button>
         {oracleMessages.length>0&&<button onClick={()=>setOracleMessages([])} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(74,109,140,0.3)",background:"none",color:"#4a6d8c",cursor:"pointer"}}>CLEAR</button>}
       </div>
     </div>
