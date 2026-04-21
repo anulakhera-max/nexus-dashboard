@@ -1685,7 +1685,7 @@ export default function NexusDashboard({ user, onLogout }) {
                 })}
               </div>
 
-              {/* ──{/*  ACTIVE SIMULATION PANEL */}
+              {/*  ACTIVE SIMULATION PANEL */}
               {(() => {
                 const pick = intelPicks[activeSim];
                 if (!pick) return null;
@@ -1875,13 +1875,6 @@ export default function NexusDashboard({ user, onLogout }) {
                         VIEW POSITIONS →
                       </button>
                     </div>
-                    <div style={{ display:"flex", justifyContent:"space-between", marginTop:8, fontSize:9, fontFamily:"monospace", color:"#4a6d8c" }}>
-                          <span>Entry: <span style={{color:"#ffb800"}}>${pick.liveOption.ask}</span></span>
-                          <span>Target exit: <span style={{color:"#39ff14"}}>${(pick.liveOption.ask*1.5).toFixed(2)}</span> (+50% ROI)</span>
-                          <span>Stop: <span style={{color:"#ff2d55"}}>${(pick.liveOption.ask*0.5).toFixed(2)}</span> (-50%)</span>
-                          <span>Est ROI: <span style={{color:"#39ff14"}}>{pick.estimatedROI||"+50%"}</span></span>
-                        </div>
-                      </div>
                     )}
                     <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 12px", marginBottom:8 }}>
                       <div style={{ fontFamily:"monospace", fontSize:9, color:"#ffb800", marginBottom:6, letterSpacing:1 }}>CRITICAL DECISION POINTS</div>
@@ -1901,7 +1894,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       </div>
                     </div>
 
-                    {/* ──{/*  WHAT HAS TO HAPPEN */}
+                    {/*  WHAT HAS TO HAPPEN */}
                     <div style={{ display:"flex", gap:8, alignItems:"flex-start" }}>
                       <div style={{ flex:1, background:"rgba(0,0,0,0.2)", borderRadius:4, padding:"8px 10px" }}>
                         <div style={{ fontFamily:"monospace", fontSize:9, color:"#9d7fff", marginBottom:4 }}>WHAT HAS TO HAPPEN</div>
@@ -2553,7 +2546,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 12, marginBottom: 20 }}>
                         {[
                           { name: "DONALD TRUMP", emoji: "🇺🇸", data: profiles.trump, fields: [["Core Driver", "coreDriver"], ["Vanity Trigger", "vanityTrigger"], ["Announcement Pattern", "announcementPattern"], ["Current Play", "currentPlay"], ["Next Move", "nextMoveProbability"]] },
-                          { name: "BENJAMIN NETANYAHU", emoji: "🇮🇱", data: profiles.netanyahu, fields: [["Core Driver", "coreDriver"], ["Survival Play", "survivalPlay"], ["Trump Leverage", "trumpLeverage"], ["Next Move", "nextMove"]] },
+                          { name: "BENJAMIN NETANYAHU", emoji: "���🇱", data: profiles.netanyahu, fields: [["Core Driver", "coreDriver"], ["Survival Play", "survivalPlay"], ["Trump Leverage", "trumpLeverage"], ["Next Move", "nextMove"]] },
                           { name: "VLADIMIR PUTIN", emoji: "🇷🇺", data: profiles.putin, fields: [["Core Driver", "coreDriver"], ["Economic Pressure", "economicPressure"], ["Iran Connection", "iranConnection"], ["Sanctions Play", "sanctionsPlay"]] },
                           { name: "XI JINPING", emoji: "🇨🇳", data: profiles.xi, fields: [["Core Driver", "coreDriver"], ["Taiwan Timeline", "taiwanTimeline"], ["Trade Play", "trumpTradePlay"], ["Next Move", "nextMove"]] },
                         ].map((p, i) => p.data && (
