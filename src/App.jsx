@@ -3123,9 +3123,10 @@ export default function NexusDashboard({ user, onLogout }) {
       ))}
     </div>
     {/* Oracle Brain Status */}
-    {showBrain && oracleBrain && (
+    {showBrain && (
       <div style={{padding:"12px 20px",borderBottom:"1px solid #0d1f3a",flexShrink:0,background:"rgba(255,215,0,0.03)"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+        {!oracleBrain && <div style={{fontFamily:"monospace",fontSize:10,color:"#ffd700",padding:"8px 0"}}>🧠 Loading Oracle Brain...</div>}
+        {oracleBrain && <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
           <div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:2}}>🧠 ORACLE BRAIN — CYCLE {oracleBrain.cycleCount} · v{oracleBrain.version}</div>
           <div style={{display:"flex",gap:6}}>
             <button onClick={triggerEvolution} style={{fontFamily:"monospace",fontSize:8,padding:"3px 8px",borderRadius:2,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>⚡ FORCE EVOLVE</button>
