@@ -1883,7 +1883,6 @@ export default function NexusDashboard({ user, onLogout }) {
                         </div>
                       </div>
                     )}
-                    {/* CRITICAL DECISION POINTS */}
                     <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 12px", marginBottom:8 }}>
                       <div style={{ fontFamily:"monospace", fontSize:9, color:"#ffb800", marginBottom:6, letterSpacing:1 }}>CRITICAL DECISION POINTS</div>
                       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
