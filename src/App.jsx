@@ -2917,26 +2917,27 @@ export default function NexusDashboard({ user, onLogout }) {
                           </div>
                           <div style={{ textAlign: "right" }}>
                             <div style={{ fontFamily: "monospace", fontSize: 11, color: "#ffd700", marginBottom: 2 }}>PROBABILITY</div>
-                            <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 700, color: "#ffd700" }}>{trade.probability}</div>
+                            <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 700, color: "#ffd700" }}>{trade.probability||trade.confidence||"—"}</div>
                           </div>
                         </div>
 
                         {/* Live options data — Yahoo Finance (no QT dependency) */}
                         {(() => {
-                          const yc = qtChains?.[trade.ticker];
-                          const sp = qtQuotes?.[trade.ticker]?.lastTradePrice || yc?.currentPrice;
+                          const sp = trade.currentPrice || trade.stock?.price;
+                          const opt = trade.option || trade.liveOption;
+                          const chg = trade.changeToday || trade.stock?.change;
                           return (
-                            <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: 14, background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: 4, padding: 12 }}>
+                            <div style={{ display:"grid", gridTemplateColumns:"repeat(5,1fr)", gap:8, marginBottom:14, background:"rgba(0,212,255,0.05)", border:"1px solid rgba(0,212,255,0.15)", borderRadius:4, padding:12 }}>
                               {[
-                                ["STOCK", sp ? "$" + Number(sp).toFixed(2) : "—"],
-                                ["STRIKE", yc?.bestStrike?.strike ? "$" + Number(yc.bestStrike.strike).toFixed(0) : (trade.strike || "ATM")],
-                                ["BID", yc?.bid ? "$" + Number(yc.bid).toFixed(2) : "—"],
-                                ["ASK", yc?.ask ? "$" + Number(yc.ask).toFixed(2) : "—"],
-                                ["MID", yc?.mid ? "$" + Number(yc.mid).toFixed(2) : yc?.bid && yc?.ask ? "$" + (( Number(yc.bid) + Number(yc.ask)) / 2).toFixed(2) : "—"],
-                              ].map(([label, val]) => (
-                                <div key={label} style={{ textAlign: "center" }}>
-                                  <div style={{ fontSize: 9, fontFamily: "monospace", color: "#4a6d8c", marginBottom: 3 }}>{label}</div>
-                                  <div style={{ fontSize: 13, fontFamily: "monospace", color: val === "—" ? "#2a3d57" : "#00d4ff", fontWeight: 700 }}>{val}</div>
+                                ["STOCK", sp?"$"+Number(sp).toFixed(2)+(chg?(chg>=0?" +":"")+chg+"%":""):"—"],
+                                ["STRIKE", opt?.strike?"$"+opt.strike:"ATM"],
+                                ["BID", opt?.bid?"$"+opt.bid:"—"],
+                                ["ASK", opt?.ask?"$"+opt.ask:"—"],
+                                ["MID", opt?.mid?"$"+opt.mid:opt?.bid&&opt?.ask?"$"+((opt.bid+opt.ask)/2).toFixed(2):"—"],
+                              ].map(([label,val])=>(
+                                <div key={label} style={{ textAlign:"center" }}>
+                                  <div style={{ fontFamily:"monospace", fontSize:8, color:"#4a6d8c", marginBottom:3 }}>{label}</div>
+                                  <div style={{ fontFamily:"monospace", fontSize:13, fontWeight:700, color:label==="STOCK"?(chg>=0?"#39ff14":"#ff2d55"):"#e8f4ff" }}>{val}</div>
                                 </div>
                               ))}
                             </div>
