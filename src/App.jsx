@@ -3116,7 +3116,7 @@ export default function NexusDashboard({ user, onLogout }) {
         <button key={q} onClick={()=>sendOracleMessage(q)} style={{fontFamily:"monospace",fontSize:9,padding:"5px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.2)",background:"rgba(255,215,0,0.04)",color:"#8aabb8",cursor:"pointer"}}>{q}</button>
       ))}
     </div>
-    <div {/* Oracle Brain Status */}
+    {/* Oracle Brain Status */}
     {showBrain && oracleBrain && (
       <div style={{padding:"12px 20px",borderBottom:"1px solid #0d1f3a",flexShrink:0,background:"rgba(255,215,0,0.03)"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
