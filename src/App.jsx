@@ -1650,7 +1650,7 @@ export default function NexusDashboard({ user, onLogout }) {
           </div>
 
           <div style={{overflowY:"auto",maxHeight:"calc(100vh - 120px)",flex:"0 0 auto"}}>
-            {/* ══════════════════════════════════════════════════════ */}
+            {/* ══════════��═══════════════════════════════════════════ */}
           {/* TOP 3 NEXUS PICKS — MISSION CONTROL */}
           {/* The entire signal stack exists to produce these 3 picks */}
           {/* ══════════════════════════════════════════════════════ */}
@@ -2558,7 +2558,7 @@ export default function NexusDashboard({ user, onLogout }) {
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 12, marginBottom: 20 }}>
                         {[
                           { name: "DONALD TRUMP", emoji: "🇺🇸", data: profiles.trump, fields: [["Core Driver", "coreDriver"], ["Vanity Trigger", "vanityTrigger"], ["Announcement Pattern", "announcementPattern"], ["Current Play", "currentPlay"], ["Next Move", "nextMoveProbability"]] },
-                          { name: "BENJAMIN NETANYAHU", emoji: "🇮🇱", data: profiles.netanyahu, fields: [["Core Driver", "coreDriver"], ["Survival Play", "survivalPlay"], ["Trump Leverage", "trumpLeverage"], ["Next Move", "nextMove"]] },
+                          { name: "BENJAMIN NETANYAHU", emoji: "����🇱", data: profiles.netanyahu, fields: [["Core Driver", "coreDriver"], ["Survival Play", "survivalPlay"], ["Trump Leverage", "trumpLeverage"], ["Next Move", "nextMove"]] },
                           { name: "VLADIMIR PUTIN", emoji: "🇷🇺", data: profiles.putin, fields: [["Core Driver", "coreDriver"], ["Economic Pressure", "economicPressure"], ["Iran Connection", "iranConnection"], ["Sanctions Play", "sanctionsPlay"]] },
                           { name: "XI JINPING", emoji: "🇨🇳", data: profiles.xi, fields: [["Core Driver", "coreDriver"], ["Taiwan Timeline", "taiwanTimeline"], ["Trade Play", "trumpTradePlay"], ["Next Move", "nextMove"]] },
                         ].map((p, i) => p.data && (
@@ -3123,7 +3123,7 @@ export default function NexusDashboard({ user, onLogout }) {
       <div style={{fontSize:10,color:"#4a6d8c",marginTop:2}}>Ask anything · Live signals · 3/17/80 Framework · Pre-trade filter</div></div>
       <div style={{display:"flex",gap:6,alignItems:"center"}}>
         <button onClick={()=>{setShowBrain(!showBrain);if(!oracleBrain)loadOracleBrain();}} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>🧠 BRAIN {showBrain?"▲":"▼"}</button>
-        <button onClick={()=>{setShowBrain(b=>!b);loadOracleBrain();}} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>🧠 BRAIN</button>
+        <button onClick={async()=>{setShowBrain(b=>!b);const r=await fetch("https://nexus-api-953z.onrender.com/api/oracle-brain",{headers:{"x-nexus-key":"nexus-axl-agent-key"}});const d=await r.json();if(d.success)setOracleBrain(d);}} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>🧠 BRAIN</button>
         {oracleMessages.length>0&&<button onClick={()=>setOracleMessages([])} style={{fontFamily:"monospace",fontSize:9,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(74,109,140,0.3)",background:"none",color:"#4a6d8c",cursor:"pointer"}}>CLEAR</button>}
       </div>
     </div>
@@ -3139,7 +3139,7 @@ export default function NexusDashboard({ user, onLogout }) {
           <div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700",letterSpacing:2}}>🧠 ORACLE BRAIN — CYCLE {oracleBrain.cycleCount} · v{oracleBrain.version}</div>
           <div style={{display:"flex",gap:6}}>
             <button onClick={triggerEvolution} style={{fontFamily:"monospace",fontSize:8,padding:"3px 8px",borderRadius:2,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.06)",color:"#ffd700",cursor:"pointer"}}>⚡ FORCE EVOLVE</button>
-            <button onClick={loadOracleBrain} style={{fontFamily:"monospace",fontSize:8,padding:"3px 8px",borderRadius:2,border:"1px solid rgba(74,109,140,0.3)",background:"none",color:"#4a6d8c",cursor:"pointer"}}>↻ REFRESH</button>
+            <button onClick={async()=>{const r=await fetch("https://nexus-api-953z.onrender.com/api/oracle-brain",{headers:{"x-nexus-key":"nexus-axl-agent-key"}});const d=await r.json();if(d.success)setOracleBrain(d);}} style={{fontFamily:"monospace",fontSize:8,padding:"3px 8px",borderRadius:2,border:"1px solid rgba(74,109,140,0.3)",background:"none",color:"#4a6d8c",cursor:"pointer"}}>↻ REFRESH</button>
           </div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:8}}>
@@ -3186,7 +3186,10 @@ export default function NexusDashboard({ user, onLogout }) {
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
           <div style={{fontFamily:"monospace",fontSize:9,color:"#ffd700"}}>🧠 ORACLE BRAIN — {oracleBrain?("CYCLE "+oracleBrain.cycleCount+" · v"+oracleBrain.version):"LOADING..."}</div>
           <div style={{display:"flex",gap:6}}>
-            <button onClick={triggerEvolution} style={{fontFamily:"monospace",fontSize:8,padding:"3px 8px",borderRadius:2,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.08)",color:"#ffd700",cursor:"pointer"}}>⚡ EVOLVE</button>
+            <button onClick={async()=>{
+              await fetch("https://nexus-api-953z.onrender.com/api/oracle-brain/evolve",{method:"POST",headers:{"x-nexus-key":"nexus-axl-agent-key","Content-Type":"application/json"}});
+              setTimeout(async()=>{const r=await fetch("https://nexus-api-953z.onrender.com/api/oracle-brain",{headers:{"x-nexus-key":"nexus-axl-agent-key"}});const d=await r.json();if(d.success)setOracleBrain(d);},3000);
+            }} style={{fontFamily:"monospace",fontSize:8,padding:"3px 8px",borderRadius:2,border:"1px solid rgba(255,215,0,0.3)",background:"rgba(255,215,0,0.08)",color:"#ffd700",cursor:"pointer"}}>⚡ EVOLVE</button>
             <button onClick={loadOracleBrain} style={{fontFamily:"monospace",fontSize:8,padding:"3px 8px",borderRadius:2,border:"1px solid rgba(74,109,140,0.3)",background:"none",color:"#4a6d8c",cursor:"pointer"}}>↻ REFRESH</button>
           </div>
         </div>
