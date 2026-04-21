@@ -1862,15 +1862,6 @@ export default function NexusDashboard({ user, onLogout }) {
                     </div>
                     <div style={{ display:"flex", justifyContent:"space-between", marginTop:8, fontSize:9, fontFamily:"monospace", color:"#4a6d8c" }}>
                           <span>Entry: <span style={{color:"#ffb800"}}>${pick.liveOption.ask}</span></span>
-                          <span>Target exit: <span style={{color:"#39ff14"}}>${(pick.liveOption.ask*1.5).toFixed(2)}</span> (+50% ROI)</span>
-                          <span>Stop: <span style={{color:"#ff2d55"}}>${(pick.liveOption.ask*0.5).toFixed(2)}</span> (-50%)</span>
-                          <span>Est ROI: <span style={{color:"#39ff14"}}>{pick.estimatedROI||"+50%"}</span></span>
-                        </div>
-                      </div>
-                    )}
-                    <div style={{ background:"rgba(0,0,0,0.3)", borderRadius:4, padding:"8px 12px", marginBottom:8 }}>
-                      <div style={{ fontFamily:"monospace", fontSize:9, color:"#ffb800", marginBottom:6, letterSpacing:1 }}>CRITICAL DECISION POINTS</div>
-                      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
                         <div style={{ borderLeft:"2px solid #39ff14", paddingLeft:8 }}>
                           <div style={{ fontFamily:"monospace", fontSize:10, color:"#39ff14", marginBottom:3 }}>IF SCENARIO A</div>
                           <div style={{ fontSize:10, color:"#c8dff0" }}>Take 50% profit · Hold rest for Scenario B target · Trail stop up</div>
