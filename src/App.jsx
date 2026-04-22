@@ -751,12 +751,34 @@ export default function NexusDashboard({ user, onLogout }) {
     } catch (err) { return { error: err.message }; }
   };
 
-  const updateOutcome = async (id, outcome, exitPrice, notes) => {
+  const updateOutcome = async (tradeId, outcome, exitPrice, notes) => {
     try {
-      const res = await fetch(nexusUrl + "/api/tracker/outcome", {
+      const url = (window.NEXUS_URL || "https://nexus-api-953z.onrender.com") + "/api/tracker/outcome";
+      const pnlPct = outcome === "WIN" ? 22 : outcome === "LOSS" ? -10 : -100;
+      const r = await fetch(url, {
         method: "POST",
-        headers: { "x-nexus-key": nexusKey, "Content-Type": "application/json" },
-        body: JSON.stringify({ id, outcome, exitPrice: exitPrice ? parseFloat(exitPrice) : null, notes })
+        headers: { "Content-Type": "application/json", "x-nexus-key": "nexus-axl-agent-key" },
+        body: JSON.stringify({ id: tradeId, outcome, exitPrice: exitPrice || null, pnlPct, notes: notes || "" })
+      });
+      const d = await r.json();
+      if (d.success) {
+        console.log("[TRACKER] " + outcome + " logged | accuracy:" + d.accuracy + "%");
+        const tr = await fetch((window.NEXUS_URL || "https://nexus-api-953z.onrender.com") + "/api/tracker", {
+          headers: { "x-nexus-key": "nexus-axl-agent-key" }
+        });
+        const td = await tr.json();
+        if (td.picks) setTrackedPicks(td.picks);
+        if (td.stats) setTrackerStats(td.stats);
+        const br = await fetch((window.NEXUS_URL || "https://nexus-api-953z.onrender.com") + "/api/oracle-brain", {
+          headers: { "x-nexus-key": "nexus-axl-agent-key" }
+        });
+        const bd = await br.json();
+        if (bd.success) setOracleBrain(bd);
+      } else {
+        console.log("[TRACKER] Error:", d.error);
+      }
+    } catch(e) { console.log("[TRACKER] Error:", e.message); }
+  })
       });
       const data = await res.json();
       if (data.success) await loadTrackerData();
@@ -844,7 +866,7 @@ export default function NexusDashboard({ user, onLogout }) {
       setOracleMessages(prev=>[...prev,{role:"oracle",content:data.response||"Oracle error",ts:new Date().toLocaleTimeString(),signals:data.signals,filter:data.preTradeFilter}]);
       setTimeout(()=>oracleChatRef.current?.scrollTo({top:9999,behavior:"smooth"}),100);
     } catch(e) {
-      setOracleMessages(prev=>[...prev,{role:"oracle",content:"⚠️ "+e.message,ts:new Date().toLocaleTimeString()}]);
+      setOracleMessages(prev=>[...prev,{role:"oracle",content:"��️ "+e.message,ts:new Date().toLocaleTimeString()}]);
     }
     setOracleChatLoading(false);
   };
