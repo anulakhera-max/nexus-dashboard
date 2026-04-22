@@ -339,6 +339,36 @@ export default function NexusDashboard({ user, onLogout }) {
   const [showBrain, setShowBrain] = React.useState(false);
   const [oracleBrain, setOracleBrain] = React.useState(null);
   const [showBrain, setShowBrain] = React.useState(false);
+  
+  // ── WIN/LOSS Button Handler (fixed) ──────────────────────────────────────
+  const setTradeOutcome=async(tradeId,outcome,pnlPct)=>{
+    try{
+      const r=await fetch((window.NEXUS_URL||"https://nexus-api-953z.onrender.com")+"/api/tracker/outcome",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","x-nexus-key":"nexus-axl-agent-key"},
+        body:JSON.stringify({id:tradeId,outcome,pnlPct:pnlPct||null})
+      });
+      const d=await r.json();
+      if(d.success){
+        console.log("[TRACKER] "+outcome+" logged | accuracy:"+d.accuracy+"%");
+        // Refresh tracker
+        const tr=await fetch((window.NEXUS_URL||"https://nexus-api-953z.onrender.com")+"/api/tracker",{
+          headers:{"x-nexus-key":"nexus-axl-agent-key"}
+        });
+        const td=await tr.json();
+        if(td.picks) setTrackedPicks(td.picks);
+        if(td.stats) setTrackerStats(td.stats);
+        // Refresh brain
+        const br=await fetch((window.NEXUS_URL||"https://nexus-api-953z.onrender.com")+"/api/oracle-brain",{
+          headers:{"x-nexus-key":"nexus-axl-agent-key"}
+        });
+        const bd=await br.json();
+        if(bd.success) setOracleBrain(bd);
+      }
+    }catch(e){console.log("[TRACKER] Error:",e.message);}
+  };
+  // ─────────────────────────────────────────────────────────────────────────
+
   const loadOracleBrain = async () => {
     try{
       const r=await fetch(nexusUrl+"/api/oracle-brain",{headers:{"x-nexus-key":nexusKey}});
