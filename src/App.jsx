@@ -828,19 +828,6 @@ export default function NexusDashboard({ user, onLogout }) {
   };
 
   const runOracle=async()=>{if(!oracleQuery.trim())return;setOracleLoading(true);setOracleError(null);setOracleResult(null);try{const res=await fetch(nexusUrl+"/api/oracle",{method:"POST",headers:{"x-nexus-key":nexusKey,"Content-Type":"application/json"},body:JSON.stringify({query:oracleQuery,targetDate:oracleDate||null})});const text=await res.text();let data;try{data=JSON.parse(text);}catch(e){throw new Error("Server error: "+text.slice(0,150));}if(data.success)setOracleResult(data);else setOracleError(data.error||"Oracle failed");}catch(e){setOracleError(e.message);}setOracleLoading(false);}
-  const loadOracleBrain = async () => {
-    try{
-      const r=await fetch("https://nexus-api-953z.onrender.com/api/oracle-brain",{headers:{"x-nexus-key":"nexus-axl-agent-key"}});
-      const d=await r.json();
-      if(d.success) setOracleBrain(d);
-    }catch(e){}
-  };
-  const triggerEvolution = async () => {
-    try{
-      await fetch("https://nexus-api-953z.onrender.com/api/oracle-brain/evolve",{method:"POST",headers:{"x-nexus-key":"nexus-axl-agent-key","Content-Type":"application/json"}});
-      setTimeout(loadOracleBrain,3000);
-    }catch(e){}
-  };
   const sendOracleMessage = async (msg) => {
     msg = msg || oracleChatInput.trim();
     if(!msg) return;
@@ -6812,6 +6799,5 @@ export default function NexusDashboard({ user, onLogout }) {
         </div>
       </div>
     </div>
-    </>
   );
 }
