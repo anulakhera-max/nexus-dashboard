@@ -337,8 +337,6 @@ export default function NexusDashboard({ user, onLogout }) {
   const oracleChatRef = React.useRef(null);
   const [oracleBrain, setOracleBrain] = React.useState(null);
   const [showBrain, setShowBrain] = React.useState(false);
-  const [oracleBrain, setOracleBrain] = React.useState(null);
-  const [showBrain, setShowBrain] = React.useState(false);
   
   // ── WIN/LOSS Button Handler (fixed) ──────────────────────────────────────
   const setTradeOutcome=async(tradeId,outcome,pnlPct)=>{
