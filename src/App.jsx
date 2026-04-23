@@ -776,7 +776,6 @@ export default function NexusDashboard({ user, onLogout }) {
         console.log("[TRACKER] Error:", d.error);
       }
     } catch(e) { console.log("[TRACKER] Error:", e.message); }
-  })
       });
       const data = await res.json();
       if (data.success) await loadTrackerData();
