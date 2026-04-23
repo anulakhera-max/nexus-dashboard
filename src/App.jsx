@@ -2073,6 +2073,12 @@ export default function NexusDashboard({ user, onLogout }) {
           <div style={S.contentArea}>
 
             {/* EVENTS */}
+            {tab === "charts" && (
+              <ChartsTab />
+            )}
+            {tab === "earnings" && (
+              <EarningsCalendar />
+            )}
             {tab === "events" && (
               <>
                 {/* ══ LIVE SIGNAL PULSE ══════════════════════════════════════ */}
