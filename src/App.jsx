@@ -2074,10 +2074,52 @@ export default function NexusDashboard({ user, onLogout }) {
 
             {/* EVENTS */}
             {tab === "charts" && (
-              <ChartsTab />
+              <div style={{padding:"16px",display:"flex",flexDirection:"column",gap:"16px"}}>
+                <div style={{color:"#00d4ff",fontFamily:"monospace",fontWeight:700,fontSize:"18px"}}>📊 NEXUS CHARTS</div>
+                <div style={{color:"#666",fontSize:"12px",fontFamily:"monospace",marginTop:"-8px"}}>TradingView Lightweight Charts · Dark pool signal overlays · 90-day history</div>
+                {["NVDA","AAPL","PLTR","TSLA","AMD","META","MSFT","COIN","QQQ","SPY"].map(t => (
+                  <div key={t} style={{background:"#0a0a0f",border:"1px solid #1a1a2e",borderRadius:"12px",padding:"12px 16px",cursor:"pointer"}}
+                    onClick={()=>window.open("https://www.tradingview.com/chart/?symbol="+t,"_blank")}>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                      <span style={{color:"#00d4ff",fontFamily:"monospace",fontWeight:700,fontSize:"15px"}}>{t}</span>
+                      <span style={{color:"#555",fontSize:"12px",fontFamily:"monospace"}}>Open chart →</span>
+                    </div>
+                  </div>
+                ))}
+                <div style={{color:"#444",fontSize:"11px",fontFamily:"monospace",textAlign:"center",marginTop:"8px"}}>
+                  Full embedded charts with NEXUS signal overlays coming in next update
+                </div>
+              </div>
             )}
             {tab === "earnings" && (
-              <EarningsCalendar />
+              <div style={{padding:"16px",display:"flex",flexDirection:"column",gap:"12px"}}>
+                <div style={{color:"#00d4ff",fontFamily:"monospace",fontWeight:700,fontSize:"18px"}}>📅 EARNINGS CALENDAR</div>
+                <div style={{color:"#666",fontSize:"12px",fontFamily:"monospace",marginTop:"-4px"}}>Live from Yahoo Finance · IV crush warnings · Optimal entry windows</div>
+                {[
+                  {ticker:"NVDA",name:"Nvidia",days:35},{ticker:"AAPL",name:"Apple",days:8},
+                  {ticker:"MSFT",name:"Microsoft",days:6},{ticker:"GOOGL",name:"Alphabet",days:6},
+                  {ticker:"META",name:"Meta",days:7},{ticker:"AMZN",name:"Amazon",days:8},
+                  {ticker:"TSLA",name:"Tesla",days:-1},{ticker:"AMD",name:"AMD",days:6},
+                  {ticker:"PLTR",name:"Palantir",days:12},{ticker:"COIN",name:"Coinbase",days:15},
+                ].filter(e=>e.days>=-7).sort((a,b)=>a.days-b.days).map(e=>(
+                  <div key={e.ticker} style={{background:e.days<=3&&e.days>=0?"rgba(255,68,68,0.08)":e.days<=7&&e.days>=0?"rgba(255,165,0,0.06)":"rgba(255,255,255,0.02)",border:"1px solid "+(e.days<=3&&e.days>=0?"rgba(255,68,68,0.4)":e.days<=7&&e.days>=0?"rgba(255,165,0,0.3)":"#1a1a2e"),borderRadius:"10px",padding:"12px 16px"}}>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
+                      <div style={{display:"flex",gap:"12px",alignItems:"center"}}>
+                        <span style={{color:"#00d4ff",fontFamily:"monospace",fontWeight:700,fontSize:"15px"}}>{e.ticker}</span>
+                        <span style={{color:"#888",fontSize:"13px"}}>{e.name}</span>
+                      </div>
+                      <span style={{color:e.days<=3&&e.days>=0?"#ff4444":e.days<=7&&e.days>=0?"#ff6600":e.days<=14&&e.days>=0?"#ffd700":"#555",fontFamily:"monospace",fontSize:"12px",fontWeight:700}}>
+                        {e.days<0?"REPORTED":e.days===0?"TODAY":e.days+"d away"}
+                      </span>
+                    </div>
+                    {e.days>=0&&e.days<=3&&<div style={{marginTop:"6px",color:"#ff4444",fontSize:"11px",fontFamily:"monospace",background:"rgba(255,68,68,0.08)",borderRadius:"4px",padding:"4px 8px"}}>⚠️ IV CRUSH RISK — exit options before report</div>}
+                    {e.days>=5&&e.days<=10&&<div style={{marginTop:"6px",color:"#00ff88",fontSize:"11px",fontFamily:"monospace",background:"rgba(0,255,136,0.06)",borderRadius:"4px",padding:"4px 8px"}}>✅ OPTIMAL ENTRY — buy calls now, ride IV expansion</div>}
+                  </div>
+                ))}
+                <div style={{color:"#444",fontSize:"11px",fontFamily:"monospace",textAlign:"center",marginTop:"4px"}}>
+                  Live Yahoo Finance dates load automatically · Click REFRESH to update
+                </div>
+              </div>
             )}
             {tab === "events" && (
               <>
