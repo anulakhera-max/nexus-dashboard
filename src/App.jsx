@@ -337,6 +337,8 @@ export default function NexusDashboard({ user, onLogout }) {
   const oracleChatRef = React.useRef(null);
   const [oracleBrain, setOracleBrain] = React.useState(null);
   const [showBrain, setShowBrain] = React.useState(false);
+  const [oracleBrain, setOracleBrain] = React.useState(null);
+  const [showBrain, setShowBrain] = React.useState(false);
   
   // ── WIN/LOSS Button Handler (fixed) ──────────────────────────────────────
   const setTradeOutcome=async(tradeId,outcome,pnlPct)=>{
@@ -776,6 +778,7 @@ export default function NexusDashboard({ user, onLogout }) {
         console.log("[TRACKER] Error:", d.error);
       }
     } catch(e) { console.log("[TRACKER] Error:", e.message); }
+  })
       });
       const data = await res.json();
       if (data.success) await loadTrackerData();
@@ -2069,55 +2072,42 @@ export default function NexusDashboard({ user, onLogout }) {
 
           <div style={S.contentArea}>
 
-            {/* EVENTS */}
-            {tab === "charts" && (
-              <div style={{padding:"16px",display:"flex",flexDirection:"column",gap:"16px"}}>
-                <div style={{color:"#00d4ff",fontFamily:"monospace",fontWeight:700,fontSize:"18px"}}>📊 NEXUS CHARTS</div>
-                <div style={{color:"#666",fontSize:"12px",fontFamily:"monospace",marginTop:"-8px"}}>TradingView Lightweight Charts · Dark pool signal overlays · 90-day history</div>
-                {["NVDA","AAPL","PLTR","TSLA","AMD","META","MSFT","COIN","QQQ","SPY"].map(t => (
-                  <div key={t} style={{background:"#0a0a0f",border:"1px solid #1a1a2e",borderRadius:"12px",padding:"12px 16px",cursor:"pointer"}}
-                    onClick={()=>window.open("https://www.tradingview.com/chart/?symbol="+t,"_blank")}>
-                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                      <span style={{color:"#00d4ff",fontFamily:"monospace",fontWeight:700,fontSize:"15px"}}>{t}</span>
-                      <span style={{color:"#555",fontSize:"12px",fontFamily:"monospace"}}>Open chart →</span>
+            {{tab === "charts" && (
+              <div style={{padding:"20px",color:"#00d4ff",fontFamily:"monospace"}}>
+                <div style={{fontSize:"18px",fontWeight:700,marginBottom:"16px"}}>📊 CHARTS</div>
+                <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+                  {["NVDA","AAPL","PLTR","TSLA","AMD","META","MSFT","COIN","QQQ","SPY"].map(t=>(
+                    <div key={t} onClick={()=>window.open("https://www.tradingview.com/chart/?symbol="+t,"_blank")}
+                      style={{background:"#0a0a0f",border:"1px solid #1a1a2e",borderRadius:"8px",padding:"12px 16px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <span style={{fontWeight:700,fontSize:"14px"}}>{t}</span>
+                      <span style={{color:"#555",fontSize:"11px"}}>Open TradingView →</span>
                     </div>
-                  </div>
-                ))}
-                <div style={{color:"#444",fontSize:"11px",fontFamily:"monospace",textAlign:"center",marginTop:"8px"}}>
-                  Full embedded charts with NEXUS signal overlays coming in next update
+                  ))}
                 </div>
               </div>
             )}
             {tab === "earnings" && (
-              <div style={{padding:"16px",display:"flex",flexDirection:"column",gap:"12px"}}>
-                <div style={{color:"#00d4ff",fontFamily:"monospace",fontWeight:700,fontSize:"18px"}}>📅 EARNINGS CALENDAR</div>
-                <div style={{color:"#666",fontSize:"12px",fontFamily:"monospace",marginTop:"-4px"}}>Live from Yahoo Finance · IV crush warnings · Optimal entry windows</div>
+              <div style={{padding:"20px",color:"#00d4ff",fontFamily:"monospace"}}>
+                <div style={{fontSize:"18px",fontWeight:700,marginBottom:"4px"}}>📅 EARNINGS CALENDAR</div>
+                <div style={{color:"#666",fontSize:"11px",marginBottom:"16px"}}>Live from Yahoo Finance · IV crush warnings</div>
                 {[
-                  {ticker:"NVDA",name:"Nvidia",days:35},{ticker:"AAPL",name:"Apple",days:8},
-                  {ticker:"MSFT",name:"Microsoft",days:6},{ticker:"GOOGL",name:"Alphabet",days:6},
-                  {ticker:"META",name:"Meta",days:7},{ticker:"AMZN",name:"Amazon",days:8},
-                  {ticker:"TSLA",name:"Tesla",days:-1},{ticker:"AMD",name:"AMD",days:6},
-                  {ticker:"PLTR",name:"Palantir",days:12},{ticker:"COIN",name:"Coinbase",days:15},
-                ].filter(e=>e.days>=-7).sort((a,b)=>a.days-b.days).map(e=>(
-                  <div key={e.ticker} style={{background:e.days<=3&&e.days>=0?"rgba(255,68,68,0.08)":e.days<=7&&e.days>=0?"rgba(255,165,0,0.06)":"rgba(255,255,255,0.02)",border:"1px solid "+(e.days<=3&&e.days>=0?"rgba(255,68,68,0.4)":e.days<=7&&e.days>=0?"rgba(255,165,0,0.3)":"#1a1a2e"),borderRadius:"10px",padding:"12px 16px"}}>
-                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
-                      <div style={{display:"flex",gap:"12px",alignItems:"center"}}>
-                        <span style={{color:"#00d4ff",fontFamily:"monospace",fontWeight:700,fontSize:"15px"}}>{e.ticker}</span>
-                        <span style={{color:"#888",fontSize:"13px"}}>{e.name}</span>
-                      </div>
-                      <span style={{color:e.days<=3&&e.days>=0?"#ff4444":e.days<=7&&e.days>=0?"#ff6600":e.days<=14&&e.days>=0?"#ffd700":"#555",fontFamily:"monospace",fontSize:"12px",fontWeight:700}}>
-                        {e.days<0?"REPORTED":e.days===0?"TODAY":e.days+"d away"}
-                      </span>
+                  {t:"TSLA",n:"Tesla",d:-1},{t:"MSFT",n:"Microsoft",d:6},{t:"GOOGL",n:"Alphabet",d:6},
+                  {t:"AMD",n:"AMD",d:6},{t:"META",n:"Meta",d:7},{t:"AAPL",n:"Apple",d:8},
+                  {t:"AMZN",n:"Amazon",d:8},{t:"PLTR",n:"Palantir",d:12},{t:"COIN",n:"Coinbase",d:15},{t:"NVDA",n:"Nvidia",d:35}
+                ].filter(e=>e.d>=-3).sort((a,b)=>a.d-b.d).map(e=>(
+                  <div key={e.t} style={{background:e.d>=0&&e.d<=3?"rgba(255,68,68,0.08)":e.d<=7?"rgba(255,165,0,0.05)":"rgba(255,255,255,0.02)",border:"1px solid "+(e.d>=0&&e.d<=3?"rgba(255,68,68,0.4)":e.d<=7?"rgba(255,165,0,0.2)":"#1a1a2e"),borderRadius:"8px",padding:"12px 16px",marginBottom:"8px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div>
+                      <span style={{fontWeight:700,fontSize:"14px",marginRight:"10px"}}>{e.t}</span>
+                      <span style={{color:"#888",fontSize:"12px"}}>{e.n}</span>
                     </div>
-                    {e.days>=0&&e.days<=3&&<div style={{marginTop:"6px",color:"#ff4444",fontSize:"11px",fontFamily:"monospace",background:"rgba(255,68,68,0.08)",borderRadius:"4px",padding:"4px 8px"}}>⚠️ IV CRUSH RISK — exit options before report</div>}
-                    {e.days>=5&&e.days<=10&&<div style={{marginTop:"6px",color:"#00ff88",fontSize:"11px",fontFamily:"monospace",background:"rgba(0,255,136,0.06)",borderRadius:"4px",padding:"4px 8px"}}>✅ OPTIMAL ENTRY — buy calls now, ride IV expansion</div>}
+                    <span style={{fontWeight:700,fontSize:"12px",color:e.d<0?"#444":e.d<=3?"#ff4444":e.d<=7?"#ff6600":"#ffd700"}}>
+                      {e.d<0?"REPORTED":e.d===0?"TODAY ⚠️":e.d+"d away"}
+                    </span>
                   </div>
                 ))}
-                <div style={{color:"#444",fontSize:"11px",fontFamily:"monospace",textAlign:"center",marginTop:"4px"}}>
-                  Live Yahoo Finance dates load automatically · Click REFRESH to update
-                </div>
               </div>
             )}
+            /* EVENTS */}
             {tab === "events" && (
               <>
                 {/* ══ LIVE SIGNAL PULSE ══════════════════════════════════════ */}
@@ -6774,6 +6764,5 @@ export default function NexusDashboard({ user, onLogout }) {
         </div>
       </div>
     </div>
-    </>
   );
 }
