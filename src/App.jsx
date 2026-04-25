@@ -253,8 +253,38 @@ function IntelNetworkTab(){
       {picks.length===0&&<div style={{color:"#555",textAlign:"center",padding:"3rem"}}>No picks - pipeline runs during market hours</div>}
     </div>
   </div>;
-}}>Intel Network - Loading signal network...</div>;}
-function P2IntelTab(){return <div style={{padding:"2rem",color:"#00ff88",background:"rgba(0,0,0,0.5)",minHeight:"400px"}}>Deep Intel - Loading P2 intelligence...</div>;}
+
+function P2IntelTab(){
+  const[data,setData]=React.useState(null);
+  const[loading,setLoading]=React.useState(true);
+  React.useEffect(()=>{
+    fetch("https://nexus-api-953z.onrender.com/api/p2-intelligence",{headers:{"x-nexus-key":"nexus-axl-agent-key"}})
+      .then(r=>r.json()).then(d=>{setData(d);setLoading(false);}).catch(()=>setLoading(false));
+  },[]);
+  if(loading)return <div style={{padding:"2rem",color:"#00ff88",textAlign:"center"}}>Loading Deep Intelligence...</div>;
+  const dp=data?.darkPool||data?.spikes||[];
+  const ins=data?.insiderForm4?.buys||[];
+  const cong=data?.congressTrades||[];
+  return <div style={{padding:"1.5rem",color:"#e0e0e0"}}>
+    <h2 style={{color:"#00ff88",marginBottom:"1rem"}}>Deep Intelligence</h2>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"1rem",marginBottom:"1rem"}}>
+      <div style={{background:"rgba(0,255,136,0.05)",border:"1px solid rgba(0,255,136,0.2)",borderRadius:"8px",padding:"1rem"}}>
+        <div style={{color:"#00ff88",fontWeight:"bold",marginBottom:"8px"}}>Dark Pool Activity</div>
+        {dp.length===0?<div style={{color:"#555",fontSize:"12px"}}>No dark pool signals</div>:dp.slice(0,6).map((d,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:"1px solid rgba(255,255,255,0.05)",fontSize:"13px"}}><span style={{color:"#fff"}}>{d.ticker||d.symbol}</span><span style={{color:"#00ff88"}}>{d.direction||d.type} {d.volRatio||""}x</span></div>)}
+      </div>
+      <div style={{background:"rgba(0,136,255,0.05)",border:"1px solid rgba(0,136,255,0.2)",borderRadius:"8px",padding:"1rem"}}>
+        <div style={{color:"#0088ff",fontWeight:"bold",marginBottom:"8px"}}>Insider Form 4</div>
+        {ins.length===0?<div style={{color:"#555",fontSize:"12px"}}>No insider buys</div>:ins.slice(0,6).map((d,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:"1px solid rgba(255,255,255,0.05)",fontSize:"13px"}}><span style={{color:"#fff"}}>{d.ticker}</span><span style={{color:"#00ff88"}}>${(d.value||0).toLocaleString()}</span></div>)}
+      </div>
+    </div>
+    <div style={{background:"rgba(255,170,0,0.05)",border:"1px solid rgba(255,170,0,0.2)",borderRadius:"8px",padding:"1rem"}}>
+      <div style={{color:"#ffaa00",fontWeight:"bold",marginBottom:"8px"}}>Congress Trades</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:"8px"}}>
+        {cong.length===0?<div style={{color:"#555",fontSize:"12px"}}>No congress trades</div>:cong.slice(0,8).map((t,i)=><div key={i} style={{background:"rgba(0,0,0,0.3)",borderRadius:"6px",padding:"8px",fontSize:"12px"}}><div style={{color:"#ffaa00",fontWeight:"bold"}}>{t.ticker}</div><div style={{color:"#888"}}>{t.representative||t.name}</div><div style={{color:t.type?.includes("Purchase")?"#00ff88":"#ff4444"}}>{t.type}</div></div>)}
+      </div>
+    </div>
+  </div>;
+}}>Deep Intel - Loading P2 intelligence...</div>;}
 function AttributionTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Attribution - Loading signal data...</div>;}
 function DeepIntelTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Deep Intel - Fetching insider data...</div>;}
 function PoliticalIntelTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Power Map - Loading institutional data...</div>;}
