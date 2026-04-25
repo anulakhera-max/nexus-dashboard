@@ -223,7 +223,37 @@ function OptionsPickCard({ pick, rank }) {
   );
 }
 
-function IntelNetworkTab(){return <div style={{padding:"2rem",color:"#00ff88",background:"rgba(0,0,0,0.5)",minHeight:"400px"}}>Intel Network - Loading signal network...</div>;}
+function IntelNetworkTab(){
+  const[data,setData]=React.useState(null);
+  const[loading,setLoading]=React.useState(true);
+  React.useEffect(()=>{
+    fetch("https://nexus-api-953z.onrender.com/api/intelligence",{headers:{"x-nexus-key":"nexus-axl-agent-key"}})
+      .then(r=>r.json()).then(d=>{setData(d);setLoading(false);}).catch(()=>setLoading(false));
+  },[]);
+  if(loading)return <div style={{padding:"2rem",color:"#00ff88",textAlign:"center"}}>Loading NEXUS Intelligence Network...</div>;
+  const picks=data?.picks||[];
+  return <div style={{padding:"1.5rem",color:"#e0e0e0"}}>
+    <h2 style={{color:"#00ff88",marginBottom:"1rem"}}>NEXUS Intelligence Network</h2>
+    <div style={{display:"grid",gap:"12px"}}>
+      {picks.map((p,i)=><div key={i} style={{background:"rgba(0,0,0,0.4)",border:"1px solid rgba(0,255,136,0.2)",borderRadius:"10px",padding:"1.2rem"}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:"8px"}}>
+          <span style={{color:"#fff",fontWeight:"bold",fontSize:"16px"}}>{p.ticker}</span>
+          <span style={{color:p.direction==="CALL"?"#00ff88":"#ff4444",fontWeight:"bold"}}>{p.direction}</span>
+          <span style={{color:"#ffaa00"}}>Score: {p.score}</span>
+          <span style={{color:"#888",fontSize:"12px"}}>{p.confidence}</span>
+        </div>
+        <div style={{color:"#aaa",fontSize:"13px",marginBottom:"6px"}}>{p.catalyst}</div>
+        <div style={{display:"flex",gap:"16px",fontSize:"12px"}}>
+          <span style={{color:"#00ff88"}}>Target: {p.targetReturn}</span>
+          <span style={{color:"#ff4444"}}>Stop: {p.stopPct}</span>
+          <span style={{color:"#888"}}>Exp: {p.expiry}</span>
+          <span style={{color:"#888"}}>${p.currentPrice}</span>
+        </div>
+      </div>)}
+      {picks.length===0&&<div style={{color:"#555",textAlign:"center",padding:"3rem"}}>No picks - pipeline runs during market hours</div>}
+    </div>
+  </div>;
+}}>Intel Network - Loading signal network...</div>;}
 function P2IntelTab(){return <div style={{padding:"2rem",color:"#00ff88",background:"rgba(0,0,0,0.5)",minHeight:"400px"}}>Deep Intel - Loading P2 intelligence...</div>;}
 function AttributionTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Attribution - Loading signal data...</div>;}
 function DeepIntelTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Deep Intel - Fetching insider data...</div>;}
