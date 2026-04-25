@@ -284,15 +284,15 @@ function P2IntelTab(){
       </div>
     </div>
   </div>;
-}}>Deep Intel - Loading P2 intelligence...</div>;}
-function AttributionTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Attribution - Loading signal data...</div>;}
-function DeepIntelTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Deep Intel - Fetching insider data...</div>;}
-function PoliticalIntelTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Power Map - Loading institutional data...</div>;}
-function CryptoTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Crypto - Loading prices...</div>;}
-function ConfidenceTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Confidence - Calculating scores...</div>;}
-function LeaderboardTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Leaderboard - Loading trades...</div>;}
-function GreeksTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Greeks - Loading options chain...</div>;}
-function DocsTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>API Reference - Loading docs...</div>;}
+
+function AttributionTab(){return <div style={{padding:"2rem",color:"#00ff88"
+function DeepIntelTab(){return <div style={{padding:"2rem",color:"#00ff88"
+function PoliticalIntelTab(){return <div style={{padding:"2rem",color:"#00ff88"
+function CryptoTab(){return <div style={{padding:"2rem",color:"#00ff88"
+function ConfidenceTab(){return <div style={{padding:"2rem",color:"#00ff88"
+function LeaderboardTab(){return <div style={{padding:"2rem",color:"#00ff88"
+function GreeksTab(){return <div style={{padding:"2rem",color:"#00ff88"
+function DocsTab(){return <div style={{padding:"2rem",color:"#00ff88"
 export default function NexusDashboard({ user, onLogout }) {
   const [events, setEvents] = useState(seedEvents);
   const [filter, setFilter] = useState("all");
