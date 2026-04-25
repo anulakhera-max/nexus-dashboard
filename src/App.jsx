@@ -1,3 +1,4 @@
+import {AttributionTab,PoliticalIntelTab,CryptoTab,ConfidenceTab,LeaderboardTab,GreeksTab,DocsTab} from "./tabs.jsx";
 import { useState, useEffect, useCallback } from "react";
 
 const API_URL = "https://api.anthropic.com/v1/messages";
