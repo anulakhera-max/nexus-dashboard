@@ -285,14 +285,6 @@ function P2IntelTab(){
     </div>
   </div>;
 
-function AttributionTab(){return <div style={{padding:'2rem',color:'#00ff88',minHeight:'200px'}}>Attribution data loads after 10 trades</div>;}
-function DeepIntelTab(){return <div style={{padding:'2rem',color:'#00ff88',minHeight:'200px'}}>Deep Intel - stub</div>;}
-function PoliticalIntelTab(){return <div style={{padding:'2rem',color:'#00ff88',minHeight:'200px'}}>Power Map - stub</div>;}
-function CryptoTab(){return <div style={{padding:'2rem',color:'#00ff88',minHeight:'200px'}}>Crypto - stub</div>;}
-function ConfidenceTab(){return <div style={{padding:'2rem',color:'#00ff88',minHeight:'200px'}}>Confidence - stub</div>;}
-function LeaderboardTab(){return <div style={{padding:'2rem',color:'#00ff88',minHeight:'200px'}}>Leaderboard - stub</div>;}
-function GreeksTab(){return <div style={{padding:'2rem',color:'#00ff88',minHeight:'200px'}}>Greeks - stub</div>;}
-function DocsTab(){return <div style={{padding:'2rem',color:'#00ff88',minHeight:'200px'}}>API Docs - stub</div>;}
 export default function NexusDashboard({ user, onLogout }) {
   const [events, setEvents] = useState(seedEvents);
   const [filter, setFilter] = useState("all");
