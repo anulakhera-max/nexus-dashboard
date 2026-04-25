@@ -253,7 +253,7 @@ function IntelNetworkTab(){
       {picks.length===0&&<div style={{color:"#555",textAlign:"center",padding:"3rem"}}>No picks - pipeline runs during market hours</div>}
     </div>
   </div>;
-
+}
 function P2IntelTab(){
   const[data,setData]=React.useState(null);
   const[loading,setLoading]=React.useState(true);
