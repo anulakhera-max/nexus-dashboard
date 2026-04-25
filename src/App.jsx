@@ -284,7 +284,7 @@ function P2IntelTab(){
       </div>
     </div>
   </div>;
-
+}
 export default function NexusDashboard({ user, onLogout }) {
   const [events, setEvents] = useState(seedEvents);
   const [filter, setFilter] = useState("all");
