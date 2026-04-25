@@ -223,6 +223,8 @@ function OptionsPickCard({ pick, rank }) {
   );
 }
 
+function IntelNetworkTab(){return <div style={{padding:"2rem",color:"#00ff88",background:"rgba(0,0,0,0.5)",minHeight:"400px"}}>Intel Network - Loading signal network...</div>;}
+function P2IntelTab(){return <div style={{padding:"2rem",color:"#00ff88",background:"rgba(0,0,0,0.5)",minHeight:"400px"}}>Deep Intel - Loading P2 intelligence...</div>;}
 function AttributionTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Attribution - Loading signal data...</div>;}
 function DeepIntelTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Deep Intel - Fetching insider data...</div>;}
 function PoliticalIntelTab(){return <div style={{padding:"2rem",color:"#00ff88"}}>Power Map - Loading institutional data...</div>;}
