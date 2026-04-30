@@ -2047,15 +2047,66 @@ export default function NexusDashboard({ user, onLogout }) {
               <button key={t} style={{ ...S.tab(tab === t, t==="intel"||t==="power"), color: tab === "intel" ? "#b24fff" : tab === "power" ? "#ff6b35" : tab === t ? "#00d4ff" : "#a8cce0" }} onClick={() => handleTab(t)}>{l}</button>
             ))}
             <span style={{ width: 1, background: "#1a2d47", margin: "4px 4px", flexShrink: 0 }}/>
-            {/* SIGNALS tab */}
-            <button style={{ background: tab === "signals" ? "rgba(57,255,20,0.15)" : "transparent", color: tab === "signals" ? "#39ff14" : "#4a6d8c", border: tab === "signals" ? "1px solid rgba(57,255,20,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace" }} onClick={() => { handleTab("signals"); if (!unusualFlow) loadUnusualFlow(); if (!warRipple) loadWarRipple(); if (!newsBias) loadNewsBias(); if (!insiderData) loadInsiderFilings(); if (!allianceData) loadAlliance(); if (!chartPatterns) loadChartPatterns(""); }}>
-              ⚡ SIGNALS
+            {/* â”€â”€ 8-TAB CONSOLIDATED NAV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+{(() => {
+  const TABS = [
+    { id: "signals",     label: "ORACLE",    color: "#39ff14", sub: ["signals","predictions","confidence","attribution"] },
+    { id: "events",      label: "CASCADE",   color: "#00d4ff", sub: ["events","war","supply","alliance","ripple"] },
+    { id: "intel",       label: "INTEL",     color: "#a78bfa", sub: ["intel","research","p2intel","bias","sources","watch"] },
+    { id: "trades",      label: "POSITIONS", color: "#ff6b35", sub: ["trades","paper","positions","greeks"] },
+    { id: "flow",        label: "MARKET",    color: "#fbbf24", sub: ["flow","charts","chart","crypto","earnings","insider"] },
+    { id: "attribution", label: "LEARN",     color: "#34d399", sub: ["leaderboard","pattern","network"] },
+    { id: "political",   label: "POLITICAL", color: "#f472b6", sub: ["political","power"] },
+    { id: "docs",        label: "SYSTEM",    color: "#94a3b8", sub: ["docs","confidence"] }
+  ];
+  const SUB_LABELS = {
+    signals:"SIGNALS",predictions:"PREDICT",confidence:"CONFIDENCE",attribution:"ATTRIBUTION",
+    events:"EVENTS",war:"WAR",supply:"SUPPLY",alliance:"ALLIANCE",ripple:"RIPPLE",
+    intel:"INTEL",research:"RESEARCH",p2intel:"P2 INTEL",bias:"BIAS",sources:"SOURCES",watch:"WATCH",
+    trades:"TRADES",paper:"PAPER",positions:"POSITIONS",greeks:"GREEKS",
+    flow:"FLOW",charts:"CHARTS",chart:"CHART",crypto:"CRYPTO",earnings:"EARNINGS",insider:"INSIDER",
+    leaderboard:"LEADERBOARD",pattern:"PATTERN",network:"NETWORK",
+    political:"POLITICAL",power:"POWER",
+    docs:"DOCS"
+  };
+  const activeMain = TABS.find(t => t.sub.includes(tab)) || TABS[0];
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginBottom: 4 }}>
+        {TABS.map(t => {
+          const isActive = t.sub.includes(tab) || tab === t.id;
+          return (
+            <button key={t.id}
+              style={{ background: isActive ? "rgba(255,255,255,0.07)" : "transparent",
+                color: isActive ? t.color : "#4a6d8c",
+                border: isActive ? "1px solid " + t.color + "55" : "1px solid transparent",
+                borderRadius: 3, padding: "7px 12px", fontSize: 10, fontWeight: 700,
+                letterSpacing: 2, cursor: "pointer", fontFamily: "monospace" }}
+              onClick={() => handleTab(t.sub[0])}>
+              {t.label}
             </button>
-            <span style={{ width: 1, background: "#1a2d47", margin: "4px 4px", flexShrink: 0 }}/>
-            {/* RESEARCH tab */}
-            <button style={{ background: tab === "research" ? "rgba(0,212,255,0.15)" : "transparent", color: tab === "research" ? "#00d4ff" : "#4a6d8c", border: tab === "research" ? "1px solid rgba(0,212,255,0.5)" : "1px solid transparent", borderRadius: 3, padding: "7px 14px", fontSize: 11, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "monospace" }} onClick={() => handleTab("research")}>
-              🔬 RESEARCH
+          );
+        })}
+      </div>
+      {activeMain && activeMain.sub.length > 1 && (
+        <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginBottom: 4, paddingLeft: 4 }}>
+          {activeMain.sub.map(s => (
+            <button key={s}
+              style={{ background: tab === s ? "rgba(255,255,255,0.1)" : "transparent",
+                color: tab === s ? "#fff" : "#4a6d8c",
+                border: tab === s ? "1px solid rgba(255,255,255,0.25)" : "1px solid transparent",
+                borderRadius: 2, padding: "3px 9px", fontSize: 9, fontWeight: 600,
+                cursor: "pointer", fontFamily: "monospace", letterSpacing: 1 }}
+              onClick={() => handleTab(s)}>
+              {SUB_LABELS[s] || s.toUpperCase()}
             </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+})()}
+{/* RESEARCH tab - kept for sub-tab access */}
           </div>
 
           {/* Pipeline run button + status */}
