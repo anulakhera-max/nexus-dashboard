@@ -2043,13 +2043,7 @@ export default function NexusDashboard({ user, onLogout }) {
 
           <div style={S.tabs}>
             {/* CORE tabs */}
-            {[["charts","≡ƒôê CHARTS"],["earnings","≡ƒôà EARNINGS"],["network","≡ƒîÉ INTEL NET"],["p2intel","≡ƒò╡∩╕Å DEEP INTEL"],["attribution","≡ƒö¼ ATTRIBUTION"],["political","≡ƒÅ¢∩╕Å POWER MAP"],["crypto","Γé┐ CRYPTO"],["confidence","≡ƒÄ» CONFIDENCE"],["leaderboard","≡ƒÅå LEADERBOARD"],["greeks","╬ö GREEKS"],["docs","≡ƒôû API"],["oracle","≡ƒö« ORACLE"],["events","≡ƒôí EVENTS"],["intel","≡ƒö¼ INTEL"],["power","Γùê POWER"],["trades","ΓùÄ TRADES"],["positions","≡ƒôï POSITIONS"],["watch","≡ƒæü WATCHLIST"]].map(([t,l]) => (
-              <button key={t} style={{ ...S.tab(tab === t, t==="intel"||t==="power"), color: tab === "intel" ? "#b24fff" : tab === "power" ? "#ff6b35" : tab === t ? "#00d4ff" : "#a8cce0" }} onClick={() => handleTab(t)}>{l}</button>
-            ))}
-            <span style={{ width: 1, background: "#1a2d47", margin: "4px 4px", flexShrink: 0 }}/>
-            {/* ├óΓÇ¥Γé¼├óΓÇ¥Γé¼ 8-TAB CONSOLIDATED NAV ├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼├óΓÇ¥Γé¼ */}
-{(() => {
-  const TABS = [
+            const TABS = [
     { id: "signals",     label: "ORACLE",    color: "#39ff14", sub: ["signals","predictions","confidence","attribution"] },
     { id: "events",      label: "CASCADE",   color: "#00d4ff", sub: ["events","war","supply","alliance","ripple"] },
     { id: "intel",       label: "INTEL",     color: "#a78bfa", sub: ["intel","research","p2intel","bias","sources","watch"] },
